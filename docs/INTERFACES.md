@@ -104,6 +104,42 @@ Outputs (everything the results page draws):
 
 `HeatPumpModel.climateStats(region) -> { heatingShareAbove5F, hoursBelow5F, hoursBelowMinus13F, coldestMonthMeanF, warmestMonthMeanF, heatingMonths, shoulderMonths, designTempF }` feeds the plain-language climate page; the Model/Data side can replace it with values from real hourly weather.
 
+
+**Model v1 mapping (Minneapolis only; added 2026-11-07)**
+
+Status: **v1 is not exactly what the end model will be, but closer to what the team is thinking.** The UI loads `model/results/frontend_data.json` (relative `fetch`; the local server serves the repo root; `.vercelignore` re-includes it; no embedded copy, so opening `index.html` from `file://` falls back to the placeholder stub with a notice). Code: `ui/model-v1.js` (adapter) and `runModel()` in `ui/app.js`. Boston, Montréal and Fairbanks still use the placeholder stub.
+
+Lookup: `recommendations["<tariff>|<weather>|credit<0|4000>|<smart|standard>"]["<lambda>"]`.
+
+| UI input | Model key | Notes |
+|---|---|---|
+| Carbon dial (results page; same value as the home-step slider), 13 snapped positions | lambda, `meta.lambda_grid_usd_per_t` = LAMS in `model/sweep.py`: 0, 10, 25, 50, 75, 100, 150, 200, 300, 400, 500, 750, 1000 ($ per tonne CO2) | `state.priority = index/12`; default (untouched) = index 10 ($500/t), roughly where the heat pump starts to win |
+| Smart meter toggle (`timeOfUse`) | tariff `tou` (on) or `flat` (off) | TOU rates are assumed in the model |
+| Winter: typical / very cold (More scenarios) | weather `tmyx_main` / `tmy3_cold` | |
+| AC: keeping / replacing too (More scenarios) | credit `0` / `4000` | $4,000 is a scenario value, not sourced |
+| Rebates on/off | not a model axis: model nets $2,000 Xcel (+ $1,100 CenterPoint if `centerpoint_rule`) inside `up_front`; UI adds them back when off | the model's *recommendation* is always computed with rebates on |
+| (none yet) | controller `smart` fixed; `standard` (installer-set fixed switchover) has no UI | |
+| Home size, envelope, thermostat, current fuel, prices, installed $/ton, heat loss | **not used** by v1 (fixed 15 kW house, gas furnace baseline, fixed prices) | UI says so on the results page |
+
+| Model output | UI element |
+|---|---|
+| `size_kbtuh` (0 = keep gas), `/12` = tons | Suggestion card; 0 shows "Keep your gas furnace" |
+| `controller`, `switchover_C`, `centerpoint_rule` | Suggestion subtext (CenterPoint: heat pump runs above 40 F) |
+| `annual_cost`; `sum(monthly.base_cost)` | Yearly bill tile (heat pump vs today) |
+| `annual_co2_t`; `sum(monthly.base_co2_kg)` | CO2 per year tile |
+| `up_front` | Upfront tile; installed = $5,286 + $178.6 x kBtu/h, rebates and AC credit backed out from it |
+| `payback_years` | UI recomputes `up_front / (base annual cost - annual_cost)`; null shows "Not on bills alone" |
+| `lifetime_cost`, `lifetime_co2_t`, `tonnes_saved_15y`, `usd_per_tonne` | Money/Carbon folds, dial sentence ("$X per tonne avoided") |
+| `monthly.*` | Monthly CO2 and bill charts, cumulative chart derived from `up_front` + years x `annual_cost` |
+| `hp_share` | "covers about N% of your heating" |
+| `recommendations[...]` across all lambda | "How the recommendation changes with the dial" table; best heat pump option = highest lambda with `size_kbtuh > 0` |
+| `meta.assumptions`, `meta.sizes_kbtuh` | Notes under results, PDF report size range |
+| `peak_kW`, `load_duration` | **no UI yet** (load-duration chart is a natural next addition) |
+
+`HeatPumpModel.run` inputs gained `scenario: { coldWinter, acCredit, rebatesOn, lamIdx }`; the adapter returns the stub's output shape plus `v1: { rec, lam, lamIdx, scenario, sizeKbtuh, usdPerTonne, ... }`, `sizes: []`, `isPlaceholder: false`, `capacityKwAt5F: null`.
+
+v1 placeholders (from `model/README.md`): installed cost curve, rebates (verify), TOU rates, AC credit, fixed house, grid carbon is a 2025 MISO average (not marginal), discount rate 0, heating only.
+
 **New UI-side fields (rebates + report, 2026-11-07)**
 
 - **Smart meter (TODO, flesh out):** `prices.timeOfUse` boolean; placeholder 10% discount in the stub. Model/Data should supply real TOU price schedules per region; usage-data calibration is not designed yet (see D-014).
@@ -114,7 +150,7 @@ Outputs (everything the results page draws):
 
 **Needs**
 
-- `model/results/frontend_data.json` from Model (not wired into `index.html` yet)
+- ~~`model/results/frontend_data.json` from Model (not wired into `index.html` yet)~~ wired for Minneapolis on 2026-11-07 (see Model v1 mapping).
 - **Data → UI:** region packs for Boston, Montréal and Fairbanks like the Minneapolis pack (monthly or hourly temperatures, design temp, electricity and fuel prices, grid CO2, rebates). Today only Minneapolis values in `ui/regions.js` come from `data.zip`; the other three are placeholders and are labeled as such on the results page.
 - **Model → UI:** an implementation of `HeatPumpModel.run` in the shape above, and agreement on whether the model runs in-browser (JS), is precomputed to JSON per region and size, or sits behind an endpoint.
 - **Open question:** free-text locations outside the four regions are not supported (no geocoding without a key). Adding more regions means adding an entry to `ui/regions.js`.

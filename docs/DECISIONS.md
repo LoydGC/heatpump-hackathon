@@ -39,6 +39,7 @@ Add a row here with each new entry.
 | D-016 | 2026-11-07 | UI | Installer report via browser print, no library | active |
 | D-017 | 2026-11-07 | UI | Smart meter is a simple toggle for now; flesh out later | active |
 | D-018 | 2026-11-07 | UI | Results show high-level answers first; rebate explainer on its own page | active |
+| D-019 | 2026-11-07 | UI | Map the front end to model v1 for Minneapolis; add carbon-price dial | active |
 
 ## How to add an entry
 
@@ -199,3 +200,11 @@ Anyone (teammate or Claude thread) who makes a decision that affects the repo, t
 - **Decided by:** Gavin.
 - **Refs:** branch `claude/project-thread-6h36e8`.
 - **Status:** active
+
+### D-019 · 2026-11-07 · Map the front end to model v1 (Minneapolis); carbon-price dial
+- **Workstream:** UI
+- **Decision:** For Minneapolis the results page reads `model/results/frontend_data.json` (adapter `ui/model-v1.js`); Boston, Montréal and Fairbanks keep the placeholder stub, and the page labels which is which. New "How much do you care about CO2?" dial on results snaps to the model's lambda grid ($0 to $1,000 per tonne) and shows the recommendation, whether a heat pump beats gas, and $/tonne; a table shows every setting. Smart meter toggle maps to flat vs time-of-use tariff; winter and AC-replacement toggles map to the weather and credit axes. The UI states everywhere (results banner, notes, footer, PDF, INTERFACES.md) that **v1 is not exactly what the end model will be, but is closer to what the team is thinking**, and lists its placeholder inputs: installed cost, rebates, TOU rates, AC credit, average (not marginal) grid intensity, discount rate 0, one fixed house. Field mapping is in INTERFACES.md ("Model v1 mapping"). Default dial position is $500/t (about where the heat pump starts to win), not the lowest setting.
+- **Why:** Gavin: v1 is closer to the intended model; map the front end to it and add a slider.
+- **Decided by:** Gavin (request); Claude (mapping).
+- **Refs:** branch `claude/project-thread-6h36e8`; model by sharvis3.
+- **Status:** active (supersede when the end model lands)

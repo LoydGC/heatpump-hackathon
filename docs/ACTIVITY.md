@@ -2,7 +2,7 @@
 
 > **Auto-generated, do not edit by hand.** Regenerate with `update-activity-windows.bat` / `update-activity-mac.command` (double-click) or `python tools/activity.py`, then commit. Workstreams come from the folder map in [WORKSTREAMS.md](WORKSTREAMS.md). Hand-written records are in [AUDIT.md](AUDIT.md) and [DECISIONS.md](DECISIONS.md).
 
-Generated 2026-11-07 22:06 UTC from 10 branches, 34 commits (merge commits excluded). A commit touching several workstreams counts once for each.
+Generated 2026-11-07 22:10 UTC from 10 branches, 35 commits (merge commits excluded). A commit touching several workstreams counts once for each.
 
 ## By workstream
 
@@ -11,13 +11,13 @@ Generated 2026-11-07 22:06 UTC from 10 branches, 34 commits (merge commits exclu
 | UI | 10 | Claude | 2026-11-07 |
 | Model | 1 | sharvis3 | 2026-11-07 |
 | Data | 8 | Claude, Matteo-P58, sharvis3 | 2026-11-07 |
-| Infra | 25 | Claude, Gavin Loyd | 2026-11-07 |
+| Infra | 26 | Claude, Gavin Loyd | 2026-11-07 |
 
 ## By author
 
 | Author | UI | Model | Data | Infra | Other | Last commit |
 |---|---|---|---|---|---|---|
-| Claude | 10 |  | 4 | 24 |  | 2026-11-07 |
+| Claude | 10 |  | 4 | 25 |  | 2026-11-07 |
 | sharvis3 |  | 1 | 3 |  |  | 2026-11-07 |
 | Gavin Loyd |  |  |  | 1 |  | 2026-11-07 |
 | Matteo-P58 |  |  | 1 |  |  | 2026-11-07 |
@@ -28,7 +28,7 @@ Commits not yet on `main`. Branches at 0 are fully merged.
 
 | Branch | Not on main | Workstreams | Authors | Last commit | Last message |
 |---|---|---|---|---|---|
-| `claude/project-thread-6h36e8` | 6 | UI, Infra | Claude | 2026-11-07 | Merge origin/main into claude/project-thread-6h36e8; renumber UI decisions D-014..D-018 |
+| `claude/project-thread-6h36e8` | 7 | UI, Infra | Claude | 2026-11-07 | Resolve merge in AUDIT.md and regenerate ACTIVITY.md |
 | `claude/project-thread-czssmr` | 1 | Infra | Claude | 2026-11-07 | Add comparable products research (COMPARABLES.md and comparables.html) |
 | `claude/project-thread-ez6q50` | 1 | UI, Infra | Claude | 2026-11-07 | Rebuild dashboard as gated 4-step wizard with placeholder model stub |
 | `claude/project-thread-yrtzah` | 0 | — | — | 2026-11-07 | Add .vercelignore so deploys upload only site files |
@@ -42,6 +42,7 @@ Commits not yet on `main`. Branches at 0 are fully merged.
 
 | Date | Commit | Workstreams | Author | Where | Message |
 |---|---|---|---|---|---|
+| 2026-11-07 | `caf39aa` | Infra | Claude | `claude/project-thread-6h36e8` | Resolve merge in AUDIT.md and regenerate ACTIVITY.md |
 | 2026-11-07 | `77da7a1` | Data, Infra | Claude | main | Restore data/processed and data/scripts; fix folder references |
 | 2026-11-07 | `1c420fe` | UI, Infra | Claude | `claude/project-thread-6h36e8` | Results: high-level first, details folded; rebates explainer on its own page |
 | 2026-11-07 | `62a7c1d` | UI, Infra | Claude | `claude/project-thread-6h36e8` | Front page: new headline with location question as subheader |
@@ -107,6 +108,7 @@ Commits not yet on `main`. Branches at 0 are fully merged.
 
 ## Infra: all commits
 
+- 2026-11-07 `caf39aa` Claude: Resolve merge in AUDIT.md and regenerate ACTIVITY.md (`docs/ACTIVITY.md`, `docs/AUDIT.md`)
 - 2026-11-07 `77da7a1` Claude: Restore data/processed and data/scripts; fix folder references (`.vercelignore`, `README.md`, `docs/ACTIVITY.md`, `docs/AUDIT.md`, `docs/DECISIONS.md` +2 more)
 - 2026-11-07 `1c420fe` Claude: Results: high-level first, details folded; rebates explainer on its own page (`docs/ACTIVITY.md`, `docs/AUDIT.md`, `docs/DECISIONS.md`)
 - 2026-11-07 `62a7c1d` Claude: Front page: new headline with location question as subheader (`docs/ACTIVITY.md`, `docs/AUDIT.md`)

@@ -181,6 +181,15 @@ details.tbl summary{cursor:pointer;font-weight:600;color:var(--muted)}
 footer{margin-top:40px;font-size:13px}
 
 
+
+.reco.single{grid-template-columns:1fr}
+.dial{margin-top:14px}
+.dial h3{font-size:19px}
+.dial-row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;margin-top:14px;font-weight:600;font-size:14px}
+.dial-val{font-family:var(--display);font-size:22px;font-weight:600;margin-top:6px}
+details.more#v1Opts{margin-top:14px}
+.lamtbl tr.cur td{background:var(--hp-soft);font-weight:700}
+
 /* Results: summary first, details folded */
 .sum-tiles{margin-top:22px}
 .whatif{margin-top:6px}
@@ -295,7 +304,7 @@ details.fold .fs{font-size:13px}
       </form>
       <div class="quick" id="quick" role="group" aria-label="Or pick a region"></div>
       <p class="loc-msg" id="locMsg" role="status"></p>
-      <p class="scope muted">We currently cover four cold-climate regions: Boston, Minneapolis–St. Paul, Montréal and Fairbanks. Other places aren't supported yet; pick the closest match.</p>
+      <p class="scope muted">We currently cover four cold-climate regions: Boston, Minneapolis–St. Paul, Montréal and Fairbanks. Other places aren't supported yet; pick the closest match. Minneapolis–St. Paul uses the team's first model; the other three use placeholder numbers for now.</p>
     </div>
   </section>
 
@@ -425,7 +434,7 @@ details.fold .fs{font-size:13px}
   <section class="step" id="step-3" aria-labelledby="h3">
     <h2 id="h3" tabindex="-1"></h2>
     <p class="muted" id="rSub" style="margin-top:6px"></p>
-    <p class="banner" id="rBanner"><b>Placeholder numbers.</b> The team's model isn't plugged in yet. These come from a simple stand-in so the layout can be reviewed.</p>
+    <p class="banner" id="rBanner"></p>
 
     <div class="reco card">
       <div>
@@ -433,10 +442,22 @@ details.fold .fs{font-size:13px}
         <p class="big" id="rReco"></p>
         <p class="muted" id="rRecoSub" style="margin-top:6px"></p>
       </div>
-      <div>
+      <div id="rSizeBox">
         <p class="muted" style="font-weight:600;font-size:14px">Try another size</p>
         <div class="sizes" id="rSizes" role="group" aria-label="Heat pump size in tons"></div>
       </div>
+    </div>
+
+    <div class="card dial" id="dialCard">
+      <h3 id="dialH">How much do you care about CO₂?</h3>
+      <p class="muted" id="dialExplain" style="max-width:70ch;margin-top:4px"></p>
+      <div class="dial-row">
+        <span class="dl">Lowest cost</span>
+        <input id="dial" type="range" min="0" max="12" step="1" value="10" aria-labelledby="dialH" aria-describedby="dialVal">
+        <span class="dl">Most CO₂ cut</span>
+      </div>
+      <p class="dial-val" id="dialVal" aria-live="polite"></p>
+      <p class="muted" id="dialResult" style="font-size:14px;margin-top:4px"></p>
     </div>
 
 
@@ -452,6 +473,17 @@ details.fold .fs{font-size:13px}
           <div class="seg" role="group" aria-label="Smart meter on or off" id="meterSeg"><button data-meter="0">Heat pump only</button><button data-meter="1">Heat pump + smart meter</button></div>
           <p class="muted wn" id="meterLede"></p></div>
       </div>
+      <details class="more" id="v1Opts" hidden>
+        <summary>More scenarios (from the model)</summary>
+        <div class="whatif-row" style="margin-top:12px">
+          <div><p class="wl">Winter</p>
+            <div class="seg" role="group" aria-label="Winter weather" id="coldSeg"><button data-cold="0">Typical winter</button><button data-cold="1">Very cold winter</button></div>
+            <p class="muted wn">The model's cold stress test uses a harsher weather year.</p></div>
+          <div><p class="wl">Air conditioning</p>
+            <div class="seg" role="group" aria-label="AC replacement" id="acSeg"><button data-ac="0">Keeping my AC</button><button data-ac="1">Replacing my AC too</button></div>
+            <p class="muted wn">A heat pump also cools, so if your AC is due for replacement we credit its cost ($4,000, placeholder).</p></div>
+        </div>
+      </details>
     </div>
 
     <div class="report-cta">
@@ -509,12 +541,15 @@ details.fold .fs{font-size:13px}
       </div>
     </details>
     <details class="fold">
-      <summary><span class="fh">Bigger or smaller?</span><span class="muted fs">heat pump size trade-offs</span></summary>
+      <summary><span class="fh" id="sizeFoldH">Bigger or smaller?</span><span class="muted fs" id="sizeFoldS">heat pump size trade-offs</span></summary>
       <div class="fold-body">
+      <div id="lamTable" hidden></div>
+      <div id="sizeCharts">
       <p class="muted" style="margin:-4px 0 14px;max-width:70ch">A bigger heat pump covers more cold nights on its own but costs more up front. A smaller one leans on your backup heat more often. Here's the trade-off over <span id="lifeYrs"></span> years.</p>
       <div class="charts2">
         <div class="chart-card"><h3>Total cost over the heat pump's life</h3><p class="sub">Upfront after rebates plus bills, by size (tons)</p><div id="chSizeCost"></div></div>
         <div class="chart-card"><h3>Total CO₂ over the heat pump's life</h3><p class="sub">Tonnes of CO₂, by size (tons)</p><div id="chSizeCo2"></div></div>
+      </div>
       </div>
       </div>
     </details>
@@ -549,12 +584,13 @@ details.fold .fs{font-size:13px}
 
   <div class="report" id="report" aria-hidden="true"></div>
 
-  <footer class="muted">Heat Pump Guide · MIT Climate Hackathon, COMSOL challenge · Prototype</footer>
+  <footer class="muted">Heat Pump Guide · MIT Climate Hackathon, COMSOL challenge · Prototype<br>Minneapolis results come from model v1: not exactly what our end model will be, but closer to what we're thinking. Its inputs for installed cost, rebates, time-of-use rates, AC credit and grid carbon (an average, not marginal, figure) are placeholders, and it uses a fixed typical house. Other regions use a stand-in model.</footer>
 </main>
 
 <script src="ui/regions.js"></script>
 <script src="ui/rebates.js"></script>
 <script src="ui/model-stub.js"></script>
+<script src="ui/model-v1.js"></script>
 <script src="ui/charts.js"></script>
 <script src="ui/app.js"></script>
 </body>
