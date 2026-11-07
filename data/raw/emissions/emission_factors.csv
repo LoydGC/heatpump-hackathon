@@ -1,0 +1,12 @@
+# Fuel combustion factors: U.S. EPA GHG Emission Factors Hub (Table 1, stationary combustion), https://www.epa.gov/climateleadership/ghg-emission-factors-hub
+# Grid: EPA eGRID2023 subregion MROW total output emission rate, https://www.epa.gov/egrid/summary-data (released Jan 2025)
+item,value,unit,notes
+natural_gas_CO2,53.06,kg CO2 per MMBtu (HHV),EPA Hub Table 1
+natural_gas_CH4,1.0,g CH4 per MMBtu,EPA Hub Table 1
+natural_gas_N2O,0.10,g N2O per MMBtu,EPA Hub Table 1
+natural_gas_heat_content,1.037,MMBtu per Mcf,EIA average (convert $/Mcf to $/MMBtu)
+propane_CO2,5.72,kg CO2 per gallon,EPA Hub Table 1
+distillate_oil_no2_CO2,10.21,kg CO2 per gallon,EPA Hub Table 1
+grid_MROW_CO2,920.022,lb CO2 per MWh,eGRID2023 total output rate (= 417 g/kWh)
+grid_MROW_CO2e,926.443,lb CO2e per MWh,eGRID2023
+grid_MROW_mix_2023,"coal 35.2%, gas 13.1%, nuclear 7.8%, hydro 4.1%, wind 37.6%, solar 1.2%",percent of generation,eGRID2023 Table 2
