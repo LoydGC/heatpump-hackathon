@@ -136,3 +136,11 @@ Anyone (teammate or Claude thread) who makes a decision that affects the repo, t
 - **Decided by:** Gavin.
 - **Refs:** this push, `.vercelignore`, `docs/local-and-deploy.md`.
 - **Status:** active
+
+### D-012 · 2026-11-07 · Broaden `.gitignore` beyond secrets
+- **Workstream:** Infra
+- **Decision:** `.gitignore` now also ignores dependencies and Python junk (`node_modules/`, `__pycache__/`, `.venv/`), OS and editor files, temp and Office lock files, large `*.mph` and `*.mp4` files, and more secret patterns (`*.p12`, `*.pfx`, `id_rsa*`, `secrets.*`, `.npmrc`). `data/raw/`, `*.zip` and `*.xlsx` are deliberately NOT ignored, because the team commits raw data there and the Model needs it; `.vercelignore` already keeps them off the live site. Nothing already tracked was untracked.
+- **Why:** The repo is public and takes data uploads; guard against accidental huge or sensitive commits.
+- **Decided by:** Gavin.
+- **Refs:** this push, `.gitignore`.
+- **Status:** active
