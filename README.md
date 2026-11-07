@@ -12,3 +12,7 @@ An oversized heat pump may meet heating demand even during extreme cold, but can
 
 - Consider different supplemental heating sources (e.g., natural gas, wood, electricity), their efficiencies, operating costs, and impacts on carbon emissions.
 - Explore how the optimal strategy may vary depending on local climate conditions, such as those in Boston, Massachusetts; Montreal, Canada; or Fairbanks, Alaska.
+
+## Run locally / deploy
+
+See [docs/local-and-deploy.md](docs/local-and-deploy.md).
