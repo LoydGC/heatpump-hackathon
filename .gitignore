@@ -1,0 +1,18 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+.DS_Store
+*.egg-info/
+.pytest_cache/
+
+# Data and outputs: keep folders, not contents (share big files via Drive/LFS)
+data/raw/*
+data/processed/*
+results/*
+!**/.gitkeep
+
+# COMSOL
+*.mph.lock
+comsol/**/*.recovery
