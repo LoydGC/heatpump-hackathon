@@ -100,6 +100,13 @@ Outputs (everything the results page draws):
 
 `HeatPumpModel.climateStats(region) -> { heatingShareAbove5F, hoursBelow5F, hoursBelowMinus13F, coldestMonthMeanF, warmestMonthMeanF, heatingMonths, shoulderMonths, designTempF }` feeds the plain-language climate page; the Model/Data side can replace it with values from real hourly weather.
 
+**New UI-side fields (rebates + report, 2026-11-07)**
+
+- `window.HP_REBATES` (`ui/rebates.js`): `REGION[id] = { intro, programs[{name, level, status, amount, note, url, checked}], paperwork[], amountsNote }` plus `SOURCES[]`. Hand-written snapshots dated 2026-11-07, not data-driven.
+- UI calls `HeatPumpModel.run` twice per render (rebates on/off, same `sizeTons`) via `costs.rebatesUsd`. Model needs no change but must keep `rebatesUsd = 0` valid and `upfront`, `paybackYears`, `lifetime` consistent with it.
+- Report reads from `run` outputs: `designLoadKw`, `capacityKwAt5F`, `sizeTons`, `recommendedSizeTons`, `annual.*.heatPumpShare`, `isPlaceholder`, `modelVersion`. It shows a size range of ±1 entry in `HeatPumpModel.sizes`. Optional Model outputs that would improve it: `designLoadBtuh`, `backupSwitchoverF`, `backupKwNeeded`.
+- **Data → UI (new):** a verified rebates pack per region (program, amount formula, deadline, URL, fuel condition). Open discrepancy: CenterPoint hybrid rebate is $1,100 in data.zip but $400 on CenterPoint's page on 2026-11-07. Boston `rebatesUsd` ($8,000) and Montréal ($3,000) are placeholders; Mass Save is $/ton and LogisVert is $/BTU-h.
+
 **Needs**
 
 - **Data → UI:** region packs for Boston, Montréal and Fairbanks like the Minneapolis pack (monthly or hourly temperatures, design temp, electricity and fuel prices, grid CO2, rebates). Today only Minneapolis values in `ui/regions.js` come from `data.zip`; the other three are placeholders and are labeled as such on the results page.

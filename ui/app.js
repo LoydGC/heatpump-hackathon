@@ -27,7 +27,7 @@
   })();
 
   // ---------- State ----------
-  const blank = () => ({ regionId: null, maxStep: 0, overrides: {}, priority: 0.5, sizeTons: null, usedTypical: true });
+  const blank = () => ({ regionId: null, maxStep: 0, overrides: {}, priority: 0.5, sizeTons: null, usedTypical: true, rebatesOn: true });
   let state = blank();
   try { const s = JSON.parse(sessionStorage.getItem("hp-wizard")); if (s && (s.regionId === null || REGIONS[s.regionId])) state = Object.assign(blank(), s); } catch (e) {}
   const save = () => { try { sessionStorage.setItem("hp-wizard", JSON.stringify(state)); } catch (e) {} };
@@ -57,7 +57,7 @@
     const r = region(), d = typical(r, state.overrides);
     return Object.assign({}, d, state.overrides);
   }
-  function modelInputs(sizeTons) {
+  function modelInputs(sizeTons, rebatesOn = state.rebatesOn) {
     const r = region(), h = effective(), f = FUELS[h.currentHeat];
     const fuelPrice = h.currentHeat === "electric" ? h.electricityUsdPerKWh : h.fuelUsdPerUnit;
     const fuelCo2 = h.currentHeat === "electric" ? r.gridKgCo2PerKWh : f.co2;
@@ -69,7 +69,7 @@
       prices: { electricityUsdPerKWh: h.electricityUsdPerKWh, fuelUsdPerUnit: fuelPrice, fuelUnit: f.unit, timeOfUse: !!h.timeOfUse,
                 fuelUsdPerKWhHeat: fuelPrice / (f.kwh * f.eff) },
       emissions: { gridKgCo2PerKWh: r.gridKgCo2PerKWh, fuelKgCo2PerUnit: fuelCo2, fuelKgCo2PerKWhHeat: fuelCo2 / (f.kwh * f.eff) },
-      costs: { installedUsdPerTon: h.installedUsdPerTon, rebatesUsd: h.rebatesUsd, lifetimeYears: LIFETIME_YEARS },
+      costs: { installedUsdPerTon: h.installedUsdPerTon, rebatesUsd: rebatesOn ? h.rebatesUsd : 0, lifetimeYears: LIFETIME_YEARS },
       priority: state.priority,
       sizeTons: sizeTons ?? null
     };
@@ -239,10 +239,12 @@
   const kFmt = v => Math.abs(v) >= 1000 ? (v / 1000).toFixed(Math.abs(v) >= 10000 ? 0 : 1) + "k" : Math.round(v).toString();
   const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
+  let lastOut = null;
   async function renderResults() {
     const r = region(); if (!r) return;
     const h = effective(), f = FUELS[h.currentHeat];
     const out = await Promise.resolve(Model().run(modelInputs(state.sizeTons)));
+    lastOut = out;
     const custom = Object.keys(state.overrides).length;
     const backup = h.currentHeat === "electric" ? "electric baseboards" : FUELS[h.currentHeat].short + " system";
     const nowName = "Today (" + f.short + ")";
@@ -325,7 +327,165 @@
       r.dataStatus === "placeholder" ? [`Climate, prices and grid carbon for ${r.name} are placeholders until the team's data for this region is in.`]
         : [`Climate, prices and grid carbon for ${r.name} come from the team's data pack (TMYx 2011–2025 weather, EIA prices, MISO 2025 grid).`]
     ).map(n => `<li>${n}</li>`).join("");
+    await renderRebates(out);
   }
+
+  // ---------- Rebates section ----------
+  const RB = window.HP_REBATES;
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  // Run the model with and without rebates at the same size, so both columns are always comparable.
+  async function bothRebateCases(out) {
+    const [w, wo] = await Promise.all([true, false].map(on => Promise.resolve(Model().run(modelInputs(out.sizeTons, on)))));
+    return { w, wo };
+  }
+  const lifeNet = o => o.annual.today.costUsd * o.lifetimeYears - o.lifetime.costUsd; // saved vs keeping today's heat
+  const paybackTxt = o => o.paybackYears != null && o.paybackYears <= 40 ? o.paybackYears.toFixed(1) + " years" : "Not on bills alone";
+  async function renderRebates(out) {
+    const r = region(), h = effective(), rb = RB.REGION[r.id];
+    const { w, wo } = await bothRebateCases(out);
+    const reb = w.upfront.rebatesUsd, life = out.lifetimeYears;
+    $("rebLede").textContent = reb > 0
+      ? `Rebates take about ${money(reb)} off the price of the ${out.sizeTons}-ton system. That lowers what you pay up front and brings break-even sooner. Switch the toggle to see the whole page with and without them.`
+      : `We're counting $0 in rebates for this home, so the two columns match. If you expect a rebate, add it under "Prices, rebates and other details" on the home step.`;
+    $("rebSeg").querySelectorAll("button").forEach(b => {
+      b.setAttribute("aria-pressed", (b.dataset.reb === "1") === state.rebatesOn);
+      b.onclick = () => { state.rebatesOn = b.dataset.reb === "1"; save(); renderResults(); };
+    });
+    const row = (k, a, b, d, on) => `<tr class="${on ? "on" : ""}"><td>${k}</td><td>${a}</td><td>${b}</td><td class="diff">${d}</td></tr>`;
+    const dlt = (x, y, fmt) => { const v = x - y; return v === 0 ? "—" : fmt(v); };
+    $("rebCmp").innerHTML = [
+      row("Upfront cost (after rebates)", money(wo.upfront.netUsd), money(w.upfront.netUsd), dlt(wo.upfront.netUsd, w.upfront.netUsd, v => money(-v))),
+      row("Break-even (pays for itself)", paybackTxt(wo), paybackTxt(w),
+          wo.paybackYears != null && w.paybackYears != null ? dlt(wo.paybackYears, w.paybackYears, v => (v > 0 ? "−" : "+") + Math.abs(v).toFixed(1) + " years") : "—"),
+      row(`Total cost over ${life} years`, money(wo.lifetime.costUsd), money(w.lifetime.costUsd), dlt(wo.lifetime.costUsd, w.lifetime.costUsd, v => money(-v))),
+      row(`Saved vs. keeping today's heat (${life} yrs)`, money(lifeNet(wo)), money(lifeNet(w)), dlt(lifeNet(w), lifeNet(wo), v => "+" + money(v)))
+    ].join("");
+    $("rebCmpNote").textContent = "Rebates change what you pay up front, not your yearly heating bill or your carbon footprint. Heating bills and CO₂ are the same in both columns.";
+
+    $("rebSources").innerHTML = RB.SOURCES.map(x => `<div class="src-card"><h3>${esc(x.title)}</h3><p class="muted">${esc(x.p)}</p></div>`).join("");
+    $("rebRegionH").textContent = `What's available around ${r.name}`;
+    $("rebRegionIntro").textContent = rb.intro;
+    $("rebPrograms").innerHTML = rb.programs.map(p => `<div class="prog"><h3>${esc(p.name)} <span class="st ${p.status}">${RB.STATUS[p.status] || p.status}</span><span class="lvl">${esc(p.level)}</span></h3>
+      <p class="amt">${esc(p.amount)}</p><p class="nt">${esc(p.note)}</p>
+      ${p.url ? `<p style="margin-top:6px"><a href="${esc(p.url)}" target="_blank" rel="noopener">Official program page ↗</a>${p.checked ? "" : ' <span class="muted" style="font-size:12px">(link not verified)</span>'}</p>` : ""}</div>`).join("");
+    $("rebCaveat").innerHTML = `<b>Verify before you rely on these.</b> Program names, amounts and deadlines were read from public pages on ${RB.asOf} and change often; some are placeholders. ${esc(rb.amountsNote)} Always confirm with the program and ask your installer which rebates they handle.`;
+  }
+
+  // ---------- Printable report (saved as PDF through the browser's print dialog) ----------
+  const TON_BTUH = 12000, KW_BTUH = 3412;
+  const roundTo = (v, n) => Math.round(v / n) * n;
+  async function buildReport() {
+    const r = region(), h = effective(), f = FUELS[h.currentHeat], rb = RB.REGION[r.id];
+    const base = lastOut || await Promise.resolve(Model().run(modelInputs(state.sizeTons)));
+    const { w, wo } = await bothRebateCases(base);
+    const out = w, a = out.annual, life = out.lifetimeYears;
+    const sizes = Model().sizes || out.sizes.map(s => s.sizeTons);
+    const i = sizes.indexOf(out.sizeTons);
+    const lo = sizes[Math.max(0, i - 1)], hi = sizes[Math.min(sizes.length - 1, i + 1)];
+    const loadBtuh = out.designLoadKw * KW_BTUH;
+    const capBtuh = out.capacityKwAt5F * KW_BTUH;
+    const ov = state.overrides, tag = k => k in ov ? '<span class="tg you">you entered</span>' : '<span class="tg">typical for area</span>';
+    const date = new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+    const backupLine = h.currentHeat === "electric"
+      ? "Keep your existing electric baseboards or furnace as backup for the coldest hours. Ask for a control that only turns on electric backup when the heat pump can't keep up."
+      : `Keep your existing ${f.short} system as backup (a "hybrid" setup). Ask for a control that switches to it below a set outdoor temperature, and ask what switchover temperature the rebate programs require.`;
+    const pay = o => o.paybackYears != null && o.paybackYears <= 40 ? o.paybackYears.toFixed(1) + " years" : "not on bills alone";
+    const cut = a.today.co2Kg - a.heatPump.co2Kg;
+    const stat = id => (RB.STATUS[id] || id);
+    const rows = [
+      ["Home size", `${h.floorAreaSqft.toLocaleString()} sq ft`, "floorAreaSqft"],
+      ["How well it holds heat", ENVELOPES[h.envelope].label, "envelope"],
+      ["Current heating", f.label, "currentHeat"],
+      ["Winter thermostat", `${h.thermostatF} °F`, "thermostatF"],
+      ["Heat loss (our estimate)", `${h.heatLossWPerF} W per °F`, "heatLossWPerF"],
+      ["Electricity price", `$${h.electricityUsdPerKWh.toFixed(3)} per kWh`, "electricityUsdPerKWh"],
+      ...(h.currentHeat === "electric" ? [] : [[`${f.short[0].toUpperCase() + f.short.slice(1)} price`, `$${h.fuelUsdPerUnit.toFixed(2)} per ${f.unit}`, "fuelUsdPerUnit"]]),
+      ["Rebates assumed", money(h.rebatesUsd), "rebatesUsd"],
+      ["Installed cost assumed", `$${h.installedUsdPerTon.toLocaleString()} per ton`, "installedUsdPerTon"]
+    ];
+    const questions = [
+      "Will you do a full Manual J load calculation for my home, and can I have a copy?",
+      `Is a ${out.sizeTons}-ton cold-climate model (range ${lo}–${hi} tons) the right size once you've measured the house? Why or why not?`,
+      "What is the model's rated heating capacity at 5 °F and at the coldest night in my area, and what is its efficiency (HSPF2 / COP) at those temperatures?",
+      "Is it on the NEEP cold-climate list and on my utility's qualified product list?",
+      "How will backup heat work, and at what outdoor temperature does it take over? Can you set it to meet my rebate's requirements?",
+      "Which rebates and loans do you handle paperwork for, and is any discount already in your quote?",
+      "Does the quote include electrical work, a new thermostat or controls, removal of old equipment, permits and ductwork changes?",
+      "What are the warranty terms on parts, compressor and labor, and who services it after install?",
+      "How long will the install take, and is a permit and inspection included?",
+      "Can I get itemized quotes from at least two other installers to compare?"
+    ];
+    const docs = ["Photo ID and proof you own the home", "Recent electric bill (and gas bill if you use gas) with account numbers", "Recent bill or delivery receipt for oil, propane or other fuel", "Photos of your current furnace or boiler, its nameplate, and your electrical panel", "Home age, floor plan or square footage, and notes on rooms that are too hot or cold", "Any past energy audit, insulation or air-sealing invoices", "Income documents, if you may qualify for income-based rebates", ...rb.paperwork.filter(p => !/income/i.test(p))];
+    const progs = rb.programs.map(p => `<tr><td><b>${esc(p.name)}</b><br><span style="font-size:9pt">${esc(p.level)}</span></td><td>${stat(p.status)}</td><td>${esc(p.amount)}${p.url ? `<br><span style="font-size:8.5pt;color:#555">${esc(p.url)}</span>` : ""}</td></tr>`).join("");
+
+    $("report").innerHTML = `
+      <header><p style="font-weight:700;color:#3E5A33">Heat pump request sheet · for your installer</p>
+        <h1>${esc(r.full)}</h1>
+        <p>Prepared ${esc(date)} with the Heat Pump Guide (prototype). ${Object.keys(ov).length ? `${Object.keys(ov).length} detail${Object.keys(ov).length > 1 ? "s" : ""} entered by the homeowner; the rest are typical values for the area.` : "All home details are typical values for the area; the homeowner has not yet entered their own."}</p></header>
+
+      <div class="warn"><b>This is an estimate, not a Manual J.</b> The numbers come from a simplified model with placeholder inputs and rules of thumb. They are a starting point for a conversation. A licensed installer must measure the home and run a proper load calculation (ACCA Manual J) and system design (Manual S/D) before choosing equipment.${out.isPlaceholder ? " The team's full model is not plugged in yet, so figures are rough." : ""}</div>
+
+      <section><h2>1. What I'm asking for</h2>
+        <div class="grid2">
+          <div class="box"><div class="big">${out.sizeTons}-ton cold-climate air-source heat pump</div>
+            <p>Please quote ${lo} to ${hi} tons. About ${roundTo(out.sizeTons * TON_BTUH, 1000).toLocaleString()} BTU/h nominal.</p>
+            <p>Rated heating output near 5 °F: about ${roundTo(capBtuh, 500).toLocaleString()} BTU/h (${out.capacityKwAt5F.toFixed(1)} kW).</p></div>
+          <div class="box"><div class="big">About ${roundTo(loadBtuh, 1000).toLocaleString()} BTU/h</div>
+            <p>Estimated heating load on the coldest design night (${degF(r.designTempF)}), ${out.designLoadKw.toFixed(1)} kW.</p>
+            <p>Estimated to cover about ${pct(a.heatPump.heatPumpShare)} of yearly heating with the heat pump alone.</p></div>
+        </div>
+        <p style="margin-top:6pt"><b>Backup / supplemental heat:</b> ${esc(backupLine)}</p>
+        ${out.sizeTons !== out.recommendedSizeTons ? `<p>(The size picker was set to ${out.sizeTons} tons; for the chosen cost-vs-carbon priority we'd suggest ${out.recommendedSizeTons} tons.)</p>` : ""}
+      </section>
+
+      <section><h2>2. Location and climate</h2>
+        <table><tbody>
+          <tr><td>Location</td><td>${esc(r.full)}</td></tr>
+          <tr><td>Winter design temperature (99%)</td><td>${degF(r.designTempF)} <span class="tg">${r.dataStatus === "data.zip" ? "from ASHRAE data" : "placeholder, confirm locally"}</span></td></tr>
+          <tr><td>Coldest month average</td><td>${degF(Math.min(...r.monthlyMeanF))}</td></tr>
+          <tr><td>Grid electricity</td><td>${esc(r.gridNote)} (~${r.gridKgCo2PerKWh} kg CO₂ per kWh)</td></tr>
+        </tbody></table></section>
+
+      <section><h2>3. Home details I entered or assumed</h2>
+        <table><thead><tr><th>Detail</th><th>Value</th><th>Source</th></tr></thead><tbody>
+        ${rows.map(([k, v, key]) => `<tr><td>${k}</td><td>${esc(v)}</td><td>${tag(key)}</td></tr>`).join("")}
+        </tbody></table>
+        <p style="font-size:9.5pt;margin-top:3pt">Please correct anything that's wrong; "typical" values are guesses for a home like mine.</p></section>
+
+      <section><h2>4. Rebates I may qualify for</h2>
+        <table><thead><tr><th>Program</th><th>Status</th><th>What it pays / where</th></tr></thead><tbody>${progs}</tbody></table>
+        <p style="margin-top:4pt"><b>Assumed in the numbers below:</b> ${money(h.rebatesUsd)} total. <b>Verify every figure with the program before signing.</b></p>
+        <p><b>Paperwork to bring or ask the installer about:</b></p>
+        <ul>${rb.paperwork.map(p => `<li>${esc(p)}</li>`).join("")}</ul></section>
+
+      <section><h2>5. Cost and CO₂ summary</h2>
+        <table><thead><tr><th></th><th>Without rebates</th><th>With rebates</th></tr></thead><tbody>
+          <tr><td>Installed price (${out.sizeTons} tons)</td><td>${money(wo.upfront.installedUsd)}</td><td>${money(w.upfront.installedUsd)}</td></tr>
+          <tr><td>Rebates</td><td>$0</td><td>−${money(w.upfront.rebatesUsd)}</td></tr>
+          <tr><td>Upfront cost after rebates</td><td>${money(wo.upfront.netUsd)}</td><td>${money(w.upfront.netUsd)}</td></tr>
+          <tr><td>Break-even</td><td>${pay(wo)}</td><td>${pay(w)}</td></tr>
+          <tr><td>Total cost over ${life} years</td><td>${money(wo.lifetime.costUsd)}</td><td>${money(w.lifetime.costUsd)}</td></tr>
+          <tr><td>Yearly heating bill: today → heat pump</td><td colspan="2">${money(a.today.costUsd)} → ${money(a.heatPump.costUsd)}</td></tr>
+          <tr><td>Yearly heating CO₂: today → heat pump</td><td colspan="2">${tonnes(a.today.co2Kg)} → ${tonnes(a.heatPump.co2Kg)} (${cut >= 0 ? "cut of" : "increase of"} ${tonnes(cut)})</td></tr>
+        </tbody></table></section>
+
+      <section><h2>6. Questions to ask the installer</h2><ol>${questions.map(q => `<li>${esc(q)}</li>`).join("")}</ol></section>
+
+      <section><h2>7. Documents to have ready</h2><ul class="cb">${docs.map(d => `<li>${esc(d)}</li>`).join("")}</ul></section>
+
+      <p class="foot">Estimate only; not a Manual J, an engineering design, a quote or financial advice. Prices, rebates and climate values are placeholders or snapshots from ${RB.asOf} and may be out of date. Model: ${esc(out.modelVersion)}${out.isPlaceholder ? " (placeholder)" : ""}. Generated in your browser; nothing was sent anywhere.</p>`;
+  }
+  async function printReport() {
+    if (!region()) return;
+    await buildReport();
+    const old = document.title;
+    document.title = `Heat-pump-report-${region().name}`;
+    const restore = () => { document.title = old; window.removeEventListener("afterprint", restore); };
+    window.addEventListener("afterprint", restore);
+    window.print();
+  }
+  document.querySelectorAll("[data-report]").forEach(b => b.addEventListener("click", printReport));
+  window.HP_buildReport = buildReport; // used by tests
   $("restart").addEventListener("click", () => { state = blank(); save(); $("place").value = ""; markQuick(); go(0); });
 
   // ---------- Boot ----------

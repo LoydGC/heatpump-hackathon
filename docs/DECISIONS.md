@@ -32,6 +32,8 @@ Add a row here with each new entry.
 | D-009 | 2026-11-07 | Infra | Keep a decision log and audit trail in the repo | active |
 | D-010 | 2026-11-07 | Infra | Map folders to workstreams; auto-generate activity digest from git | active |
 | D-011 | 2026-11-07 | UI | Replace single dashboard with a gated 4-step guided flow | active |
+| D-012 | 2026-11-07 | UI | Rebates section: cost effect and sources, with verify caveats | active |
+| D-013 | 2026-11-07 | UI | Installer report via browser print, no library | active |
 
 ## How to add an entry
 
@@ -136,3 +138,19 @@ Anyone (teammate or Claude thread) who makes a decision that affects the repo, t
 - **Decided by:** Gavin.
 - **Refs:** branch `claude/project-thread-ez6q50`.
 - **Status:** active (numbers are placeholders until the Model workstream plugs in)
+
+### D-012 · 2026-11-07 · Rebates section: show cost effect and explain sources, with verify caveats
+- **Workstream:** UI
+- **Decision:** Results page gets a Rebates section: a With/Without rebates toggle that re-runs the model (the toggle drives the whole page), an always-visible side-by-side table (upfront, break-even, lifetime cost, saved vs today), a plain-language "where rebates come from" explainer, and per-region program cards (Mass Save, Xcel/CenterPoint, Hydro-Québec LogisVert, AHFC) with official links. Content lives in `ui/rebates.js` as snapshots dated 2026-11-07. Findings flagged: federal 25C ended 12/31/2025; DOE reportedly ended fuel-switching use of IRA home rebates (June 2026, trade press); Alaska's program not launched; CenterPoint page showed $400 vs $1,100 in data.zip. Calculator rebate defaults were NOT changed.
+- **Why:** Gavin wanted rebate effects on cost metrics and a qualitative explanation of where rebates come from.
+- **Decided by:** Gavin (request); Claude (content and layout).
+- **Refs:** branch `claude/project-thread-6h36e8`.
+- **Status:** active (Data workstream should verify and own the figures)
+
+### D-013 · 2026-11-07 · Installer report via browser print, no library
+- **Workstream:** UI
+- **Decision:** "Download your report (PDF)" fills a hidden `#report` element and calls `window.print()`; a `@media print` stylesheet hides everything else, so "Save as PDF" in the print dialog gives a clean Letter-size document. No PDF library, CDN, secrets or server. Report covers location and design temp, home details tagged typical vs user-entered, load and size range, backup heat, rebates and paperwork, cost and CO2 with/without rebates, installer questions, document checklist, and a not-a-Manual-J disclaimer.
+- **Why:** Static-site constraint (Vercel Hobby), no paid services, smallest dependency footprint. Tradeoff: user must choose "Save as PDF" in the dialog.
+- **Decided by:** Gavin (request); Claude (approach).
+- **Refs:** branch `claude/project-thread-6h36e8`.
+- **Status:** active
