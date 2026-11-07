@@ -2,7 +2,7 @@
 
 > **Auto-generated, do not edit by hand.** Regenerate with `update-activity-windows.bat` / `update-activity-mac.command` (double-click) or `python tools/activity.py`, then commit. Workstreams come from the folder map in [WORKSTREAMS.md](WORKSTREAMS.md). Hand-written records are in [AUDIT.md](AUDIT.md) and [DECISIONS.md](DECISIONS.md).
 
-Generated 2026-11-07 20:33 UTC from 7 branches, 17 commits (merge commits excluded). A commit touching several workstreams counts once for each.
+Generated 2026-11-07 20:36 UTC from 7 branches, 18 commits (merge commits excluded). A commit touching several workstreams counts once for each.
 
 ## By workstream
 
@@ -11,13 +11,13 @@ Generated 2026-11-07 20:33 UTC from 7 branches, 17 commits (merge commits exclud
 | UI | 4 | Claude | 2026-11-07 |
 | Model | 0 | — | — |
 | Data | 5 | Claude, Matteo-P58, sharvis3 | 2026-11-07 |
-| Infra | 11 | Claude | 2026-11-07 |
+| Infra | 12 | Claude | 2026-11-07 |
 
 ## By author
 
 | Author | UI | Model | Data | Infra | Other | Last commit |
 |---|---|---|---|---|---|---|
-| Claude | 4 |  | 3 | 11 |  | 2026-11-07 |
+| Claude | 4 |  | 3 | 12 |  | 2026-11-07 |
 | sharvis3 |  |  | 1 |  |  | 2026-11-07 |
 | Matteo-P58 |  |  | 1 |  |  | 2026-11-07 |
 
@@ -27,7 +27,7 @@ Commits not yet on `main`. Branches at 0 are fully merged.
 
 | Branch | Not on main | Workstreams | Authors | Last commit | Last message |
 |---|---|---|---|---|---|
-| `claude/project-thread-5j68ss` | 5 | Infra | Claude | 2026-11-07 | Activity digest: count unpushed and unpulled branch work |
+| `claude/project-thread-5j68ss` | 0 | — | — | 2026-11-07 | Regenerate docs/ACTIVITY.md |
 | `claude/project-thread-yrtzah` | 0 | — | — | 2026-11-07 | Document disabled preview deploys |
 | `claude/project-thread-73yxqe` | 0 | — | — | 2026-11-07 | Add Vercel Hobby guardrails doc and .gitignore for secrets |
 | `claude/project-thread-fr56yz` | 0 | — | — | 2026-11-07 | Replace dark mode with four light organic theme options |
@@ -38,11 +38,12 @@ Commits not yet on `main`. Branches at 0 are fully merged.
 
 | Date | Commit | Workstreams | Author | Where | Message |
 |---|---|---|---|---|---|
-| 2026-11-07 | `c75e4cc` | Infra | Claude | `claude/project-thread-5j68ss` | Activity digest: count unpushed and unpulled branch work |
-| 2026-11-07 | `94616d6` | Infra | Claude | `claude/project-thread-5j68ss` | Generate docs/ACTIVITY.md |
-| 2026-11-07 | `46726ed` | Infra | Claude | `claude/project-thread-5j68ss` | Add folder-to-workstream map and activity digest script |
-| 2026-11-07 | `f100345` | Infra | Claude | `claude/project-thread-5j68ss` | Tag decision log and audit trail by workstream; add INTERFACES.md for handoffs |
-| 2026-11-07 | `684b321` | Infra | Claude | `claude/project-thread-5j68ss` | Add decision log and audit trail |
+| 2026-11-07 | `8d4bcc3` | Infra | Claude | main | Regenerate docs/ACTIVITY.md |
+| 2026-11-07 | `c75e4cc` | Infra | Claude | main | Activity digest: count unpushed and unpulled branch work |
+| 2026-11-07 | `94616d6` | Infra | Claude | main | Generate docs/ACTIVITY.md |
+| 2026-11-07 | `46726ed` | Infra | Claude | main | Add folder-to-workstream map and activity digest script |
+| 2026-11-07 | `f100345` | Infra | Claude | main | Tag decision log and audit trail by workstream; add INTERFACES.md for handoffs |
+| 2026-11-07 | `684b321` | Infra | Claude | main | Add decision log and audit trail |
 | 2026-11-07 | `a7f7cae` | Infra | Claude | main | Document disabled preview deploys |
 | 2026-11-07 | `c83833f` | Infra | Claude | main | Turn off Vercel Git auto-deploys; add double-click localhost launchers and docs |
 | 2026-11-07 | `664e88d` | Infra | Claude | main | Add Vercel Hobby guardrails doc and .gitignore for secrets |
@@ -73,6 +74,7 @@ Commits not yet on `main`. Branches at 0 are fully merged.
 
 ## Infra: all commits
 
+- 2026-11-07 `8d4bcc3` Claude: Regenerate docs/ACTIVITY.md (`docs/ACTIVITY.md`)
 - 2026-11-07 `c75e4cc` Claude: Activity digest: count unpushed and unpulled branch work (`tools/activity.py`)
 - 2026-11-07 `94616d6` Claude: Generate docs/ACTIVITY.md (`docs/ACTIVITY.md`)
 - 2026-11-07 `46726ed` Claude: Add folder-to-workstream map and activity digest script (`README.md`, `docs/AUDIT.md`, `docs/DECISIONS.md`, `docs/WORKSTREAMS.md`, `tools/activity.py` +2 more)
