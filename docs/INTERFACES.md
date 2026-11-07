@@ -57,13 +57,54 @@ Entry format:
 
 **Provides**
 
-- **Test sizing page** · UI → all · delivered
-  - What / where: `index.html`, live at https://heatpump-hackathon.vercel.app
-  - Format: static page; inputs and outputs currently placeholder values from the team sketch
+- **Guided 4-step page** · UI → all · delivered (prototype, placeholder numbers)
+  - What / where: `index.html` (root, static), `ui/app.js` (wizard), `ui/charts.js`, `ui/regions.js` (region data), `ui/model-stub.js` (placeholder model). No build step.
+  - Flow: Location → Climate summary → Home details → Results. Steps are gated: you can go back to any step already reached, never forward past it (direct `#results` URLs fall back to step 1). Changing an earlier answer re-renders later steps.
+  - Owner: Gavin (via Claude) · Updated: 2026-11-07
+
+**UI/Model handoff (proposed)**
+
+The page calls `window.HeatPumpModel` and nothing else. `ui/model-stub.js` is a placeholder implementation (`isPlaceholder: true`). To plug in the real model, load a script after it that replaces `window.HeatPumpModel` (or `run` / `climateStats`) with the same shape, and return `isPlaceholder: false` so the "placeholder numbers" banner hides. `run` may return a value or a Promise (e.g. a `fetch` to a Model-owned JSON file or service).
+
+`HeatPumpModel.run(inputs) -> outputs`
+
+Inputs (built by `modelInputs()` in `ui/app.js`; units in names):
+
+```
+{ schemaVersion: 1,
+  region:   { id, name, designTempF, monthlyMeanF[12], monthlySdF[12], dataStatus: "placeholder" | "data.zip" },
+  home:     { source: "typical" | "custom", floorAreaSqft, envelope: "drafty"|"average"|"tight",
+              heatLossWPerF, thermostatF, currentHeat: "gas"|"oil"|"propane"|"electric"|"wood"|"kerosene" },
+  prices:   { electricityUsdPerKWh, fuelUsdPerUnit, fuelUnit, timeOfUse: bool, fuelUsdPerKWhHeat },
+  emissions:{ gridKgCo2PerKWh, fuelKgCo2PerUnit, fuelKgCo2PerKWhHeat },
+  costs:    { installedUsdPerTon, rebatesUsd, lifetimeYears },
+  priority: 0..1,          // 0 = lowest cost, 1 = lowest CO2
+  sizeTons: number | null  // null = model picks; otherwise evaluate this size
+}
+```
+
+Outputs (everything the results page draws):
+
+```
+{ schemaVersion: 1, isPlaceholder: bool, modelVersion: string,
+  recommendedSizeTons, sizeTons, capacityKwAt5F, designLoadKw, lifetimeYears,
+  annual:   { today:    { costUsd, co2Kg, heatKWh },
+              heatPump: { costUsd, co2Kg, electricityKWh, heatPumpShare /*0..1 of heat load*/ } },
+  monthly:  [ 12 x { today: { costUsd, co2Kg }, heatPump: { costUsd, co2Kg } } ],   // Jan..Dec
+  upfront:  { installedUsd, rebatesUsd, netUsd },
+  paybackYears: number | null,
+  lifetime: { costUsd, co2Kg, todayCostUsd, todayCo2Kg },        // heat pump life totals
+  sizes:    [ { sizeTons, lifetimeCostUsd, lifetimeCo2Kg, heatPumpShare, paybackYears } ],  // sweep for the trade-off charts
+  notes:    [ string ] }                                             // shown under results
+```
+
+`HeatPumpModel.climateStats(region) -> { heatingShareAbove5F, hoursBelow5F, hoursBelowMinus13F, coldestMonthMeanF, warmestMonthMeanF, heatingMonths, shoulderMonths, designTempF }` feeds the plain-language climate page; the Model/Data side can replace it with values from real hourly weather.
 
 **Needs**
 
-- _(add)_
+- **Data → UI:** region packs for Boston, Montréal and Fairbanks like the Minneapolis pack (monthly or hourly temperatures, design temp, electricity and fuel prices, grid CO2, rebates). Today only Minneapolis values in `ui/regions.js` come from `data.zip`; the other three are placeholders and are labeled as such on the results page.
+- **Model → UI:** an implementation of `HeatPumpModel.run` in the shape above, and agreement on whether the model runs in-browser (JS), is precomputed to JSON per region and size, or sits behind an endpoint.
+- **Open question:** free-text locations outside the four regions are not supported (no geocoding without a key). Adding more regions means adding an entry to `ui/regions.js`.
 
 ## Infra
 

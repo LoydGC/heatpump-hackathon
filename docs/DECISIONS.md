@@ -31,6 +31,7 @@ Add a row here with each new entry.
 | D-008 | 2026-11-07 | Infra | Manual deploys only; no preview deploys | active |
 | D-009 | 2026-11-07 | Infra | Keep a decision log and audit trail in the repo | active |
 | D-010 | 2026-11-07 | Infra | Map folders to workstreams; auto-generate activity digest from git | active |
+| D-011 | 2026-11-07 | UI | Replace single dashboard with a gated 4-step guided flow | active |
 
 ## How to add an entry
 
@@ -127,3 +128,11 @@ Anyone (teammate or Claude thread) who makes a decision that affects the repo, t
 - **Decided by:** Gavin (chose folder mapping).
 - **Refs:** this push.
 - **Status:** active
+
+### D-011 · 2026-11-07 · Replace single dashboard with a gated 4-step guided flow
+- **Workstream:** UI
+- **Decision:** `index.html` is now a wizard: 1 location ("Where is your home for a heat pump?"), 2 plain-language climate summary with a heat pump illustration, 3 home details (optional; location alone gives a typical synthetic home for the region), 4 results separated into Carbon, Money and Bigger-or-smaller sections with charts. Back navigation works; forward only through completed steps; changing an earlier answer updates later pages. Supported regions: Boston, Minneapolis–St. Paul, Montréal, Fairbanks (typed city/ZIP is matched to these; no geocoding service, so other places are unsupported). Results come from a placeholder model behind `window.HeatPumpModel`; the handoff shape is in `docs/INTERFACES.md`. Still static, no build step; same four light themes via `?theme=`.
+- **Why:** Gavin wanted a human-friendly, guided experience instead of an inputs-and-chart dashboard.
+- **Decided by:** Gavin.
+- **Refs:** branch `claude/project-thread-ez6q50`.
+- **Status:** active (numbers are placeholders until the Model workstream plugs in)

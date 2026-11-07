@@ -38,3 +38,4 @@ To filter by workstream: search the page for `| UI |`, `| Model |`, `| Data |` o
 | 2026-11-07 | repo | Infra | Added DECISIONS.md, AUDIT.md and INTERFACES.md | Claude, for Gavin | this push | D-009 |
 | 2026-11-07 | repo | Infra | Folder-to-workstream map, activity script and launchers, generated ACTIVITY.md | Claude, for Gavin | this push | D-010 |
 | 2026-11-07 | merge | Infra | Fast-forwarded `claude/project-thread-5j68ss` (decision log, audit, interfaces, workstream map, activity digest) into `main` | Claude, for Gavin | `5a5d347` | D-009, D-010 |
+| 2026-11-07 | repo | UI | Rebuilt dashboard as gated 4-step wizard (location, climate, home, results); added `ui/` scripts and placeholder model stub; documented UI/Model handoff | Claude, for Gavin | this push (branch `claude/project-thread-ez6q50`) | D-011 |
