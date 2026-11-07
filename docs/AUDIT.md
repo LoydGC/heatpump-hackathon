@@ -39,3 +39,4 @@ To filter by workstream: search the page for `| UI |`, `| Model |`, `| Data |` o
 | 2026-11-07 | repo | Infra | Folder-to-workstream map, activity script and launchers, generated ACTIVITY.md | Claude, for Gavin | this push | D-010 |
 | 2026-11-07 | merge | Infra | Fast-forwarded `claude/project-thread-5j68ss` (decision log, audit, interfaces, workstream map, activity digest) into `main` | Claude, for Gavin | `5a5d347` | D-009, D-010 |
 | 2026-11-07 | repo | Infra | Added `.vercelignore`: deploys skip raw data, archives, model code, docs and tooling | Claude, for Gavin | this push | D-011 |
+| 2026-11-07 | repo | Data | Added docs/COMPARABLES.md and docs/comparables.html: comparable heat pump products research (no PR, no deploy; docs/ excluded from deploys) | Claude, for Gavin | this push | |
