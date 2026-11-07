@@ -31,6 +31,7 @@ Add a row here with each new entry.
 | D-008 | 2026-11-07 | Infra | Manual deploys only; no preview deploys | active |
 | D-009 | 2026-11-07 | Infra | Keep a decision log and audit trail in the repo | active |
 | D-010 | 2026-11-07 | Infra | Map folders to workstreams; auto-generate activity digest from git | active |
+| D-011 | 2026-11-07 | Infra | Deploys upload only site files (`.vercelignore`) | active |
 
 ## How to add an entry
 
@@ -126,4 +127,12 @@ Anyone (teammate or Claude thread) who makes a decision that affects the repo, t
 - **Why:** Trace teammates' manual work (uploads, edits) from git alone, without relying on everyone writing AUDIT.md rows.
 - **Decided by:** Gavin (chose folder mapping).
 - **Refs:** this push.
+- **Status:** active
+
+### D-011 · 2026-11-07 · Deploys upload only site files (`.vercelignore`)
+- **Workstream:** Infra
+- **Decision:** `.vercelignore` excludes raw data and archives (`*.zip`, `*.xlsx`, `data/raw/`, `data/scripts/`), model/analysis code (`model/`, `comsol/`, `notebooks/`, `*.py`, ...), docs, tooling, launchers and `*.md`. Kept: `index.html`, `vercel.json`, and anything else, such as `ui/`, `assets/`, `data/processed/`, `results/`, so the page can load processed data or model outputs. Denylist chosen over allowlist so new site folders deploy without config changes.
+- **Why:** Smaller, faster deploys within Hobby limits; no raw data or internal files on the public site.
+- **Decided by:** Gavin.
+- **Refs:** this push, `.vercelignore`, `docs/local-and-deploy.md`.
 - **Status:** active

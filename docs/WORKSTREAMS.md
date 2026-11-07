@@ -43,6 +43,7 @@ Infra  tools/*
 Infra  README.md
 Infra  vercel.json
 Infra  .gitignore
+Infra  .vercelignore
 Infra  .claude/*
 Infra  run-local-*
 Infra  update-activity-*

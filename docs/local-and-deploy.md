@@ -29,6 +29,10 @@ Pushing to GitHub does **not** deploy. `vercel.json` turns off Git auto-deploys,
 
 Preview deploys are turned off for every branch (Vercel → Settings → Git: preview deployments disabled, plus an Ignored Build Step `[ "$VERCEL_ENV" = "preview" ]` that skips any preview build). Only production deploys of `main` run. To test a branch, use localhost.
 
+### What gets uploaded
+
+`.vercelignore` keeps raw data, archives (`data.zip`, `.xlsx`), model code, docs and tooling out of deploys, so only the site files go up. Kept: `index.html`, `vercel.json`, and folders like `ui/`, `assets/`, `data/processed/`, `results/`. If the page needs a file that's excluded, remove its line from `.vercelignore`. Localhost is unaffected.
+
 ### Undo a bad deploy
 
 Deployments page → find the last good **Production** deployment → **⋯** → **Promote** (or **Instant Rollback**). The live link switches back in seconds.

@@ -1,0 +1,38 @@
+# Files Vercel does NOT upload when deploying. The live site is index.html
+# plus any folder it loads from (e.g. ui/, assets/, data/processed/, results/).
+# If the page needs a file listed here, remove that line (see docs/local-and-deploy.md).
+
+# Raw data and archives
+*.zip
+*.xlsx
+*.xls
+data/raw/
+data/scripts/
+
+# Model / analysis code (not served)
+model/
+comsol/
+notebooks/
+tests/
+src/
+scripts/
+*.py
+*.ipynb
+*.mph
+
+# Repo docs and tooling
+docs/
+tools/
+.claude/
+*.md
+run-local-*
+update-activity-*
+.gitignore
+.vercelignore
+
+# Secrets (also gitignored)
+.env
+.env.*
+*.pem
+*.key
+credentials*.json
