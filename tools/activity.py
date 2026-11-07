@@ -72,15 +72,14 @@ def classify(path, rules):
 
 
 def branches():
-    """Remote branches (origin/*) plus local-only branches, by short name."""
-    refs = {}
+    """Branch short name -> its refs (local and origin/), so unpushed and unpulled work both count."""
+    refs = defaultdict(list)
     for line in git("for-each-ref", "--format=%(refname)", "refs/remotes/origin", "refs/heads").split():
         if line.endswith("/HEAD"):
             continue
-        if line.startswith("refs/remotes/origin/"):
-            refs[line[len("refs/remotes/origin/"):]] = line
-        else:
-            refs.setdefault(line[len("refs/heads/"):], line)
+        for prefix in ("refs/remotes/origin/", "refs/heads/"):
+            if line.startswith(prefix):
+                refs[line[len(prefix):]].append(line)
     return refs
 
 
@@ -109,19 +108,20 @@ def main():
         git("fetch", "--all", "--prune", "--quiet", check=False)
     rules = load_map()
     refs = branches()
-    main_ref = refs.get("main")
-    all_commits = commits(["--all"] if not refs else list(refs.values()), rules)
+    main_refs = refs.get("main", [])
+    not_main = ["--not", *main_refs] if main_refs else []
+    all_commits = commits([r for rs in refs.values() for r in rs], rules)
 
     # Which branches carry each commit that is not on main.
     on_branch = defaultdict(list)
     branch_rows = []
-    for name, ref in sorted(refs.items()):
+    for name, rs in sorted(refs.items()):
         if name == "main":
             continue
-        ahead = commits([f"{main_ref}..{ref}"] if main_ref else [ref], rules)
+        ahead = commits([*rs, *not_main], rules)
         for c in ahead:
             on_branch[c["sha"]].append(name)
-        last = git("log", "-1", "--format=%aI\x1f%an\x1f%s", ref).strip().split("\x1f")
+        last = git("log", "-1", "--format=%aI\x1f%an\x1f%s", *rs).strip().split("\x1f")
         ws = sorted({w for c in ahead for w in c["ws"]}, key=ORDER.index)
         authors = sorted({c["author"] for c in ahead})
         branch_rows.append((name, len(ahead), ws, authors, last))
