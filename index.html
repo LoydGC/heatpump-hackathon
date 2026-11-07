@@ -370,6 +370,9 @@ footer{margin-top:40px;font-size:13px}
           <div class="f full"><span class="lbl" id="envL">How well does it hold heat? <span class="src" data-src="envelope"></span></span>
             <div class="seg" role="group" aria-labelledby="envL" id="envSeg"></div></div>
           <div class="f"><label for="tstat">Thermostat in winter (°F) <span class="src" data-src="thermostatF"></span></label><input id="tstat" type="number" min="55" max="78" step="1"></div>
+          <div class="f full"><span class="lbl">Smart meter <span class="src" data-src="timeOfUse"></span></span>
+            <label class="check"><input type="checkbox" id="tou"> I have a smart meter (time-of-use rate)</label>
+            <p class="hint muted">Placeholder for now: we assume electricity is 10% cheaper on average with a smart meter and time-of-use plan. Using real meter data comes later.</p></div>
           <div class="f full"><span class="lbl" id="prioL">What matters more to you?</span>
             <div class="prio"><span>Saving money</span><input id="prio" type="range" min="0" max="100" value="50" aria-labelledby="prioL"><span>Cutting carbon</span></div>
             <p class="hint muted" id="prioText"></p></div>
@@ -383,7 +386,6 @@ footer{margin-top:40px;font-size:13px}
             <div class="f"><label for="rebates">Rebates you expect ($) <span class="src" data-src="rebatesUsd"></span></label><input id="rebates" type="number" min="0" step="100"></div>
             <div class="f"><label for="costTon">Installed cost ($ per ton) <span class="src" data-src="installedUsdPerTon"></span></label><input id="costTon" type="number" min="0" step="250"></div>
             <div class="f"><label for="ua">Heat loss (W per °F) <span class="src" data-src="heatLossWPerF"></span></label><input id="ua" type="number" min="20" step="5"><p class="hint muted">Leave as is unless you have an energy audit. We estimate it from size and draftiness.</p></div>
-            <div class="f"><span class="lbl">Electricity plan</span><label class="check"><input type="checkbox" id="tou"> Time-of-use rate (cheaper off-peak)</label></div>
           </div>
         </details>
         <p class="status-line muted" id="homeStatus"></p>

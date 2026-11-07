@@ -102,6 +102,7 @@ Outputs (everything the results page draws):
 
 **New UI-side fields (rebates + report, 2026-11-07)**
 
+- **Smart meter (TODO, flesh out):** `prices.timeOfUse` boolean; placeholder 10% discount in the stub. Model/Data should supply real TOU price schedules per region; usage-data calibration is not designed yet (see D-014).
 - `window.HP_REBATES` (`ui/rebates.js`): `REGION[id] = { intro, programs[{name, level, status, amount, note, url, checked}], paperwork[], amountsNote }` plus `SOURCES[]`. Hand-written snapshots dated 2026-11-07, not data-driven.
 - UI calls `HeatPumpModel.run` twice per render (rebates on/off, same `sizeTons`) via `costs.rebatesUsd`. Model needs no change but must keep `rebatesUsd = 0` valid and `upfront`, `paybackYears`, `lifetime` consistent with it.
 - Report reads from `run` outputs: `designLoadKw`, `capacityKwAt5F`, `sizeTons`, `recommendedSizeTons`, `annual.*.heatPumpShare`, `isPlaceholder`, `modelVersion`. It shows a size range of ±1 entry in `HeatPumpModel.sizes`. Optional Model outputs that would improve it: `designLoadBtuh`, `backupSwitchoverF`, `backupKwNeeded`.

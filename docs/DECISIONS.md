@@ -34,6 +34,7 @@ Add a row here with each new entry.
 | D-011 | 2026-11-07 | UI | Replace single dashboard with a gated 4-step guided flow | active |
 | D-012 | 2026-11-07 | UI | Rebates section: cost effect and sources, with verify caveats | active |
 | D-013 | 2026-11-07 | UI | Installer report via browser print, no library | active |
+| D-014 | 2026-11-07 | UI | Smart meter is a simple toggle for now; flesh out later | active |
 
 ## How to add an entry
 
@@ -154,3 +155,11 @@ Anyone (teammate or Claude thread) who makes a decision that affects the repo, t
 - **Decided by:** Gavin (request); Claude (approach).
 - **Refs:** branch `claude/project-thread-6h36e8`.
 - **Status:** active
+
+### D-014 · 2026-11-07 · Smart meter stays a simple toggle for now
+- **Workstream:** UI
+- **Decision:** The smart meter is a visible checkbox on the Your home step (`inputs.prices.timeOfUse`; the stub applies 10% cheaper electricity). No usage-data upload or Green Button support yet. **TODO (needs fleshing out):** define what a smart meter changes (real time-of-use rates per utility from the Data pack, hourly usage to calibrate heat loss, optional upload of Green Button/CSV or monthly totals), and have the Model use hourly prices instead of the flat 10%.
+- **Why:** Gavin: not ready for the upload idea; just a toggle for now.
+- **Decided by:** Gavin.
+- **Refs:** branch `claude/project-thread-6h36e8`.
+- **Status:** active (open TODO)

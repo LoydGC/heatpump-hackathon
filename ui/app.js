@@ -397,6 +397,7 @@
       ["How well it holds heat", ENVELOPES[h.envelope].label, "envelope"],
       ["Current heating", f.label, "currentHeat"],
       ["Winter thermostat", `${h.thermostatF} °F`, "thermostatF"],
+      ["Smart meter / time-of-use rate", h.timeOfUse ? "Yes (assumed 10% cheaper electricity)" : "No", "timeOfUse"],
       ["Heat loss (our estimate)", `${h.heatLossWPerF} W per °F`, "heatLossWPerF"],
       ["Electricity price", `$${h.electricityUsdPerKWh.toFixed(3)} per kWh`, "electricityUsdPerKWh"],
       ...(h.currentHeat === "electric" ? [] : [[`${f.short[0].toUpperCase() + f.short.slice(1)} price`, `$${h.fuelUsdPerUnit.toFixed(2)} per ${f.unit}`, "fuelUsdPerUnit"]]),
