@@ -1,0 +1,43 @@
+{
+  "city": "Minneapolis-St. Paul, MN (MSP airport, WMO 726580)",
+  "design_conditions": {
+    "heating_99pct_C": -20.6,
+    "heating_99_6pct_C": -23.0,
+    "source": "ASHRAE via EnergyPlus .ddy (TMYx/TMY3 files)"
+  },
+  "weather_files": {
+    "main": "processed/msp_weather_TMYx.2011-2025.csv",
+    "recent_alt": "processed/msp_weather_TMYx.2009-2023.csv",
+    "cold_stress_test": "processed/msp_weather_TMY3.csv"
+  },
+  "electricity": {
+    "flat_all_in_usd_per_kWh": 0.1644,
+    "source": "EIA EPM Table 5.6.B, MN residential YTD Jan-Aug 2026",
+    "tou_scenario_usd_per_kWh": {
+      "peak_weekday_15_20h": 0.24,
+      "base": 0.145,
+      "offpeak_0_6h": 0.09,
+      "note": "ASSUMPTION: reported Xcel winter TOU energy charges + ~5c riders; verify vs Xcel rate book A72/A74"
+    }
+  },
+  "natural_gas": {
+    "winter_avg_usd_per_Mcf": 10.65,
+    "usd_per_kWh_fuel": 0.035,
+    "source": "EIA N3010MN3 Oct 2025-Mar 2026 average"
+  },
+  "furnace_efficiency_AFUE": 0.95,
+  "emissions": {
+    "gas_kgCO2_per_MMBtu": 53.06,
+    "gas_gCO2_per_kWh_fuel": 181.0,
+    "grid_hourly_file": "processed/miso_hourly_grid_carbon_2025.csv",
+    "grid_annual_eGRID_MROW_gCO2_per_kWh": 417.3
+  },
+  "rebates_usd": {
+    "xcel_ccashp_ducted_combo_gas": 2000,
+    "centerpoint_hybrid_with_furnace": 1100,
+    "centerpoint_condition": "switchover programmed at or below 40F",
+    "federal_25C": 0
+  },
+  "heat_pump_curves": "processed/hp_carrier_37MUHAQ_heating_curves.csv",
+  "analysis_years": 15
+}
