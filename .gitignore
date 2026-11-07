@@ -27,10 +27,6 @@ desktop.ini
 *.tmp
 ~$*
 
-# Large files: COMSOL models and videos stay out of git
-*.mph
-*.mp4
-
 # More secrets
 *.p12
 *.pfx
