@@ -21,5 +21,6 @@ See [docs/local-and-deploy.md](docs/local-and-deploy.md).
 
 - [docs/DECISIONS.md](docs/DECISIONS.md): decision log (why).
 - [docs/AUDIT.md](docs/AUDIT.md): audit trail of changes, merges, deploys and settings (what, when, who).
+- [docs/INTERFACES.md](docs/INTERFACES.md): what UI, Model and Data each provide to and need from the others.
 
-When you change something, add a row to AUDIT.md in the same push, and a DECISIONS.md entry if it was a decision.
+Entries are tagged by workstream: UI, Model, Data, or Infra (cross-cutting). When you change something, add a row to AUDIT.md in the same push, a DECISIONS.md entry if it was a decision, and update INTERFACES.md if a handoff changed.
