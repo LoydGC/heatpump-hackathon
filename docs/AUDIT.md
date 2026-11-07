@@ -42,3 +42,4 @@ To filter by workstream: search the page for `| UI |`, `| Model |`, `| Data |` o
 | 2026-11-07 | repo | UI | Added Rebates section (with/without toggle, per-region program explainer with links) and printable "Download your report (PDF)" to results; new `ui/rebates.js` | Claude, for Gavin | this push (branch `claude/project-thread-6h36e8`) | D-012, D-013 |
 | 2026-11-07 | repo | UI | Moved smart meter (time-of-use) toggle to main Your home form and into the report; flagged as placeholder to flesh out | Claude, for Gavin | this push | D-014 |
 | 2026-11-07 | repo | UI | Results: "Add a smart meter?" section compares heat pump vs heat pump + smart meter (toggle applies it page-wide) | Claude, for Gavin | this push | D-014 |
+| 2026-11-07 | repo | UI | Front page: headline "Let's get you a heat pump!" with the location question as subheader | Claude, for Gavin | this push | |
