@@ -6,3 +6,34 @@
 *.key
 credentials*.json
 .vercel
+
+# Dependencies and Python junk
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Temp and Office lock files (repo may live in OneDrive)
+*.log
+*.tmp
+~$*
+
+# Large files: COMSOL models and videos stay out of git
+*.mph
+*.mp4
+
+# More secrets
+*.p12
+*.pfx
+id_rsa*
+secrets.*
+.npmrc
