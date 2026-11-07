@@ -9,8 +9,15 @@
 data/raw/
 data/scripts/
 
-# Model / analysis code (not served)
-model/
+# Model / analysis code (not served), except the one file the site loads.
+# Gitignore-style re-include: a directory itself can't be re-included once excluded,
+# so exclude its contents (model/*), re-include model/results/, exclude its contents,
+# then re-include frontend_data.json. NOT YET TESTED ON VERCEL: after the next deploy
+# confirm /model/results/frontend_data.json returns 200 (see D-013).
+model/*
+!model/results/
+model/results/*
+!model/results/frontend_data.json
 comsol/
 notebooks/
 tests/

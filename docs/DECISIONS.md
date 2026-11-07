@@ -32,6 +32,8 @@ Add a row here with each new entry.
 | D-009 | 2026-11-07 | Infra | Keep a decision log and audit trail in the repo | active |
 | D-010 | 2026-11-07 | Infra | Map folders to workstreams; auto-generate activity digest from git | active |
 | D-011 | 2026-11-07 | Infra | Deploys upload only site files (`.vercelignore`) | active |
+| D-012 | 2026-11-07 | Infra | Broaden `.gitignore` beyond secrets | active |
+| D-013 | 2026-11-07 | Data | Restore data/processed and scripts; deploy `frontend_data.json` | active |
 
 ## How to add an entry
 
@@ -131,7 +133,7 @@ Anyone (teammate or Claude thread) who makes a decision that affects the repo, t
 
 ### D-011 · 2026-11-07 · Deploys upload only site files (`.vercelignore`)
 - **Workstream:** Infra
-- **Decision:** `.vercelignore` excludes raw data and archives (`*.zip`, `*.xlsx`, `data/raw/`, `data/scripts/`), model/analysis code (`model/`, `comsol/`, `notebooks/`, `*.py`, ...), docs, tooling, launchers and `*.md`. Kept: `index.html`, `vercel.json`, and anything else, such as `ui/`, `assets/`, `data/processed/`, `results/`, so the page can load processed data or model outputs. Denylist chosen over allowlist so new site folders deploy without config changes.
+- **Decision:** `.vercelignore` excludes raw data and archives (`*.zip`, `*.xlsx`, `data/raw/`, `data/scripts/`), model/analysis code (`model/`, `comsol/`, `notebooks/`, `*.py`, ...), docs, tooling, launchers and `*.md`. Kept: `index.html`, `vercel.json`, and anything else, such as `ui/`, `assets/`, `data/processed/`, `results/`, so the page can load processed data or model outputs. (Amended by D-013: `model/` is now excluded except `model/results/frontend_data.json`.) Denylist chosen over allowlist so new site folders deploy without config changes.
 - **Why:** Smaller, faster deploys within Hobby limits; no raw data or internal files on the public site.
 - **Decided by:** Gavin.
 - **Refs:** this push, `.vercelignore`, `docs/local-and-deploy.md`.
@@ -143,4 +145,13 @@ Anyone (teammate or Claude thread) who makes a decision that affects the repo, t
 - **Why:** The repo is public and takes data uploads; guard against accidental huge or sensitive commits.
 - **Decided by:** Gavin.
 - **Refs:** this push, `.gitignore`.
+- **Status:** active
+
+### D-013 · 2026-11-07 · Restore `data/processed/`, and let the site load `frontend_data.json`
+- **Workstream:** Data (with Model and Infra)
+- **Decision:** Restored `data/processed/` (6 files), `data/scripts/` (2 small helpers, read and harmless: EPW-to-CSV conversion and JSON text extraction) and `data/README.md` from the original `data.zip` commit `b7e8b32`. The unzip in `49460e6` had only kept `data/raw/`, so `model/data.py` (which reads `data/processed/`) failed on a fresh clone. `.vercelignore` now excludes `model/*` but re-includes `model/results/frontend_data.json`, the Model output the UI loads. Stale references in INTERFACES, WORKSTREAMS and the README were updated.
+- **Why:** The model could not run from the repo, and the old `.vercelignore` excluded all of `model/`, so the deployed page could not fetch its data.
+- **Verified:** `pytest` in `model/` passes (6 tests); re-running `python3 sweep.py` reproduces the committed `model/results/sweep.csv` exactly (max difference 0.0). The `.vercelignore` re-include is **not tested on Vercel**: after the next manual deploy, check that `/model/results/frontend_data.json` returns 200.
+- **Decided by:** Gavin.
+- **Refs:** this push, `.vercelignore`, `data/README.md`.
 - **Status:** active
