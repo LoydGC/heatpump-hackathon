@@ -371,8 +371,8 @@ footer{margin-top:40px;font-size:13px}
             <div class="seg" role="group" aria-labelledby="envL" id="envSeg"></div></div>
           <div class="f"><label for="tstat">Thermostat in winter (°F) <span class="src" data-src="thermostatF"></span></label><input id="tstat" type="number" min="55" max="78" step="1"></div>
           <div class="f full"><span class="lbl">Smart meter <span class="src" data-src="timeOfUse"></span></span>
-            <label class="check"><input type="checkbox" id="tou"> I have a smart meter (time-of-use rate)</label>
-            <p class="hint muted">Placeholder for now: we assume electricity is 10% cheaper on average with a smart meter and time-of-use plan. Using real meter data comes later.</p></div>
+            <label class="check"><input type="checkbox" id="tou"> I already have a smart meter (time-of-use rate)</label>
+            <p class="hint muted">Leave it off to see what adding one would do; the results page compares heat pump with and without a smart meter. Placeholder: 10% cheaper electricity.</p></div>
           <div class="f full"><span class="lbl" id="prioL">What matters more to you?</span>
             <div class="prio"><span>Saving money</span><input id="prio" type="range" min="0" max="100" value="50" aria-labelledby="prioL"><span>Cutting carbon</span></div>
             <p class="hint muted" id="prioText"></p></div>
@@ -451,6 +451,15 @@ footer{margin-top:40px;font-size:13px}
         </div>
       </div>
       <details class="tbl"><summary>Show monthly numbers as a table</summary><div class="table-scroll"><table><thead><tr><th>Month</th><th>Bill today</th><th>Bill with heat pump</th><th>CO₂ today</th><th>CO₂ with heat pump</th></tr></thead><tbody id="mTable"></tbody></table></div></details>
+    </section>
+
+    <section class="section" aria-labelledby="meterH">
+      <div class="section-head"><h2 id="meterH">Add a smart meter?</h2><span class="tag">Placeholder</span></div>
+      <p class="muted" id="meterLede" style="max-width:70ch;margin:-4px 0 14px"></p>
+      <div class="reb-toggle"><span style="font-weight:600">Show the numbers on this page:</span>
+        <div class="seg" role="group" aria-label="Smart meter on or off" id="meterSeg"><button data-meter="0">Heat pump only</button><button data-meter="1">Heat pump + smart meter</button></div></div>
+      <div class="card" style="padding:12px 16px"><div class="table-scroll"><table class="cmp"><thead><tr><th></th><th>Heat pump</th><th>Heat pump + smart meter</th><th>Meter adds</th></tr></thead><tbody id="meterCmp"></tbody></table></div></div>
+      <p class="muted" style="font-size:14px;margin-top:10px;max-width:70ch">Placeholder: we assume a smart meter on a time-of-use plan makes electricity 10% cheaper on average, and cost nothing to add. Real utility rate plans and meter costs still need to be worked out.</p>
     </section>
 
     <section class="section" aria-labelledby="rebH">

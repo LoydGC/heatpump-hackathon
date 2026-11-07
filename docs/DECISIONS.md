@@ -162,4 +162,5 @@ Anyone (teammate or Claude thread) who makes a decision that affects the repo, t
 - **Why:** Gavin: not ready for the upload idea; just a toggle for now.
 - **Decided by:** Gavin.
 - **Refs:** branch `claude/project-thread-6h36e8`.
+- **Update (same day):** Gavin wants the framing "heat pump + meter vs heat pump + no meter" (you're already doing this, why not add a meter). Results now have an "Add a smart meter?" side-by-side (bill, break-even, lifetime cost) and a toggle that applies it page-wide; the home-step checkbox means "I already have one". Still the flat 10% placeholder, meter cost assumed zero.
 - **Status:** active (open TODO)

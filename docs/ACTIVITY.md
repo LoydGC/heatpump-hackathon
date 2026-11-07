@@ -2,16 +2,16 @@
 
 > **Auto-generated, do not edit by hand.** Regenerate with `update-activity-windows.bat` / `update-activity-mac.command` (double-click) or `python tools/activity.py`, then commit. Workstreams come from the folder map in [WORKSTREAMS.md](WORKSTREAMS.md). Hand-written records are in [AUDIT.md](AUDIT.md) and [DECISIONS.md](DECISIONS.md).
 
-Generated 2026-11-07 21:27 UTC from 10 branches, 27 commits (merge commits excluded). A commit touching several workstreams counts once for each.
+Generated 2026-11-07 21:30 UTC from 10 branches, 28 commits (merge commits excluded). A commit touching several workstreams counts once for each.
 
 ## By workstream
 
 | Workstream | Commits | Authors | Last activity |
 |---|---|---|---|
-| UI | 6 | Claude | 2026-11-07 |
+| UI | 7 | Claude | 2026-11-07 |
 | Model | 0 | — | — |
 | Data | 6 | Claude, Matteo-P58, sharvis3 | 2026-11-07 |
-| Infra | 20 | Claude, Gavin Loyd | 2026-11-07 |
+| Infra | 21 | Claude, Gavin Loyd | 2026-11-07 |
 | Other | 1 | Claude | 2026-11-07 |
 
 Unmapped files (add a rule in WORKSTREAMS.md): `.vercelignore`
@@ -20,7 +20,7 @@ Unmapped files (add a rule in WORKSTREAMS.md): `.vercelignore`
 
 | Author | UI | Model | Data | Infra | Other | Last commit |
 |---|---|---|---|---|---|---|
-| Claude | 6 |  | 3 | 19 | 1 | 2026-11-07 |
+| Claude | 7 |  | 3 | 20 | 1 | 2026-11-07 |
 | Gavin Loyd |  |  |  | 1 |  | 2026-11-07 |
 | sharvis3 |  |  | 2 |  |  | 2026-11-07 |
 | Matteo-P58 |  |  | 1 |  |  | 2026-11-07 |
@@ -31,7 +31,7 @@ Commits not yet on `main`. Branches at 0 are fully merged.
 
 | Branch | Not on main | Workstreams | Authors | Last commit | Last message |
 |---|---|---|---|---|---|
-| `claude/project-thread-6h36e8` | 2 | UI, Infra | Claude | 2026-11-07 | Add rebates section and printable installer report (PDF via print) |
+| `claude/project-thread-6h36e8` | 3 | UI, Infra | Claude | 2026-11-07 | Make smart meter a visible toggle on Your home step; note to flesh out |
 | `claude/project-thread-czssmr` | 1 | Infra | Claude | 2026-11-07 | Add comparable products research (COMPARABLES.md and comparables.html) |
 | `claude/project-thread-ez6q50` | 1 | UI, Infra | Claude | 2026-11-07 | Rebuild dashboard as gated 4-step wizard with placeholder model stub |
 | `claude/project-thread-yrtzah` | 0 | — | — | 2026-11-07 | Add .vercelignore so deploys upload only site files |
@@ -45,6 +45,7 @@ Commits not yet on `main`. Branches at 0 are fully merged.
 
 | Date | Commit | Workstreams | Author | Where | Message |
 |---|---|---|---|---|---|
+| 2026-11-07 | `92b8837` | UI, Infra | Claude | `claude/project-thread-6h36e8` | Make smart meter a visible toggle on Your home step; note to flesh out |
 | 2026-11-07 | `335ec24` | UI, Infra | Claude | `claude/project-thread-6h36e8` | Add rebates section and printable installer report (PDF via print) |
 | 2026-11-07 | `14b1a96` | Infra | Claude | `claude/project-thread-czssmr` | Add comparable products research (COMPARABLES.md and comparables.html) |
 | 2026-11-07 | `225bf6d` | UI, Infra | Claude | `claude/project-thread-6h36e8`, `claude/project-thread-ez6q50` | Rebuild dashboard as gated 4-step wizard with placeholder model stub |
@@ -75,6 +76,7 @@ Commits not yet on `main`. Branches at 0 are fully merged.
 
 ## UI: all commits
 
+- 2026-11-07 `92b8837` Claude: Make smart meter a visible toggle on Your home step; note to flesh out (`index.html`, `ui/app.js`)
 - 2026-11-07 `335ec24` Claude: Add rebates section and printable installer report (PDF via print) (`index.html`, `ui/app.js`, `ui/rebates.js`)
 - 2026-11-07 `225bf6d` Claude: Rebuild dashboard as gated 4-step wizard with placeholder model stub (`index.html`, `ui/app.js`, `ui/charts.js`, `ui/model-stub.js`, `ui/regions.js`)
 - 2026-11-07 `a62fe09` Claude: Replace dark mode with four light organic theme options (`index.html`)
@@ -93,6 +95,7 @@ Commits not yet on `main`. Branches at 0 are fully merged.
 
 ## Infra: all commits
 
+- 2026-11-07 `92b8837` Claude: Make smart meter a visible toggle on Your home step; note to flesh out (`docs/ACTIVITY.md`, `docs/AUDIT.md`, `docs/DECISIONS.md`, `docs/INTERFACES.md`)
 - 2026-11-07 `335ec24` Claude: Add rebates section and printable installer report (PDF via print) (`docs/ACTIVITY.md`, `docs/AUDIT.md`, `docs/DECISIONS.md`, `docs/INTERFACES.md`)
 - 2026-11-07 `14b1a96` Claude: Add comparable products research (COMPARABLES.md and comparables.html) (`docs/AUDIT.md`, `docs/COMPARABLES.md`, `docs/comparables.html`)
 - 2026-11-07 `225bf6d` Claude: Rebuild dashboard as gated 4-step wizard with placeholder model stub (`docs/AUDIT.md`, `docs/DECISIONS.md`, `docs/INTERFACES.md`)

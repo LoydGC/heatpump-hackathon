@@ -57,7 +57,7 @@
     const r = region(), d = typical(r, state.overrides);
     return Object.assign({}, d, state.overrides);
   }
-  function modelInputs(sizeTons, rebatesOn = state.rebatesOn) {
+  function modelInputs(sizeTons, rebatesOn = state.rebatesOn, tou = null) {
     const r = region(), h = effective(), f = FUELS[h.currentHeat];
     const fuelPrice = h.currentHeat === "electric" ? h.electricityUsdPerKWh : h.fuelUsdPerUnit;
     const fuelCo2 = h.currentHeat === "electric" ? r.gridKgCo2PerKWh : f.co2;
@@ -66,7 +66,7 @@
       region: { id: r.id, name: r.full, designTempF: r.designTempF, monthlyMeanF: r.monthlyMeanF, monthlySdF: r.monthlySdF, dataStatus: r.dataStatus },
       home: { source: Object.keys(state.overrides).length ? "custom" : "typical", floorAreaSqft: h.floorAreaSqft, envelope: h.envelope,
               heatLossWPerF: h.heatLossWPerF, thermostatF: h.thermostatF, currentHeat: h.currentHeat },
-      prices: { electricityUsdPerKWh: h.electricityUsdPerKWh, fuelUsdPerUnit: fuelPrice, fuelUnit: f.unit, timeOfUse: !!h.timeOfUse,
+      prices: { electricityUsdPerKWh: h.electricityUsdPerKWh, fuelUsdPerUnit: fuelPrice, fuelUnit: f.unit, timeOfUse: tou == null ? !!h.timeOfUse : tou,
                 fuelUsdPerKWhHeat: fuelPrice / (f.kwh * f.eff) },
       emissions: { gridKgCo2PerKWh: r.gridKgCo2PerKWh, fuelKgCo2PerUnit: fuelCo2, fuelKgCo2PerKWhHeat: fuelCo2 / (f.kwh * f.eff) },
       costs: { installedUsdPerTon: h.installedUsdPerTon, rebatesUsd: rebatesOn ? h.rebatesUsd : 0, lifetimeYears: LIFETIME_YEARS },
@@ -327,7 +327,31 @@
       r.dataStatus === "placeholder" ? [`Climate, prices and grid carbon for ${r.name} are placeholders until the team's data for this region is in.`]
         : [`Climate, prices and grid carbon for ${r.name} come from the team's data pack (TMYx 2011–2025 weather, EIA prices, MISO 2025 grid).`]
     ).map(n => `<li>${n}</li>`).join("");
+    await renderMeter(out);
     await renderRebates(out);
+  }
+
+
+  // ---------- Smart meter comparison: heat pump vs heat pump + smart meter ----------
+  async function renderMeter(out) {
+    const run = tou => Promise.resolve(Model().run(modelInputs(out.sizeTons, state.rebatesOn, tou)));
+    const [no, yes] = await Promise.all([run(false), run(true)]);
+    const had = !!effective().timeOfUse;
+    $("meterLede").textContent = had
+      ? "You told us you already have a smart meter. Here's the same heat pump with and without it."
+      : "If you're already adding a heat pump, a smart meter and time-of-use plan could trim the electricity bill further. Here's the difference.";
+    $("meterSeg").querySelectorAll("button").forEach(b => {
+      b.setAttribute("aria-pressed", (b.dataset.meter === "1") === had);
+      b.onclick = () => { setOverride("timeOfUse", b.dataset.meter === "1"); renderResults(); };
+    });
+    const d = (a, b) => { const v = a - b; return v === 0 ? "—" : (v > 0 ? "−" : "+") + money(Math.abs(v)); };
+    const row = (k, a, b, c) => `<tr><td>${k}</td><td>${a}</td><td>${b}</td><td class="diff">${c}</td></tr>`;
+    $("meterCmp").innerHTML = [
+      row("Yearly heating bill", money(no.annual.heatPump.costUsd), money(yes.annual.heatPump.costUsd), d(no.annual.heatPump.costUsd, yes.annual.heatPump.costUsd)),
+      row("Break-even", paybackTxt(no), paybackTxt(yes),
+          no.paybackYears != null && yes.paybackYears != null ? (yes.paybackYears - no.paybackYears < 0 ? "−" : "+") + Math.abs(yes.paybackYears - no.paybackYears).toFixed(1) + " years" : "—"),
+      row(`Total cost over ${out.lifetimeYears} years`, money(no.lifetime.costUsd), money(yes.lifetime.costUsd), d(no.lifetime.costUsd, yes.lifetime.costUsd))
+    ].join("");
   }
 
   // ---------- Rebates section ----------
