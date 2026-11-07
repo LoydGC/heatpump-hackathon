@@ -29,10 +29,12 @@ Entry format:
   - What / where: `Table_1.11_Heating_Degree-Days_by_Census_Division.xlsx` (repo root)
   - Format: as uploaded; not yet documented
   - Owner: Matteo-P58 · Updated: 2026-11-07
-- **data.zip (Minneapolis–St. Paul data pack)** · Data → Model · delivered (raw upload)
+- **data.zip (Minneapolis–St. Paul data pack)** · Data → Model · delivered (zipped; not unpacked in repo)
   - What / where: `data.zip` (repo root); its own `data/README.md` describes contents
-  - Contents: TMYx weather (`.epw` + other formats, `scripts/epw_to_csv.py`), ASHRAE design conditions PDF, EIA MN electricity and natural gas prices (CSV), Xcel MN TOU rates, emission factors (CSV), MN rebates 2026, EIA heating degree-days table
-  - Format: per file; schemas not yet documented here
+  - Model-ready (`data/processed/`): `model_inputs_minneapolis.json` (all scalar inputs: design temps, prices, emission factors, rebates, file pointers); `msp_weather_TMYx.2011-2025.csv` (main weather, 8,760 hourly rows); `msp_weather_TMYx.2009-2023.csv` and `msp_weather_TMY3.csv` (alternate / cold stress test); `hp_carrier_37MUHAQ_heating_curves.csv` (6 sizes, capacity and COP vs outdoor temp); `miso_hourly_grid_carbon_2025.csv` (8,760 hours of grid gCO2/kWh)
+  - Raw (`data/raw/`): EPW weather, ASHRAE PDF, EIA prices, Xcel TOU notes, emission factors, rebates, NEEP heat pump tables, MISO grid chunks
+  - Flagged assumptions for Model/UI: grid CO2 is an average-emissions approach; TOU prices are assumed; CenterPoint hybrid rebate requires switchover at 40 °F or lower
+  - Format: see `data/README.md` inside the zip
   - Owner: sharvis3 · Updated: 2026-11-07
 - **Candidate source list** · Data → all · delivered
   - What / where: `DATASETS.md`

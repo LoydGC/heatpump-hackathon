@@ -37,3 +37,4 @@ To filter by workstream: search the page for `| UI |`, `| Model |`, `| Data |` o
 | 2026-11-07 | settings | Infra | Vercel: preview deployments disabled; Ignored Build Step skips preview builds | Claude, for Gavin | `a7f7cae` (docs) | D-008 |
 | 2026-11-07 | repo | Infra | Added DECISIONS.md, AUDIT.md and INTERFACES.md | Claude, for Gavin | this push | D-009 |
 | 2026-11-07 | repo | Infra | Folder-to-workstream map, activity script and launchers, generated ACTIVITY.md | Claude, for Gavin | this push | D-010 |
+| 2026-11-07 | merge | Infra | Fast-forwarded `claude/project-thread-5j68ss` (decision log, audit, interfaces, workstream map, activity digest) into `main` | Claude, for Gavin | `5a5d347` | D-009, D-010 |
