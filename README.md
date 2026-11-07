@@ -16,3 +16,10 @@ An oversized heat pump may meet heating demand even during extreme cold, but can
 ## Run locally / deploy
 
 See [docs/local-and-deploy.md](docs/local-and-deploy.md).
+
+## Project records
+
+- [docs/DECISIONS.md](docs/DECISIONS.md): decision log (why).
+- [docs/AUDIT.md](docs/AUDIT.md): audit trail of changes, merges, deploys and settings (what, when, who).
+
+When you change something, add a row to AUDIT.md in the same push, and a DECISIONS.md entry if it was a decision.
