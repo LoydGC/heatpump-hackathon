@@ -2,7 +2,7 @@
 
 > **Auto-generated, do not edit by hand.** Regenerate with `update-activity-windows.bat` / `update-activity-mac.command` (double-click) or `python tools/activity.py`, then commit. Workstreams come from the folder map in [WORKSTREAMS.md](WORKSTREAMS.md). Hand-written records are in [AUDIT.md](AUDIT.md) and [DECISIONS.md](DECISIONS.md).
 
-Generated 2026-11-07 20:36 UTC from 7 branches, 18 commits (merge commits excluded). A commit touching several workstreams counts once for each.
+Generated 2026-11-07 20:36 UTC from 7 branches, 20 commits (merge commits excluded). A commit touching several workstreams counts once for each.
 
 ## By workstream
 
@@ -11,13 +11,13 @@ Generated 2026-11-07 20:36 UTC from 7 branches, 18 commits (merge commits exclud
 | UI | 4 | Claude | 2026-11-07 |
 | Model | 0 | — | — |
 | Data | 5 | Claude, Matteo-P58, sharvis3 | 2026-11-07 |
-| Infra | 12 | Claude | 2026-11-07 |
+| Infra | 14 | Claude | 2026-11-07 |
 
 ## By author
 
 | Author | UI | Model | Data | Infra | Other | Last commit |
 |---|---|---|---|---|---|---|
-| Claude | 4 |  | 3 | 12 |  | 2026-11-07 |
+| Claude | 4 |  | 3 | 14 |  | 2026-11-07 |
 | sharvis3 |  |  | 1 |  |  | 2026-11-07 |
 | Matteo-P58 |  |  | 1 |  |  | 2026-11-07 |
 
@@ -38,6 +38,8 @@ Commits not yet on `main`. Branches at 0 are fully merged.
 
 | Date | Commit | Workstreams | Author | Where | Message |
 |---|---|---|---|---|---|
+| 2026-11-07 | `69ef62c` | Infra | Claude | main | Log merge to main; document data.zip contents in INTERFACES.md |
+| 2026-11-07 | `5a5d347` | Infra | Claude | main | Regenerate docs/ACTIVITY.md on main |
 | 2026-11-07 | `8d4bcc3` | Infra | Claude | main | Regenerate docs/ACTIVITY.md |
 | 2026-11-07 | `c75e4cc` | Infra | Claude | main | Activity digest: count unpushed and unpulled branch work |
 | 2026-11-07 | `94616d6` | Infra | Claude | main | Generate docs/ACTIVITY.md |
@@ -74,6 +76,8 @@ Commits not yet on `main`. Branches at 0 are fully merged.
 
 ## Infra: all commits
 
+- 2026-11-07 `69ef62c` Claude: Log merge to main; document data.zip contents in INTERFACES.md (`docs/AUDIT.md`, `docs/INTERFACES.md`)
+- 2026-11-07 `5a5d347` Claude: Regenerate docs/ACTIVITY.md on main (`docs/ACTIVITY.md`)
 - 2026-11-07 `8d4bcc3` Claude: Regenerate docs/ACTIVITY.md (`docs/ACTIVITY.md`)
 - 2026-11-07 `c75e4cc` Claude: Activity digest: count unpushed and unpulled branch work (`tools/activity.py`)
 - 2026-11-07 `94616d6` Claude: Generate docs/ACTIVITY.md (`docs/ACTIVITY.md`)
