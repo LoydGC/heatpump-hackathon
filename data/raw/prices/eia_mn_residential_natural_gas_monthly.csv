@@ -1,0 +1,8 @@
+# Source: U.S. EIA, Minnesota Price of Natural Gas Delivered to Residential Consumers, series N3010MN3 (Dollars per Thousand Cubic Feet)
+# URL: https://www.eia.gov/dnav/ng/hist/n3010mn3m.htm  | Retrieved 2026-11-07 (release 2026-10-30)
+year,jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec
+2022,10.06,10.72,10.90,11.36,16.35,20.97,19.50,22.63,20.79,13.42,11.29,12.92
+2023,12.85,13.63,11.71,12.50,18.32,18.12,18.12,15.40,15.75,8.94,7.69,8.70
+2024,9.77,10.08,9.40,8.94,10.70,14.89,16.37,16.56,16.14,14.07,11.05,10.62
+2025,11.28,11.12,11.09,11.07,12.82,14.33,17.31,18.13,16.07,10.04,7.99,9.43
+2026,11.17,13.03,12.24,10.70,12.13,14.79,17.28,18.06,,,,

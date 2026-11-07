@@ -43,6 +43,7 @@ Infra  tools/*
 Infra  README.md
 Infra  vercel.json
 Infra  .gitignore
+Infra  .vercelignore
 Infra  .claude/*
 Infra  run-local-*
 Infra  update-activity-*
@@ -63,15 +64,19 @@ Notes:
 - `*.py` is deliberately not mapped: a Python file could be Model or Data, so put it under `model/` or `data/` (or add a specific rule) to tag it.
 - `index.html` stays at the repo root because Vercel serves the root as the live site. Moving the page into `ui/` would need a Vercel config change.
 
-## Proposed folder layout (not applied)
+## Folder layout
 
-Nothing has been moved. If the team wants cleaner tracking, this is a suggested layout; the map above already recognises these folders, so files placed there are tagged automatically.
+Most of this layout is now in use. `index.html` stays at the repo root because Vercel serves the root as the live site.
 
-| Folder | Workstream | Would hold | Existing files that could move there |
+| Folder | Workstream | Holds | Status |
 |---|---|---|---|
-| repo root | UI | `index.html` (must stay at root for Vercel unless config changes) | — |
-| `ui/` | UI | extra pages, scripts, styles, images | — |
-| `model/` | Model | model code, notebooks, COMSOL files, model outputs for the UI | — |
-| `data/` | Data | raw and processed data, prep scripts | contents of `data.zip` (it already unpacks to `data/raw/...` and `data/scripts/...`); `Table_1.11_...xlsx` (already duplicated inside `data.zip` at `data/raw/eia/`) |
-| `docs/` | Infra | decisions, audit, interfaces, how-tos | `DATASETS.md` could move here or to `data/` (currently tagged Data at the root) |
-| `tools/` | Infra | repo helper scripts | — |
+| repo root | UI | `index.html` (must stay at root for Vercel unless config changes) | in use |
+| `ui/` | UI | extra pages, scripts, styles, images | not created yet |
+| `model/` | Model | model code (`sweep.py`, `simulate.py`, `heatpump.py`, ...), tests, plots, README. Run scripts from inside `model/` | in use (`model_v1`, sharvis3) |
+| `model/results/` | Model | model outputs; `frontend_data.json` is the UI input (the only file under `model/` that the deploy uploads) | in use |
+| `data/` | Data | `README.md` describing everything below | in use |
+| `data/raw/` | Data | original sources, untouched (EPW weather, ASHRAE, EIA, NEEP, prices, rebates, grid chunks) | in use |
+| `data/processed/` | Data | model-ready inputs read by `model/data.py` (weather CSVs, heat pump curves, grid carbon, `model_inputs_minneapolis.json`) | restored 2026-11-07 (D-013) |
+| `data/scripts/` | Data | small prep helpers (`epw_to_csv.py`, `extract_tool_text.py`) | restored 2026-11-07 (D-013) |
+| `docs/` | Infra | decisions, audit, interfaces, how-tos | in use (`DATASETS.md` could move here or to `data/`; currently tagged Data at the root) |
+| `tools/` | Infra | repo helper scripts | in use |
