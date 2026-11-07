@@ -27,7 +27,7 @@ Pushing to GitHub does **not** deploy. `vercel.json` turns off Git auto-deploys,
 4. Choose branch **main** (or paste a commit link/SHA) → **Create Deployment**.
 5. Wait for **Ready**, then open https://heatpump-hackathon.vercel.app to check.
 
-Deploying a branch other than `main` creates a preview (needs a Vercel login to view). Only `main` goes to the live link.
+Preview deploys are turned off for every branch (Vercel → Settings → Git: preview deployments disabled, plus an Ignored Build Step `[ "$VERCEL_ENV" = "preview" ]` that skips any preview build). Only production deploys of `main` run. To test a branch, use localhost.
 
 ### Undo a bad deploy
 
@@ -45,4 +45,4 @@ This uploads your local folder as-is, including uncommitted changes, so commit f
 
 ### Turning auto-deploy back on
 
-Delete `vercel.json` (or set `"deploymentEnabled": true`) and push to `main`.
+Delete `vercel.json` (or set `"deploymentEnabled": true`) and push to `main`. For previews, re-enable them in Vercel → Settings → Git and clear the Ignored Build Step under Settings → Build and Deployment.
