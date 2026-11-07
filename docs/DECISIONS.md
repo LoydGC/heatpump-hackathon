@@ -32,6 +32,7 @@ Add a row here with each new entry.
 | D-009 | 2026-11-07 | Infra | Keep a decision log and audit trail in the repo | active |
 | D-010 | 2026-11-07 | Infra | Map folders to workstreams; auto-generate activity digest from git | active |
 | D-011 | 2026-11-07 | UI | Replace single dashboard with a gated 4-step guided flow | active |
+| D-012 | 2026-11-07 | UI | Climate page claims are cited and tagged by evidence type | active |
 
 ## How to add an entry
 
@@ -136,3 +137,12 @@ Anyone (teammate or Claude thread) who makes a decision that affects the repo, t
 - **Decided by:** Gavin.
 - **Refs:** branch `claude/project-thread-ez6q50`.
 - **Status:** active (numbers are placeholders until the Model workstream plugs in)
+
+### D-012 · 2026-11-07 · Climate page claims are cited and tagged by evidence type
+- **Workstream:** UI
+- **Decision:** Step 2 keeps its structure (headline, three cards, heat pump explainer) and adds a qualitative climate-type overview plus a Sources footer. Each claim is tagged Research (cited study), Team data (computed from `data.zip`), Our reasoning (own inference, e.g. gas-vs-electric price arithmetic) or Not researched. Minneapolis and Boston have researched content; Montréal is limited; Fairbanks shows a "needs a specialist" message because the sources found report significant data gaps for very cold climates. Design temperatures use ASHRAE 99.6% (Minneapolis −9 °F from the `.ddy` in `data.zip`, Boston 8 °F).
+- **Why:** Gavin asked what research backed the page; the first version was rules over placeholder numbers with unsourced general claims.
+- **Decided by:** Gavin.
+- **Refs:** `ui/regions.js` (`CLIMATE`, `SOURCES`).
+- **Status:** active (Boston hourly weather and current MA prices still to be added; Montréal and Fairbanks need research)
+

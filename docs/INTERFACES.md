@@ -64,7 +64,7 @@ Entry format:
 
 **UI/Model handoff (proposed)**
 
-The page calls `window.HeatPumpModel` and nothing else. `ui/model-stub.js` is a placeholder implementation (`isPlaceholder: true`). To plug in the real model, load a script after it that replaces `window.HeatPumpModel` (or `run` / `climateStats`) with the same shape, and return `isPlaceholder: false` so the "placeholder numbers" banner hides. `run` may return a value or a Promise (e.g. a `fetch` to a Model-owned JSON file or service).
+The results page calls `window.HeatPumpModel.run` and nothing else. `ui/model-stub.js` is a placeholder implementation (`isPlaceholder: true`). To plug in the real model, load a script after it that replaces `window.HeatPumpModel` (or `run`) with the same shape, and return `isPlaceholder: false` so the "placeholder numbers" banner hides. `run` may return a value or a Promise (e.g. a `fetch` to a Model-owned JSON file or service).
 
 `HeatPumpModel.run(inputs) -> outputs`
 
@@ -98,7 +98,7 @@ Outputs (everything the results page draws):
   notes:    [ string ] }                                             // shown under results
 ```
 
-`HeatPumpModel.climateStats(region) -> { heatingShareAbove5F, hoursBelow5F, hoursBelowMinus13F, coldestMonthMeanF, warmestMonthMeanF, heatingMonths, shoulderMonths, designTempF }` feeds the plain-language climate page; the Model/Data side can replace it with values from real hourly weather.
+Step 2 (climate page) does not call the model: its text is hand-written per region in `ui/regions.js` (`CLIMATE`, `CLIMATE_TYPES`, `SOURCES`), with each claim tagged Research / Team data / Our reasoning / Not researched and cited in a Sources footer.
 
 **Needs**
 

@@ -25,7 +25,7 @@
     boston: {
       id: "boston", name: "Boston", full: "Boston, Massachusetts", short: "Boston, MA",
       dataStatus: "placeholder",
-      designTempF: 9,
+      designTempF: 8,       // ASHRAE 99.6% heating design, 7.7 °F (source 8)
       monthlyMeanF: [29.9, 31.8, 38.3, 48.6, 58.4, 68.0, 74.1, 72.7, 65.6, 54.8, 44.7, 35.2],
       monthlySdF:   [10, 10, 9, 9, 9, 8, 7, 7, 8, 8, 9, 10],
       electricityUsdPerKWh: 0.31,
@@ -39,7 +39,7 @@
     minneapolis: {
       id: "minneapolis", name: "Minneapolis", full: "Minneapolis–St. Paul, Minnesota", short: "Minneapolis–St. Paul, MN",
       dataStatus: "data.zip",
-      designTempF: -5,        // ASHRAE 99% heating design: −20.6 °C
+      designTempF: -9,        // ASHRAE 99.6% heating design: −23.0 °C (data.zip .ddy)
       monthlyMeanF: [17.3, 21.8, 33.5, 45.5, 60.7, 71.6, 75.4, 72.4, 65.4, 51.3, 36.8, 23.4], // TMYx 2011–2025
       monthlySdF:   [12.7, 11.9, 11.8, 14.1, 11.4, 8.7, 7.1, 7.0, 10.7, 12.6, 9.3, 10.8],
       electricityUsdPerKWh: 0.1644,      // EIA, MN residential 2026 YTD
@@ -81,6 +81,97 @@
     }
   };
 
+
+  // ---------- Step 2 content ----------
+  // Every claim carries a tag: "research" (a cited study), "data" (the team's data pack, computed),
+  // "reasoning" (our own inference, shown as such) or "gap" (not researched / not enough evidence).
+  // Numbers in `src` index SOURCES below.
+  const SOURCES = {
+    1: { t: "Center for Energy and Environment (CEE), Cold Climate Air Source Heat Pump Field Assessment, 2015–2017 (six Minnesota homes without gas)", u: "https://www.mncee.org/cold-climate-air-source-heat-pump-field-assessment" },
+    2: { t: "Schoenbauer et al., CEE / ACEEE, Turning Up the Heat on Cold Climate Heat Pumps (Minnesota field study: ~55% savings vs electric resistance, ~40% vs propane, operation to −20 °F)", u: "https://www.mncee.org/sites/default/files/report-files/ACEEEccHP%20%282%29.pdf" },
+    3: { t: "NEEP, Cold Climate Air-Source Heat Pump Specification v3.0 (COP above 1.75 at 5 °F at maximum capacity; capacity ratings at 47, 17 and 5 °F)", u: "https://neep.org/sites/default/files/ColdClimateAir-sourceHeatPumpSpecification-Version3.0FINAL.pdf" },
+    4: { t: "Synapse Energy Economics, Switch on the Savings: A Heat Pump Cost-Effectiveness Study (Massachusetts, 2018)", u: "https://www.synapse-energy.com/switch-savings-heat-pump-cost-effectiveness-study" },
+    5: { t: "Harvard Kennedy School, Opportunities for Cost-Effective Residential Heat Pump Adoption in Massachusetts", u: "https://www.hks.harvard.edu/opportunities-cost-effective-residential-heat-pump-adoption-massachusetts" },
+    6: { t: "Air Source Heat Pumps in Very Cold Climates (Alaska field monitoring and cold-chamber tests, OSTI)", u: "https://www.osti.gov/biblio/1975545" },
+    7: { t: "Team data pack (data.zip): MSP TMYx 2011–2025 and TMY3 hourly weather, ASHRAE design conditions (.ddy), EIA prices, EPA/MISO emissions. Percentages on this page were computed from these files.", u: null },
+    8: { t: "ASHRAE heating design temperatures for major US cities (Boston 99.6%: 7.7 °F), as tabulated by FGIA", u: "https://fgiaonline.org/wp-content/uploads/2025/02/ASHRAE-Temperatures-for-Major-US-Cities.pdf" }
+  };
+
+  // Four climate types, in plain language (qualitative; sources in brackets)
+  const CLIMATE_TYPES = [
+    { id: "mild", name: "Mild winters", text: "A heat pump can do the whole job alone, and is two to three times as efficient as ordinary electric heating.", src: [1] },
+    { id: "cold", name: "Cold winters", text: "Modern cold-climate models are built for this. Savings depend mostly on what you're replacing: big against electric heat and propane, small against cheap natural gas.", src: [3, 4, 5] },
+    { id: "verycold", name: "Very cold winters", text: "Good units keep running down to around 0 to −13 °F and in tests as low as −20 °F, but they deliver less heat as it gets colder. Plan on backup for the coldest nights.", src: [1, 2] },
+    { id: "extreme", name: "Extreme cold", text: "Published field evidence is thin. Whether a heat pump makes sense depends on the exact home and unit, so talk to a specialist.", src: [6] }
+  ];
+
+  const CLIMATE = {
+    minneapolis: {
+      type: "verycold", status: "researched",
+      headline: "Minneapolis is a very cold climate that heat pumps can handle, with backup.",
+      design: { text: "−9 °F", label: "a very cold night (1-in-250 hours)", src: [7] },
+      cards: [
+        { k: "Heat pumps excel at", h: "Most of your heating hours", tag: "data", src: [7, 3],
+          p: "In the team's typical-year weather file, about 90% of the heat a home needs falls on hours at or above 5 °F, and about 73% at or above 17 °F. Those are the temperatures where cold-climate units publish their ratings." },
+        { k: "Your climate is ideal for", h: "Replacing electric heat or propane", tag: "research", src: [2, 1],
+          p: "A Minnesota field study of cold-climate heat pumps found about 55% energy-cost savings against electric resistance heat and about 40% against propane. Its guidance: size the unit to carry the whole home down to about 10 °F, and use backup below that." },
+        { k: "Where we expect less benefit", h: "Homes already heated with natural gas", tag: "reasoning", src: [7],
+          p: "Natural gas is cheap here: electricity costs about 4.5 times as much as gas per unit of heat. A heat pump delivering 2 to 3 units of heat per unit of electricity would likely raise the bill. It can still cut carbon, because the grid break-even is around 2.3 units. This is our own arithmetic from the team's price and emissions data; the Minnesota studies covered homes without gas, so we found no field result for gas-heated homes." }
+      ],
+      notes: [
+        { tag: "data", text: "The typical-year file's coldest hour is −12 °F with no hours below −13 °F. The older, colder TMY3 file has 32 hours below −13 °F and a low of −24 °F, so a cold winter is harder on a heat pump than a typical one.", src: [7] },
+        { tag: "research", text: "Cold-climate units listed by NEEP must deliver a COP above 1.75 at 5 °F at full output. That is the benchmark Xcel's rebate uses.", src: [3, 7] },
+        { tag: "gap", text: "Not found yet: published field results below −13 °F for current models. CEE has a 2026–2029 study planned to measure this.", src: [] }
+      ]
+    },
+    boston: {
+      type: "cold", status: "researched",
+      headline: "Boston is a good fit for a heat pump. What you replace decides the savings.",
+      design: { text: "8 °F", label: "a very cold night (1-in-250 hours)", src: [8] },
+      cards: [
+        { k: "Heat pumps excel at", h: "Replacing electric resistance heat", tag: "research", src: [4, 5],
+          p: "A Massachusetts cost study found heat pumps about three times as efficient as electric resistance heat, with a payback near four years even without incentives. A Harvard study put the yearly savings for a typical electric-heated home at up to $2,900." },
+        { k: "Your climate is ideal for", h: "Carrying the whole winter", tag: "reasoning", src: [8, 3],
+          p: "Boston's very cold night is about 8 °F, compared with about −9 °F in Minneapolis. That keeps most hours inside the range (5 °F and up) where NEEP-listed units publish their ratings, so a properly sized unit should carry nearly all of the heating. We have not checked this against a Boston hourly weather file, which isn't in the repo yet." },
+        { k: "Where we expect less benefit", h: "Homes heated with natural gas or oil", tag: "research", src: [5, 4],
+          p: "The Harvard study found switching from natural gas typically raises yearly bills by about $300 to $500. For oil, bills fall only modestly, and the Synapse study put payback past 25 years without incentives. Rebates, cooling savings and a lower-priced electricity plan can change that." }
+      ],
+      notes: [
+        { tag: "gap", text: "The Synapse study used 2017 fuel prices and we did not check the Harvard study's price assumptions. Current Massachusetts fuel and electricity prices still need checking.", src: [] }
+      ]
+    },
+    montreal: {
+      type: "verycold", status: "limited",
+      headline: "Montréal is a cold-climate case we haven't researched yet.",
+      design: null,
+      cards: [
+        { k: "Heat pumps excel at", h: "Replacing electric baseboards", tag: "reasoning", src: [1],
+          p: "The Minnesota field work found heat pumps two to three times as efficient as standard electric heating. Many Québec homes use electric baseboards, so that is the likely best case. We haven't found Québec-specific studies." },
+        { k: "Your climate is ideal for", h: "Not established yet", tag: "gap", src: [],
+          p: "We haven't sourced Québec's grid emissions or prices, so we won't claim a carbon benefit here yet." },
+        { k: "Where we expect less benefit", h: "The coldest weeks", tag: "reasoning", src: [1, 2],
+          p: "Montréal winters are colder than Boston's, closer to Minneapolis. The research above says good units run down to about 0 to −13 °F and deliver less heat as it gets colder, so plan for backup." }
+      ],
+      notes: [{ tag: "gap", text: "Prices, rebates and climate numbers for Montréal in the results are rough placeholders.", src: [] }]
+    },
+    fairbanks: {
+      type: "extreme", status: "specialist",
+      headline: "Fairbanks needs a specialist's eye before you decide.",
+      design: null,
+      specialist: "Fairbanks winters run far colder than the conditions most heat pump research covers. The published evidence we found says significant data gaps exist for very cold environments and that sizing and operation need careful attention. We can show a rough estimate, but please treat it as a starting point and talk to a local installer or the Alaska Center for Energy and Power before spending money.",
+      cards: [
+        { k: "Heat pumps excel at", h: "Spring, fall and milder winter days", tag: "reasoning", src: [1],
+          p: "Newer cold-climate units run well at moderate temperatures, and can keep running down to about 0 to −13 °F. Fairbanks has many months in that range." },
+        { k: "Your climate is ideal for", h: "Not enough evidence", tag: "gap", src: [6],
+          p: "Alaska field and cold-chamber work shows heat pumps can stay efficient in very cold climates if used in the right situations and the right way, but gives no simple rule." },
+        { k: "Where we expect less benefit", h: "Deep winter", tag: "reasoning", src: [6, 1],
+          p: "In the coldest weeks, outdoor temperatures can drop well below what most units are rated for. Expect your current heat to carry much of the load then." }
+      ],
+      notes: [{ tag: "gap", text: "Prices, rebates, grid carbon and climate numbers for Fairbanks in the results are rough placeholders.", src: [] }]
+    }
+  };
+  Object.keys(CLIMATE).forEach(k => REGIONS[k].climate = CLIMATE[k]);
+
   // Free-text matching for the location box: names, states/provinces, ZIP and postal prefixes.
   const ALIASES = [
     ["boston", /\b(boston|cambridge|somerville|brookline|newton|quincy|massachusetts|mass|ma)\b/],
@@ -104,5 +195,5 @@
     return null;
   }
 
-  window.HP_DATA = { FUELS, ENVELOPES, REGIONS, matchPlace };
+  window.HP_DATA = { FUELS, ENVELOPES, REGIONS, matchPlace, SOURCES, CLIMATE_TYPES };
 })();
