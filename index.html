@@ -180,6 +180,27 @@ details.tbl summary{cursor:pointer;font-weight:600;color:var(--muted)}
 .notes li+li{margin-top:4px}
 footer{margin-top:40px;font-size:13px}
 
+
+/* Results: summary first, details folded */
+.sum-tiles{margin-top:22px}
+.whatif{margin-top:6px}
+.whatif h3{font-size:18px;margin-bottom:10px}
+.whatif-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+@media (max-width:720px){.whatif-row{grid-template-columns:1fr}}
+.whatif .wl{font-weight:600;font-size:14px;margin-bottom:6px}
+.whatif .wn{font-size:13px;margin-top:6px}
+.rebate-hop{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-top:14px;padding:18px 24px}
+.rebate-hop h3{font-size:19px}
+.more-h{margin:34px 0 12px;font-size:24px}
+details.fold{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);margin-top:12px}
+details.fold>summary{cursor:pointer;list-style:none;padding:16px 22px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::before{content:"+";font-weight:700;font-size:20px;width:18px;color:var(--accent)}
+details.fold[open]>summary::before{content:"\2212"}
+details.fold .fh{font-family:var(--display);font-size:20px;font-weight:600}
+details.fold .fs{font-size:13px}
+.fold-body{padding:0 22px 22px}
+
 /* Rebates + report */
 .report-cta{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;background:var(--hp-soft);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:var(--r);padding:22px 26px;margin-top:22px}
 .report-cta h3{font-size:22px}
@@ -419,13 +440,34 @@ footer{margin-top:40px;font-size:13px}
     </div>
 
 
-    <div class="report-cta">
-      <div><h3>Taking this to an installer?</h3><p class="muted">Get a printable report with your home details, the size to ask for, rebates to claim, questions to ask and documents to bring.</p></div>
-      <button class="pill-btn report-btn" data-report><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 20h16"/></svg>Download your report (PDF)</button>
+    <div class="tiles sum-tiles" id="sumTiles"></div>
+
+    <div class="card whatif">
+      <h3>What if&hellip;</h3>
+      <div class="whatif-row">
+        <div><p class="wl">Rebates</p>
+          <div class="seg" role="group" aria-label="Rebates on or off" id="rebSeg"><button data-reb="1">With rebates</button><button data-reb="0">Without rebates</button></div>
+          <p class="muted wn" id="rebLede"></p></div>
+        <div><p class="wl">Smart meter</p>
+          <div class="seg" role="group" aria-label="Smart meter on or off" id="meterSeg"><button data-meter="0">Heat pump only</button><button data-meter="1">Heat pump + smart meter</button></div>
+          <p class="muted wn" id="meterLede"></p></div>
+      </div>
     </div>
 
-    <section class="section" aria-labelledby="co2H">
-      <div class="section-head"><h2 id="co2H">Carbon (CO₂)</h2><span class="tag">Placeholder</span></div>
+    <div class="report-cta">
+      <div><h3>Taking this to an installer?</h3><p class="muted">Get a printable report with your home details, the size to ask for, rebates to claim, questions to ask and documents to bring.</p></div>
+      <button class="pill-btn report-btn" data-report><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 20h16"/></svg> Download your report (PDF)</button>
+    </div>
+
+    <div class="rebate-hop card">
+      <div><h3>Curious where rebates come from?</h3><p class="muted">What programs exist near you, who pays them, and what paperwork they need.</p></div>
+      <button class="ghost-btn" id="toRebates">Learn about rebates →</button>
+    </div>
+
+    <h2 class="more-h">Want the details?</h2>
+    <details class="fold">
+      <summary><span class="fh">Carbon (CO₂)</span><span class="muted fs">monthly CO₂ and 15-year totals</span></summary>
+      <div class="fold-body">
       <div class="tiles" id="co2Tiles"></div>
       <div class="chart-card">
         <h3>Heating CO₂ by month</h3>
@@ -433,10 +475,11 @@ footer{margin-top:40px;font-size:13px}
         <div class="legend"><span><i style="border-color:var(--c-now)"></i><span id="lgNow1">Today</span></span><span><i style="border-color:var(--c-hp)"></i>With heat pump</span></div>
         <div id="chCo2"></div>
       </div>
-    </section>
-
-    <section class="section" aria-labelledby="moneyH">
-      <div class="section-head"><h2 id="moneyH">Money</h2><span class="tag">Placeholder</span></div>
+      </div>
+    </details>
+    <details class="fold">
+      <summary><span class="fh">Money</span><span class="muted fs">bills, break-even and total spent over time</span></summary>
+      <div class="fold-body">
       <div class="tiles" id="moneyTiles"></div>
       <div class="charts2">
         <div class="chart-card">
@@ -453,47 +496,28 @@ footer{margin-top:40px;font-size:13px}
         </div>
       </div>
       <details class="tbl"><summary>Show monthly numbers as a table</summary><div class="table-scroll"><table><thead><tr><th>Month</th><th>Bill today</th><th>Bill with heat pump</th><th>CO₂ today</th><th>CO₂ with heat pump</th></tr></thead><tbody id="mTable"></tbody></table></div></details>
-    </section>
-
-    <section class="section" aria-labelledby="meterH">
-      <div class="section-head"><h2 id="meterH">Add a smart meter?</h2><span class="tag">Placeholder</span></div>
-      <p class="muted" id="meterLede" style="max-width:70ch;margin:-4px 0 14px"></p>
-      <div class="reb-toggle"><span style="font-weight:600">Show the numbers on this page:</span>
-        <div class="seg" role="group" aria-label="Smart meter on or off" id="meterSeg"><button data-meter="0">Heat pump only</button><button data-meter="1">Heat pump + smart meter</button></div></div>
-      <div class="card" style="padding:12px 16px"><div class="table-scroll"><table class="cmp"><thead><tr><th></th><th>Heat pump</th><th>Heat pump + smart meter</th><th>Meter adds</th></tr></thead><tbody id="meterCmp"></tbody></table></div></div>
-      <p class="muted" style="font-size:14px;margin-top:10px;max-width:70ch">Placeholder: we assume a smart meter on a time-of-use plan makes electricity 10% cheaper on average, and cost nothing to add. Real utility rate plans and meter costs still need to be worked out.</p>
-    </section>
-
-    <section class="section" aria-labelledby="rebH">
-      <div class="section-head"><h2 id="rebH">Rebates</h2><span class="tag">Figures may be out of date</span></div>
-      <p class="muted" id="rebLede" style="max-width:70ch;margin:-4px 0 14px"></p>
-      <div class="reb-toggle"><span style="font-weight:600">Show the numbers on this page:</span>
-        <div class="seg" role="group" aria-label="Rebates on or off" id="rebSeg"><button data-reb="1">With rebates</button><button data-reb="0">Without rebates</button></div></div>
+      </div>
+    </details>
+    <details class="fold">
+      <summary><span class="fh">How rebates and a smart meter change the numbers</span><span class="muted fs">side-by-side tables</span></summary>
+      <div class="fold-body">
       <div class="card" style="padding:12px 16px"><div class="table-scroll"><table class="cmp"><thead><tr><th></th><th>Without rebates</th><th>With rebates</th><th>Rebates change</th></tr></thead><tbody id="rebCmp"></tbody></table></div></div>
       <p class="muted" id="rebCmpNote" style="font-size:14px;margin-top:10px;max-width:70ch"></p>
-
-      <h3 style="margin-top:28px;font-size:22px">Where rebates come from</h3>
-      <div class="src-grid" id="rebSources"></div>
-
-      <h3 style="margin-top:28px;font-size:22px" id="rebRegionH"></h3>
-      <p class="muted" id="rebRegionIntro" style="margin-top:4px;max-width:70ch"></p>
-      <div id="rebPrograms"></div>
-      <p class="banner" id="rebCaveat"></p>
-    </section>
-
-    <section class="section" aria-labelledby="sizeH">
-      <div class="section-head"><h2 id="sizeH">Bigger or smaller?</h2><span class="tag">Placeholder</span></div>
+      <h3 style="margin:18px 0 8px;font-size:17px">Smart meter</h3>
+      <div class="card" style="padding:12px 16px"><div class="table-scroll"><table class="cmp"><thead><tr><th></th><th>Heat pump</th><th>Heat pump + smart meter</th><th>Meter adds</th></tr></thead><tbody id="meterCmp"></tbody></table></div></div>
+      <p class="muted" style="font-size:14px;margin-top:10px;max-width:70ch">Placeholder: we assume a smart meter on a time-of-use plan makes electricity 10% cheaper on average, and cost nothing to add. Real utility rate plans and meter costs still need to be worked out.</p>
+      </div>
+    </details>
+    <details class="fold">
+      <summary><span class="fh">Bigger or smaller?</span><span class="muted fs">heat pump size trade-offs</span></summary>
+      <div class="fold-body">
       <p class="muted" style="margin:-4px 0 14px;max-width:70ch">A bigger heat pump covers more cold nights on its own but costs more up front. A smaller one leans on your backup heat more often. Here's the trade-off over <span id="lifeYrs"></span> years.</p>
       <div class="charts2">
         <div class="chart-card"><h3>Total cost over the heat pump's life</h3><p class="sub">Upfront after rebates plus bills, by size (tons)</p><div id="chSizeCost"></div></div>
         <div class="chart-card"><h3>Total CO₂ over the heat pump's life</h3><p class="sub">Tonnes of CO₂, by size (tons)</p><div id="chSizeCo2"></div></div>
       </div>
-    </section>
-
-    <div class="report-cta">
-      <div><h3>Ready to call an installer?</h3><p class="muted">Print or save the report as a PDF and hand it over.</p></div>
-      <button class="pill-btn report-btn" data-report><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 20h16"/></svg>Download your report (PDF)</button>
-    </div>
+      </div>
+    </details>
 
     <ul class="notes muted" id="rNotes"></ul>
 
@@ -501,6 +525,26 @@ footer{margin-top:40px;font-size:13px}
       <button class="ghost-btn" data-back>← Change home details</button>
       <button class="ghost-btn" id="restart">Start over</button>
     </div>
+  </section>
+
+  <!-- Rebates page: a sub-page of results, reached from the results page -->
+  <section class="step" id="step-4" aria-labelledby="h4">
+    <button class="ghost-btn" data-to-results style="margin-bottom:14px">← Back to results</button>
+    <h2 id="h4" tabindex="-1">About rebates</h2>
+    <p class="muted" style="margin-top:6px;max-width:70ch">Rebates are one-time discounts or tax credits that lower what you pay for a heat pump. They come from several places, and what's available depends on where you live and what you heat with today.</p>
+      <h3 style="margin-top:28px;font-size:24px">Where rebates come from</h3>
+      <div class="src-grid" id="rebSources"></div>
+
+      <h3 style="margin-top:28px;font-size:22px" id="rebRegionH"></h3>
+      <p class="muted" id="rebRegionIntro" style="margin-top:4px;max-width:70ch"></p>
+      <div id="rebPrograms"></div>
+      <p class="banner" id="rebCaveat"></p>
+
+    <div class="report-cta">
+      <div><h3>Bring this to your installer</h3><p class="muted">The report lists the programs and paperwork for your region.</p></div>
+      <button class="pill-btn report-btn" data-report><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 20h16"/></svg> Download your report (PDF)</button>
+    </div>
+    <div class="nav-row"><button class="ghost-btn" data-to-results>← Back to results</button></div>
   </section>
 
   <div class="report" id="report" aria-hidden="true"></div>

@@ -2,16 +2,16 @@
 
 > **Auto-generated, do not edit by hand.** Regenerate with `update-activity-windows.bat` / `update-activity-mac.command` (double-click) or `python tools/activity.py`, then commit. Workstreams come from the folder map in [WORKSTREAMS.md](WORKSTREAMS.md). Hand-written records are in [AUDIT.md](AUDIT.md) and [DECISIONS.md](DECISIONS.md).
 
-Generated 2026-11-07 21:32 UTC from 10 branches, 29 commits (merge commits excluded). A commit touching several workstreams counts once for each.
+Generated 2026-11-07 21:43 UTC from 10 branches, 30 commits (merge commits excluded). A commit touching several workstreams counts once for each.
 
 ## By workstream
 
 | Workstream | Commits | Authors | Last activity |
 |---|---|---|---|
-| UI | 8 | Claude | 2026-11-07 |
+| UI | 9 | Claude | 2026-11-07 |
 | Model | 0 | — | — |
 | Data | 6 | Claude, Matteo-P58, sharvis3 | 2026-11-07 |
-| Infra | 22 | Claude, Gavin Loyd | 2026-11-07 |
+| Infra | 23 | Claude, Gavin Loyd | 2026-11-07 |
 | Other | 1 | Claude | 2026-11-07 |
 
 Unmapped files (add a rule in WORKSTREAMS.md): `.vercelignore`
@@ -20,7 +20,7 @@ Unmapped files (add a rule in WORKSTREAMS.md): `.vercelignore`
 
 | Author | UI | Model | Data | Infra | Other | Last commit |
 |---|---|---|---|---|---|---|
-| Claude | 8 |  | 3 | 21 | 1 | 2026-11-07 |
+| Claude | 9 |  | 3 | 22 | 1 | 2026-11-07 |
 | Gavin Loyd |  |  |  | 1 |  | 2026-11-07 |
 | sharvis3 |  |  | 2 |  |  | 2026-11-07 |
 | Matteo-P58 |  |  | 1 |  |  | 2026-11-07 |
@@ -31,7 +31,7 @@ Commits not yet on `main`. Branches at 0 are fully merged.
 
 | Branch | Not on main | Workstreams | Authors | Last commit | Last message |
 |---|---|---|---|---|---|
-| `claude/project-thread-6h36e8` | 4 | UI, Infra | Claude | 2026-11-07 | Add heat pump vs heat pump + smart meter comparison to results |
+| `claude/project-thread-6h36e8` | 5 | UI, Infra | Claude | 2026-11-07 | Front page: new headline with location question as subheader |
 | `claude/project-thread-czssmr` | 1 | Infra | Claude | 2026-11-07 | Add comparable products research (COMPARABLES.md and comparables.html) |
 | `claude/project-thread-ez6q50` | 1 | UI, Infra | Claude | 2026-11-07 | Rebuild dashboard as gated 4-step wizard with placeholder model stub |
 | `claude/project-thread-yrtzah` | 0 | — | — | 2026-11-07 | Add .vercelignore so deploys upload only site files |
@@ -45,6 +45,7 @@ Commits not yet on `main`. Branches at 0 are fully merged.
 
 | Date | Commit | Workstreams | Author | Where | Message |
 |---|---|---|---|---|---|
+| 2026-11-07 | `62a7c1d` | UI, Infra | Claude | `claude/project-thread-6h36e8` | Front page: new headline with location question as subheader |
 | 2026-11-07 | `597dcf0` | UI, Infra | Claude | `claude/project-thread-6h36e8` | Add heat pump vs heat pump + smart meter comparison to results |
 | 2026-11-07 | `92b8837` | UI, Infra | Claude | `claude/project-thread-6h36e8` | Make smart meter a visible toggle on Your home step; note to flesh out |
 | 2026-11-07 | `335ec24` | UI, Infra | Claude | `claude/project-thread-6h36e8` | Add rebates section and printable installer report (PDF via print) |
@@ -77,6 +78,7 @@ Commits not yet on `main`. Branches at 0 are fully merged.
 
 ## UI: all commits
 
+- 2026-11-07 `62a7c1d` Claude: Front page: new headline with location question as subheader (`index.html`)
 - 2026-11-07 `597dcf0` Claude: Add heat pump vs heat pump + smart meter comparison to results (`index.html`, `ui/app.js`)
 - 2026-11-07 `92b8837` Claude: Make smart meter a visible toggle on Your home step; note to flesh out (`index.html`, `ui/app.js`)
 - 2026-11-07 `335ec24` Claude: Add rebates section and printable installer report (PDF via print) (`index.html`, `ui/app.js`, `ui/rebates.js`)
@@ -97,6 +99,7 @@ Commits not yet on `main`. Branches at 0 are fully merged.
 
 ## Infra: all commits
 
+- 2026-11-07 `62a7c1d` Claude: Front page: new headline with location question as subheader (`docs/ACTIVITY.md`, `docs/AUDIT.md`)
 - 2026-11-07 `597dcf0` Claude: Add heat pump vs heat pump + smart meter comparison to results (`docs/ACTIVITY.md`, `docs/AUDIT.md`, `docs/DECISIONS.md`)
 - 2026-11-07 `92b8837` Claude: Make smart meter a visible toggle on Your home step; note to flesh out (`docs/ACTIVITY.md`, `docs/AUDIT.md`, `docs/DECISIONS.md`, `docs/INTERFACES.md`)
 - 2026-11-07 `335ec24` Claude: Add rebates section and printable installer report (PDF via print) (`docs/ACTIVITY.md`, `docs/AUDIT.md`, `docs/DECISIONS.md`, `docs/INTERFACES.md`)

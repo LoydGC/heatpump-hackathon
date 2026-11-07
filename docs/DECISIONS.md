@@ -35,6 +35,7 @@ Add a row here with each new entry.
 | D-012 | 2026-11-07 | UI | Rebates section: cost effect and sources, with verify caveats | active |
 | D-013 | 2026-11-07 | UI | Installer report via browser print, no library | active |
 | D-014 | 2026-11-07 | UI | Smart meter is a simple toggle for now; flesh out later | active |
+| D-015 | 2026-11-07 | UI | Results show high-level answers first; rebate explainer on its own page | active |
 
 ## How to add an entry
 
@@ -164,3 +165,11 @@ Anyone (teammate or Claude thread) who makes a decision that affects the repo, t
 - **Refs:** branch `claude/project-thread-6h36e8`.
 - **Update (same day):** Gavin wants the framing "heat pump + meter vs heat pump + no meter" (you're already doing this, why not add a meter). Results now have an "Add a smart meter?" side-by-side (bill, break-even, lifetime cost) and a toggle that applies it page-wide; the home-step checkbox means "I already have one". Still the flat 10% placeholder, meter cost assumed zero.
 - **Status:** active (open TODO)
+
+### D-015 · 2026-11-07 · Results: high level first; rebate explainer on a separate page
+- **Workstream:** UI
+- **Decision:** Results page shows only the suggestion, four headline tiles (yearly bill, upfront after rebates, break-even, CO2 cut per year), a "What if..." row (rebates on/off, smart meter on/off), the PDF button and a "Learn about rebates" button. Carbon, Money, the rebate/meter comparison tables and "Bigger or smaller?" are collapsed sections. The qualitative rebate content (sources, regional programs, links, caveat) is a separate sub-page `#rebates` reached only from results (it counts as step 4 in the nav; direct links fall back if results were not reached) with a back button.
+- **Why:** Gavin: the results page was overwhelming; rebate details should be a page you choose to visit.
+- **Decided by:** Gavin.
+- **Refs:** branch `claude/project-thread-6h36e8`.
+- **Status:** active

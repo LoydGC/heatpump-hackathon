@@ -4,7 +4,7 @@
   const { FUELS, ENVELOPES, REGIONS, matchPlace } = window.HP_DATA;
   const Model = () => window.HeatPumpModel;
   const $ = id => document.getElementById(id);
-  const ROUTES = ["where", "climate", "home", "results"];
+  const ROUTES = ["where", "climate", "home", "results", "rebates"]; // "rebates" is a sub-page of results, reached from it
   const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const INSTALLED_USD_PER_TON = 5500;   // placeholder
   const LIFETIME_YEARS = 15;            // data.zip analysis_years
@@ -80,15 +80,16 @@
     i = Math.max(0, Math.min(i, state.maxStep));
     current = i;
     document.querySelectorAll(".step").forEach((s, k) => s.classList.toggle("active", k === i));
+    const navI = Math.min(i, 3); // the rebates page lives under step 4
     document.querySelectorAll("#steps button").forEach((b, k) => {
       b.disabled = k > state.maxStep;
-      b.classList.toggle("done", k < state.maxStep && k !== i);
-      if (k === i) b.setAttribute("aria-current", "step"); else b.removeAttribute("aria-current");
+      b.classList.toggle("done", k < Math.min(state.maxStep, 3) && k !== navI);
+      if (k === navI) b.setAttribute("aria-current", "step"); else b.removeAttribute("aria-current");
       b.title = k > state.maxStep ? "Finish the earlier steps first" : "";
     });
     if (i === 1) renderClimate();
     if (i === 2) renderHome();
-    if (i === 3) renderResults();
+    if (i === 3 || i === 4) renderResults();
     const hash = "#" + ROUTES[i];
     if (location.hash !== hash) { if (push) history.pushState(null, "", hash); else history.replaceState(null, "", hash); }
     const h = $("h" + i); if (h && push) { window.scrollTo({ top: 0 }); h.focus({ preventScroll: true }); }
@@ -98,6 +99,7 @@
   const routeIndex = () => Math.max(0, ROUTES.indexOf(location.hash.slice(1)));
   window.addEventListener("popstate", () => go(routeIndex(), false));
   document.querySelectorAll("#steps button").forEach(b => b.addEventListener("click", () => go(+b.dataset.go)));
+  document.querySelectorAll("[data-to-results]").forEach(b => b.addEventListener("click", () => go(3)));
   document.querySelectorAll("[data-back]").forEach(b => b.addEventListener("click", () => go(current - 1)));
 
   // ---------- Step 1: location ----------
@@ -288,6 +290,13 @@
       ["", `Over ${life} years`, (lifeSave >= 0 ? "" : "") + money(Math.abs(lifeSave)), lifeSave >= 0 ? "saved overall, after upfront cost" : "more overall, after upfront cost"]
     ].map(([c, k, v, s]) => `<div class="tile ${c}"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join("");
 
+    $("sumTiles").innerHTML = [
+      ["hero-t", "Yearly heating bill", money(a.heatPump.costUsd), `vs ${money(a.today.costUsd)} today · ${saveYr >= 0 ? money(saveYr) + " saved" : money(-saveYr) + " more"} per year`],
+      ["", "Upfront, after rebates", money(up.netUsd), `${money(up.installedUsd)} installed − ${money(up.rebatesUsd)} rebates`],
+      ["", "Pays for itself in", out.paybackYears != null && out.paybackYears <= 40 ? out.paybackYears.toFixed(1) + " years" : "Not on bills alone", out.paybackYears != null ? `heat pumps last about ${life} years` : "bills don't drop enough to repay the cost"],
+      ["", cut >= 0 ? "CO₂ cut per year" : "CO₂ added per year", tonnes(cut), a.today.co2Kg ? `${pct(Math.abs(cut) / a.today.co2Kg)} ${cut >= 0 ? "less" : "more"} than today` : ""]
+    ].map(([c, k, v, s]) => `<div class="tile ${c}"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join("");
+
     $("lgNow2").textContent = "Keep " + f.short;
     const yrs = Array.from({ length: life + 1 }, (_, y) => y);
     HPCharts.lineChart($("chCum"), {
@@ -337,9 +346,8 @@
     const run = tou => Promise.resolve(Model().run(modelInputs(out.sizeTons, state.rebatesOn, tou)));
     const [no, yes] = await Promise.all([run(false), run(true)]);
     const had = !!effective().timeOfUse;
-    $("meterLede").textContent = had
-      ? "You told us you already have a smart meter. Here's the same heat pump with and without it."
-      : "If you're already adding a heat pump, a smart meter and time-of-use plan could trim the electricity bill further. Here's the difference.";
+    const meterSave = no.annual.heatPump.costUsd - yes.annual.heatPump.costUsd;
+    $("meterLede").textContent = had ? "Counting your smart meter." : `Adding one could trim about ${money(meterSave)} a year (placeholder estimate).`;
     $("meterSeg").querySelectorAll("button").forEach(b => {
       b.setAttribute("aria-pressed", (b.dataset.meter === "1") === had);
       b.onclick = () => { setOverride("timeOfUse", b.dataset.meter === "1"); renderResults(); };
@@ -369,8 +377,8 @@
     const { w, wo } = await bothRebateCases(out);
     const reb = w.upfront.rebatesUsd, life = out.lifetimeYears;
     $("rebLede").textContent = reb > 0
-      ? `Rebates take about ${money(reb)} off the price of the ${out.sizeTons}-ton system. That lowers what you pay up front and brings break-even sooner. Switch the toggle to see the whole page with and without them.`
-      : `We're counting $0 in rebates for this home, so the two columns match. If you expect a rebate, add it under "Prices, rebates and other details" on the home step.`;
+      ? `Counting about ${money(reb)} off the upfront cost.`
+      : `No rebates counted for this home. Add one under "Prices, rebates and other details" on the home step.`;
     $("rebSeg").querySelectorAll("button").forEach(b => {
       b.setAttribute("aria-pressed", (b.dataset.reb === "1") === state.rebatesOn);
       b.onclick = () => { state.rebatesOn = b.dataset.reb === "1"; save(); renderResults(); };
@@ -511,6 +519,7 @@
   }
   document.querySelectorAll("[data-report]").forEach(b => b.addEventListener("click", printReport));
   window.HP_buildReport = buildReport; // used by tests
+  $("toRebates").addEventListener("click", () => { unlock(4); go(4); });
   $("restart").addEventListener("click", () => { state = blank(); save(); $("place").value = ""; markQuick(); go(0); });
 
   // ---------- Boot ----------

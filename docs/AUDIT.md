@@ -43,3 +43,4 @@ To filter by workstream: search the page for `| UI |`, `| Model |`, `| Data |` o
 | 2026-11-07 | repo | UI | Moved smart meter (time-of-use) toggle to main Your home form and into the report; flagged as placeholder to flesh out | Claude, for Gavin | this push | D-014 |
 | 2026-11-07 | repo | UI | Results: "Add a smart meter?" section compares heat pump vs heat pump + smart meter (toggle applies it page-wide) | Claude, for Gavin | this push | D-014 |
 | 2026-11-07 | repo | UI | Front page: headline "Let's get you a heat pump!" with the location question as subheader | Claude, for Gavin | this push | |
+| 2026-11-07 | repo | UI | Results page split: headline numbers, what-if toggles (rebates, smart meter), PDF button first; CO2, money, tables and size trade-off folded; rebate explainer moved to its own `#rebates` page reached by a button | Claude, for Gavin | this push | D-015 |
