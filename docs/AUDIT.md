@@ -15,7 +15,7 @@ Add one row per change, in the same push as the change (for repo changes, put th
 
 Columns: **Date** (YYYY-MM-DD, UTC) · **Type** (`repo`, `merge`, `deploy`, `settings`, `upload`, `pr`) · **Workstream** (`UI`, `Model`, `Data`, `Infra` for cross-cutting) · **What** · **Who** (person, and Claude thread if one did it) · **Ref** (commit SHA, PR, or link) · **Decision** (D-NNN, if any).
 
-To filter by workstream: search the page for `| UI |`, `| Model |`, `| Data |` or `| Infra |`. Full git history: `git log --oneline --graph --all`.
+To filter by workstream: search the page for `| UI |`, `| Model |`, `| Data |` or `| Infra |`. Automatic per-workstream/author/branch digest: [ACTIVITY.md](ACTIVITY.md). Full git history: `git log --oneline --graph --all`.
 
 | Date | Type | Workstream | What | Who | Ref | Decision |
 |---|---|---|---|---|---|---|
@@ -36,3 +36,4 @@ To filter by workstream: search the page for `| UI |`, `| Model |`, `| Data |` o
 | 2026-11-07 | repo | Infra | Git auto-deploys off (`vercel.json`); localhost launchers; deploy docs | Claude, for Gavin | `c83833f` | D-008 |
 | 2026-11-07 | settings | Infra | Vercel: preview deployments disabled; Ignored Build Step skips preview builds | Claude, for Gavin | `a7f7cae` (docs) | D-008 |
 | 2026-11-07 | repo | Infra | Added DECISIONS.md, AUDIT.md and INTERFACES.md | Claude, for Gavin | this push | D-009 |
+| 2026-11-07 | repo | Infra | Folder-to-workstream map, activity script and launchers, generated ACTIVITY.md | Claude, for Gavin | this push | D-010 |

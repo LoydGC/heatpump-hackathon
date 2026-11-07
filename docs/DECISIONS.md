@@ -30,6 +30,7 @@ Add a row here with each new entry.
 | D-007 | 2026-11-07 | Infra | Get everything on main | active |
 | D-008 | 2026-11-07 | Infra | Manual deploys only; no preview deploys | active |
 | D-009 | 2026-11-07 | Infra | Keep a decision log and audit trail in the repo | active |
+| D-010 | 2026-11-07 | Infra | Map folders to workstreams; auto-generate activity digest from git | active |
 
 ## How to add an entry
 
@@ -117,4 +118,12 @@ Anyone (teammate or Claude thread) who makes a decision that affects the repo, t
 - **Why:** Trace changes and interactions, and coordinate across the UI, Model and Data workstreams, teammates and Claude threads.
 - **Decided by:** Gavin.
 - **Refs:** this commit.
+- **Status:** active
+
+### D-010 · 2026-11-07 · Map folders to workstreams; auto-generate activity digest from git
+- **Workstream:** Infra
+- **Decision:** Each file maps to a workstream via the map in `docs/WORKSTREAMS.md`. `tools/activity.py` (double-click `update-activity-*`) reads all branches and writes `docs/ACTIVITY.md` by workstream, author and branch. A suggested folder layout is documented but no files were moved.
+- **Why:** Trace teammates' manual work (uploads, edits) from git alone, without relying on everyone writing AUDIT.md rows.
+- **Decided by:** Gavin (chose folder mapping).
+- **Refs:** this push.
 - **Status:** active

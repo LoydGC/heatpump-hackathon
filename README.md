@@ -22,5 +22,7 @@ See [docs/local-and-deploy.md](docs/local-and-deploy.md).
 - [docs/DECISIONS.md](docs/DECISIONS.md): decision log (why).
 - [docs/AUDIT.md](docs/AUDIT.md): audit trail of changes, merges, deploys and settings (what, when, who).
 - [docs/INTERFACES.md](docs/INTERFACES.md): what UI, Model and Data each provide to and need from the others.
+- [docs/WORKSTREAMS.md](docs/WORKSTREAMS.md): which folders/files belong to which workstream.
+- [docs/ACTIVITY.md](docs/ACTIVITY.md): auto-generated digest of commits by workstream, author and branch. Refresh by double-clicking `update-activity-windows.bat` or `update-activity-mac.command`, then commit.
 
 Entries are tagged by workstream: UI, Model, Data, or Infra (cross-cutting). When you change something, add a row to AUDIT.md in the same push, a DECISIONS.md entry if it was a decision, and update INTERFACES.md if a handoff changed.
