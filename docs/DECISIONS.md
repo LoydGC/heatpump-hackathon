@@ -249,7 +249,7 @@ Anyone (teammate or Claude thread) who makes a decision that affects the repo, t
 
 ### D-024 · 2026-11-08 · Climate card rule: kicker and heading read as one sentence; body supports the heading
 - **Workstream:** UI
-- **Decision:** On the climate page each card's kicker plus heading must read as one natural sentence, and the body must directly support the heading (no card promises what its body does not show). Cards are ordered climate, big savings, little or no savings: "In your climate / Most winter hours suit a heat pump", "Big savings from replacing / Electric heat or propane", "Little or no savings from replacing / Natural gas". The old kickers "Heat pumps excel at", "Your climate is ideal for" and "Where we expect less benefit" are retired. Boston and Fairbanks cards follow the same pattern. The rule is also a comment in `ui/regions.js`.
+- **Decision:** On the climate page each card's kicker plus heading must read as one natural sentence, and the body must directly support the heading (no card promises what its body does not show). Cards are ordered climate, big savings, may not fit (softened per Gavin: the page is bullish on heat pumps): "In your climate / Most winter hours suit a heat pump", "Big savings from replacing / Electric heat or propane", "It may not be a good fit if you heat with / Natural gas". The old kickers "Heat pumps excel at", "Your climate is ideal for" and "Where we expect less benefit" are retired. Boston and Fairbanks cards follow the same pattern. The rule is also a comment in `ui/regions.js`.
 - **Why:** Gavin: "Your climate is ideal for" and "Handling the cold" read awkwardly; the card must logically flow from its header.
 - **Decided by:** Gavin.
 - **Refs:** `ui/regions.js` (`CLIMATE`).
