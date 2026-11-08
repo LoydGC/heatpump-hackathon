@@ -108,8 +108,8 @@
     // An option is dominated when another one is at least as cheap and at least as clean, and better on one of the two: greyed out.
     const dom = p => pts.some(q => q !== p && q.x <= p.x && q.y <= p.y && (q.x < p.x || q.y < p.y));
     let nDom = 0;
-    pts.forEach(p => {
-      if (p.current) return;
+    // dominated options are drawn first so the green circles sit on top where they overlap
+    pts.filter(p => !p.current).sort((a, b) => dom(b) - dom(a)).forEach(p => {
       const d = dom(p); if (d) nDom++;
       const g = el("circle", { cx: X(p.x), cy: Y(p.y), r: 5, fill: d ? "var(--grid)" : "var(--panel)", stroke: d ? "var(--axis)" : "var(--c-hp)", "stroke-width": 2, opacity: d ? 0.8 : 1 }, svg);
       el("title", {}, g).textContent = d ? p.label + " (greyed out: another option is cheaper and cleaner)" : p.label;
