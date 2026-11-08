@@ -105,11 +105,18 @@
     el("text", { x: m.l + iw / 2, y: H - 6, "text-anchor": "middle", class: "tick" }, svg).textContent = o.xTitle;
     const yt = el("text", { x: 14, y: m.t + ih / 2, "text-anchor": "middle", class: "tick", transform: `rotate(-90 14 ${m.t + ih / 2})` }, svg); yt.textContent = o.yTitle;
     el("polyline", { points: (() => { let lo = Infinity; return pts.filter(p => p.y < lo && (lo = p.y, true)); })().map(p => `${X(p.x)},${Y(p.y)}`).join(" ")  /* line joins only the best options: nothing else is both cheaper and cleaner */, fill: "none", stroke: "var(--c-hp)", "stroke-width": 2, "stroke-linejoin": "round", opacity: 0.6 }, svg);
+    // An option is dominated when another one is at least as cheap and at least as clean, and better on one of the two: greyed out.
+    const dom = p => pts.some(q => q !== p && q.x <= p.x && q.y <= p.y && (q.x < p.x || q.y < p.y));
+    let nDom = 0;
     pts.forEach(p => {
       if (p.current) return;
-      const g = el("circle", { cx: X(p.x), cy: Y(p.y), r: 5, fill: "var(--panel)", stroke: "var(--c-hp)", "stroke-width": 2 }, svg);
-      el("title", {}, g).textContent = p.label;
+      const d = dom(p); if (d) nDom++;
+      const g = el("circle", { cx: X(p.x), cy: Y(p.y), r: 5, fill: d ? "var(--grid)" : "var(--panel)", stroke: d ? "var(--axis)" : "var(--c-hp)", "stroke-width": 2, opacity: d ? 0.8 : 1 }, svg);
+      el("title", {}, g).textContent = d ? p.label + " (greyed out: another option is cheaper and cleaner)" : p.label;
     });
+    const lg = document.createElement("div"); lg.className = "legend"; lg.style.marginTop = "6px";
+    lg.innerHTML = `<span><i style="border-color:var(--c-hp)"></i>Worth considering</span><span><i style="border-color:var(--axis)"></i>Greyed out (${nDom}): another option is both cheaper and cleaner</span>`;
+    host.appendChild(lg);
     pts.filter(p => p.current).forEach(p => {
       const g = el("circle", { cx: X(p.x), cy: Y(p.y), r: 8, fill: "var(--accent)", stroke: "var(--panel)", "stroke-width": 2 }, svg);
       el("title", {}, g).textContent = p.label;
