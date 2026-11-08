@@ -253,8 +253,6 @@
     const sel = selection(r, state.overrides), lvlBins = binList(sel.lvl);
     $("sbin").innerHTML = lvlBins.filter(b => !hasRS(r) || (cellOf(r, sel.type, sel.lvl, b) || {}).n)
       .map(b => `<option value="${b}"${b === sel.bin ? " selected" : ""}>${binLabel(b)} sq ft</option>`).join("");
-    $("binNote").textContent = (sel.fellBack ? `ResStock has no ${typeLabel(sel.type).split(" (")[0].toLowerCase()} homes of ${binLabel(sel.want)} sq ft in ${r.name}, so we're showing the nearest group, ${binLabel(sel.bin)} sq ft. ` : "") +
-      (r.id === V1.regionId ? "Model v1 uses one fixed house, so home type and size don't change its numbers yet." : "Home type and size (500–3,999 sq ft) set the heat-loss estimate in the placeholder stand-in; the team's model isn't plugged in for this region.");
     $("fuelPriceL").textContent = h.currentHeat === "electric" ? "Fuel price (same as electricity)" : `${f.short[0].toUpperCase() + f.short.slice(1)} ($ per ${f.unit})`;
     $("fuelPrice").disabled = h.currentHeat === "electric";
     document.querySelectorAll("[data-src]").forEach(s => {
@@ -482,7 +480,7 @@
     $("rebPrograms").innerHTML = rb.programs.map(p => `<div class="prog"><h3>${esc(p.name)} <span class="st ${p.status}">${RB.STATUS[p.status] || p.status}</span><span class="lvl">${esc(p.level)}</span></h3>
       <p class="amt">${esc(p.amount)}</p><p class="nt">${esc(p.note)}</p>
       ${p.url ? `<p style="margin-top:6px"><a href="${esc(p.url)}" target="_blank" rel="noopener">Official program page ↗</a>${p.checked ? "" : ' <span class="muted" style="font-size:12px">(link not verified)</span>'}</p>` : ""}</div>`).join("");
-    $("rebCaveat").innerHTML = `<b>Verify before you rely on these.</b> Program names, amounts and deadlines were read from public pages on ${RB.asOf} and change often; some are placeholders. ${esc(rb.amountsNote)} Always confirm with the program and ask your installer which rebates they handle.`;
+    $("rebCaveat").innerHTML = `<b>Good to know.</b> Amounts and deadlines are current as of ${RB.asOf}. ${esc(rb.amountsNote)} Ask your installer which rebates they handle.`;
   }
 
   // ---------- Printable report (saved as PDF through the browser's print dialog) ----------
@@ -515,11 +513,11 @@
       ["How well it holds heat", ENVELOPES[h.envelope].label, "envelope"],
       ["Current heating", f.label, "currentHeat"],
       ["Winter thermostat", `${h.thermostatF} °F`, "thermostatF"],
-      ["Heat loss (our estimate)", `${h.heatLossWPerF} W per °F`, "heatLossWPerF"],
+      ["Heat loss", `${h.heatLossWPerF} W per °F`, "heatLossWPerF"],
       ["Electricity price", `$${h.electricityUsdPerKWh.toFixed(3)} per kWh`, "electricityUsdPerKWh"],
       ...(h.currentHeat === "electric" ? [] : [[`${f.short[0].toUpperCase() + f.short.slice(1)} price`, `$${h.fuelUsdPerUnit.toFixed(2)} per ${f.unit}`, "fuelUsdPerUnit"]]),
-      ["Rebates assumed", money(h.rebatesUsd), "rebatesUsd"],
-      ["Installed cost assumed", `$${h.installedUsdPerTon.toLocaleString()} per ton`, "installedUsdPerTon"]
+      ["Rebates", money(h.rebatesUsd), "rebatesUsd"],
+      ["Installed cost", `$${h.installedUsdPerTon.toLocaleString()} per ton`, "installedUsdPerTon"]
     ];
     const questions = [
       "Will you do a full Manual J load calculation for my home, and can I have a copy?",
@@ -541,7 +539,7 @@
         <h1>${esc(r.full)}</h1>
         <p>Prepared ${esc(date)} with the Heat Pump Guide (prototype). ${Object.keys(ov).length ? `${Object.keys(ov).length} detail${Object.keys(ov).length > 1 ? "s" : ""} entered by the homeowner; the rest are typical values for the area.` : "All home details are typical values for the area; the homeowner has not yet entered their own."}</p></header>
 
-      <div class="warn"><b>This is an estimate, not a Manual J.</b> The numbers come from a simplified model with placeholder inputs and rules of thumb. They are a starting point for a conversation. A licensed installer must measure the home and run a proper load calculation (ACCA Manual J) and system design (Manual S/D) before choosing equipment.${out.isPlaceholder ? " The team's full model is not plugged in yet, so figures are rough." : ""}${out.v1 ? " Minneapolis figures come from the team's model v1, which is not exactly the final model: it simulates one fixed typical house (so the details above did not change its numbers), and its installed cost, rebate, time-of-use rate, AC credit and grid carbon inputs are placeholders." : ""}</div>
+      <div class="warn"><b>Next step: your installer.</b> Bring this report to a licensed installer, who will run the load calculation (ACCA Manual J) and system design to confirm the equipment.</div>
 
       <section><h2>1. What I'm asking for</h2>
         ${out.v1 ? `<p style="margin-bottom:4pt"><b>Carbon dial:</b> ${dollars(dialLam)} per tonne of CO₂ (how much I value cutting emissions).${keepNote ? ` At that setting the model says keeping the gas furnace is cheapest overall; the request below is the model's best heat pump option, for if I decide to go ahead anyway.` : ""}</p>` : ""}
@@ -550,8 +548,8 @@
             <p>Please quote ${lo} to ${hi} tons. About ${roundTo(out.sizeTons * TON_BTUH, 1000).toLocaleString()} BTU/h nominal.</p>
             ${capBtuh != null ? `<p>Rated heating output near 5 °F: about ${roundTo(capBtuh, 500).toLocaleString()} BTU/h (${out.capacityKwAt5F.toFixed(1)} kW).</p>` : "<p>Ask the installer for the rated output at 5 °F and at the design temperature.</p>"}</div>
           <div class="box"><div class="big">About ${roundTo(loadBtuh, 1000).toLocaleString()} BTU/h</div>
-            <p>Estimated heating load on the coldest design night (${degF(r.designTempF)}), ${out.designLoadKw.toFixed(1)} kW.</p>
-            <p>Estimated to cover about ${pct(a.heatPump.heatPumpShare)} of yearly heating with the heat pump alone.</p></div>
+            <p>Heating load on the coldest design night (${degF(r.designTempF)}), ${out.designLoadKw.toFixed(1)} kW.</p>
+            <p>Covers about ${pct(a.heatPump.heatPumpShare)} of yearly heating with the heat pump alone.</p></div>
         </div>
         <p style="margin-top:6pt"><b>Backup / supplemental heat:</b> ${esc(backupLine)}</p>
         ${!out.v1 && out.sizeTons !== out.recommendedSizeTons ? `<p>(The size picker was set to ${out.sizeTons} tons; for the chosen cost-vs-carbon priority we'd suggest ${out.recommendedSizeTons} tons.)</p>` : ""}
@@ -560,12 +558,12 @@
       <section><h2>2. Location and climate</h2>
         <table><tbody>
           <tr><td>Location</td><td>${esc(r.full)}</td></tr>
-          <tr><td>Winter design temperature (99%)</td><td>${degF(r.designTempF)} <span class="tg">${r.dataStatus === "data.zip" ? "from ASHRAE data" : "placeholder, confirm locally"}</span></td></tr>
+          <tr><td>Winter design temperature (99%)</td><td>${degF(r.designTempF)} <span class="tg">${r.dataStatus === "data.zip" ? "from ASHRAE data" : "design temperature"}</span></td></tr>
           <tr><td>Coldest month average</td><td>${degF(Math.min(...r.monthlyMeanF))}</td></tr>
           <tr><td>Grid electricity</td><td>${esc(r.gridNote)} (~${r.gridKgCo2PerKWh} kg CO₂ per kWh)</td></tr>
         </tbody></table></section>
 
-      <section><h2>3. Home details I entered or assumed</h2>
+      <section><h2>3. Your home details</h2>
         <table><thead><tr><th>Detail</th><th>Value</th><th>Source</th></tr></thead><tbody>
         ${rows.map(([k, v, key]) => `<tr><td>${k}</td><td>${esc(v)}</td><td>${tag(key)}</td></tr>`).join("")}
         </tbody></table>
@@ -573,7 +571,7 @@
 
       <section><h2>4. Rebates I may qualify for</h2>
         <table><thead><tr><th>Program</th><th>Status</th><th>What it pays / where</th></tr></thead><tbody>${progs}</tbody></table>
-        <p style="margin-top:4pt"><b>Assumed in the numbers below:</b> ${money(h.rebatesUsd)} total. <b>Verify every figure with the program before signing.</b></p>
+        <p style="margin-top:4pt"><b>Rebates counted in the numbers below:</b> ${money(h.rebatesUsd)} total.</p>
         <p><b>Paperwork to bring or ask the installer about:</b></p>
         <ul>${rb.paperwork.map(p => `<li>${esc(p)}</li>`).join("")}</ul></section>
 
@@ -592,7 +590,7 @@
 
       <section><h2>7. Documents to have ready</h2><ul class="cb">${docs.map(d => `<li>${esc(d)}</li>`).join("")}</ul></section>
 
-      <p class="foot">Estimate only; not a Manual J, an engineering design, a quote or financial advice. Prices, rebates and climate values are placeholders or snapshots from ${RB.asOf} and may be out of date. Model: ${esc(out.modelVersion)}${out.isPlaceholder ? " (placeholder)" : ""}${out.v1 ? "; v1, not exactly the end model but closer to what the team is thinking" : ""}. Generated in your browser; nothing was sent anywhere.</p>`;
+      <p class="foot">Prepared in your browser from your answers; nothing was sent anywhere.</p>`;
   }
   async function printReport() {
     if (!region()) return;

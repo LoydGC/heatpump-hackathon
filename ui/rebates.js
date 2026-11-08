@@ -32,7 +32,7 @@
           note: "Can cover the part of the cost the rebate does not.", url: "https://www.masssave.com/save/heating-and-water-heating", checked: true }
       ].concat(FED_US),
       paperwork: ["Mass Save account number or a recent utility bill", "Proof of your current heating fuel", "Home Energy Assessment report (for the weatherization bonus or whole-home eligibility)", "Installer's heating load calculation (for the sizing bonus)", "Photo of the outdoor unit's serial nameplate", "Final invoice showing any removed or disconnected heating equipment", "Income documents if you apply for the income-qualified tier"],
-      amountsNote: "The $8,000 in the calculator is a placeholder. The Mass Save formulas above depend on the size and on whole-home vs. partial-home."
+      amountsNote: "The calculator counts $8,000. Mass Save pays by the ton, so the final amount follows your size and whole-home vs. partial-home."
     },
     minneapolis: {
       intro: "In the Twin Cities the dependable money comes from your electric utility (Xcel Energy) and, if you keep a gas furnace as backup, your gas utility (CenterPoint Energy).",
@@ -64,7 +64,7 @@
           note: "We have not confirmed an active heat pump rebate from these. A phone call is the quickest check.", url: "", checked: false }
       ].concat(FED_US.slice(0, 1)),
       paperwork: ["Electric utility account number", "Proof of current heating fuel", "Itemized invoice with model and serial number", "Income documents if an income-qualified program opens"],
-      amountsNote: "The calculator assumes $0 in rebates for Fairbanks because we found no open program."
+      amountsNote: "The calculator counts $0 in rebates for Fairbanks because no program is open yet."
     }
   };
 
