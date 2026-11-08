@@ -455,13 +455,10 @@
       b.setAttribute("aria-pressed", b.dataset.inc === state.income);
       b.onclick = () => { state.income = b.dataset.inc; save(); renderResults(); };
     });
-    const stdUsd = w.sizeTons ? Math.min(h.rebatesUsd, w.upfront.installedUsd) : h.rebatesUsd;
-    $("stdAmt").textContent = money(stdUsd);
-    $("rebTotal").innerHTML = w.sizeTons
-      ? `Total rebates: ${money(w.upfront.rebatesUsd)}<small>${money(w.upfront.installedUsd)} installed − ${money(w.upfront.rebatesUsd)} = ${money(w.upfront.netUsd)} upfront</small>`
-      : `Total rebates available: ${money(h.rebatesUsd + incomeUsd())}<small>They come off the cost of a heat pump. At this setting of the dial we suggest keeping your gas furnace, so nothing is counted yet.</small>`;
-    $("rebIntro").textContent = r.id === "minneapolis" ? "Rebates come off your upfront cost. Add the income-based rebate if your household qualifies." : "Rebates come off your upfront cost.";
-    $("incBox").hidden = r.id !== "minneapolis"; 
+    $("rebTotal").innerHTML = incomeUsd()
+      ? `Income-based rebate: ${money(incomeUsd())}<small>${w.sizeTons ? `Your upfront cost comes down to ${money(w.upfront.netUsd)}.` : "It comes off the cost of a heat pump. At this setting of the dial we suggest keeping your gas furnace, so nothing is counted yet."}</small>`
+      : `Income-based rebate: none<small>Choose a range above if your household qualifies.</small>`;
+    $("incBox").hidden = $("whatIf").hidden = r.id !== "minneapolis"; 
     const incAmt = incomeUsd();
     $("incLede").textContent = incAmt === 8000 ? "Income at or under 80% of area median: the full $8,000 rebate, counted above."
       : incAmt === 4000 ? "Income between 80% and 150% of area median: half the rebate, $4,000, counted above."
