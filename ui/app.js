@@ -11,12 +11,16 @@
   const PRICE_KEYS = ["electricityUsdPerKWh", "fuelUsdPerUnit", "rebatesUsd"];
 
   // ---------- State ----------
-  const blank = () => ({ regionId: null, maxStep: 0, overrides: {}, priority: 0.5, prioSet: false, sizeTons: null, usedTypical: true, rebatesOn: true, cold: false, acCredit: false });
+  // Income-based rebate tiers (HEAR as in apply_rebate.py): share of area median income -> rebate cap in dollars.
+  const INCOME_USD = { none: 0, partial: 4000, full: 8000 };
+  const blank = () => ({ regionId: null, maxStep: 0, overrides: {}, priority: 0.5, prioSet: false, sizeTons: null, usedTypical: true, rebatesOn: true, income: "none", cold: false, acCredit: false });
   let state = blank();
   try { const s = JSON.parse(sessionStorage.getItem("hp-wizard")); if (s && (s.regionId === null || REGIONS[s.regionId])) state = Object.assign(blank(), s); } catch (e) {}
   // A saved or tampered state can't unlock pages: no region means step 1 only; never past the last page.
   state.maxStep = Math.max(0, Math.min(+state.maxStep || 0, 4));
   if (!state.regionId) state.maxStep = 0;
+  delete state.overrides.homeType; delete state.overrides.envelope;  // home type and heat-holding inputs were removed from the page
+  if (!INCOME_USD.hasOwnProperty(state.income)) state.income = "none";
   state.sizeTons = null;                // no size picker any more; the suggestion follows the dial
   const save = () => { try { sessionStorage.setItem("hp-wizard", JSON.stringify(state)); } catch (e) {} };
   let current = 0;
@@ -33,7 +37,7 @@
     if (inp.region.id === V1.regionId && V1.loaded()) {
       const sc = inp.scenario;
       return V1.run(inp, { tariff: inp.prices.timeOfUse ? "tou" : "flat", weather: sc.coldWinter ? "tmy3_cold" : "tmyx_main",
-                           credit: sc.acCredit ? 4000 : 0, controller: "smart", lamIdx: sc.lamIdx, rebatesOn: sc.rebatesOn });
+                           credit: sc.acCredit ? 4000 : 0, controller: "smart", lamIdx: sc.lamIdx, rebatesOn: sc.rebatesOn, incomeUsd: sc.incomeUsd });
     }
     return Model().run(inp);
   }
@@ -129,10 +133,10 @@
       prices: { electricityUsdPerKWh: h.electricityUsdPerKWh, fuelUsdPerUnit: fuelPrice, fuelUnit: f.unit, timeOfUse: tou == null ? !!h.timeOfUse : tou,
                 fuelUsdPerKWhHeat: fuelPrice / (f.kwh * f.eff) },
       emissions: { gridKgCo2PerKWh: r.gridKgCo2PerKWh, fuelKgCo2PerUnit: fuelCo2, fuelKgCo2PerKWhHeat: fuelCo2 / (f.kwh * f.eff) },
-      costs: { installedUsdPerTon: h.installedUsdPerTon, rebatesUsd: rebatesOn ? h.rebatesUsd : 0, lifetimeYears: LIFETIME_YEARS },
+      costs: { installedUsdPerTon: h.installedUsdPerTon, rebatesUsd: rebatesOn ? h.rebatesUsd + INCOME_USD[state.income] : 0, lifetimeYears: LIFETIME_YEARS },
       priority: state.prioSet ? state.priority : (isV1(r) ? DEFAULT_LAM_IDX / DIAL_STEPS : state.priority),
       sizeTons: sizeTons ?? null,
-      scenario: { coldWinter: state.cold, acCredit: state.acCredit, rebatesOn, lamIdx: lamIdx ?? dialIdx() }  // used by model v1
+      scenario: { coldWinter: state.cold, acCredit: state.acCredit, rebatesOn, incomeUsd: INCOME_USD[state.income], lamIdx: lamIdx ?? dialIdx() }  // used by model v1
     };
   }
 
@@ -217,10 +221,6 @@
   // ---------- Step 3: home ----------
   const heatSel = $("heat");
   Object.entries(FUELS).forEach(([k, f]) => { const o = document.createElement("option"); o.value = k; o.textContent = f.label; heatSel.appendChild(o); });
-  Object.entries(ENVELOPES).forEach(([k, e]) => {
-    const b = document.createElement("button"); b.type = "button"; b.dataset.env = k; b.textContent = e.label;
-    b.addEventListener("click", () => setOverride("envelope", k)); $("envSeg").appendChild(b);
-  });
   const FIELDS = [ // [inputId, key, parse]
     ["heat", "currentHeat", String], ["tstat", "thermostatF", Number],
     ["elec", "electricityUsdPerKWh", Number], ["fuelPrice", "fuelUsdPerUnit", Number], ["rebates", "rebatesUsd", Number],
@@ -239,8 +239,6 @@
     $(id).addEventListener("change", e => setOverride(key, e.target.value === "" ? "" : parse(e.target.value)));
   });
   // Home type + size dropdowns (ResStock options)
-  HOME_TYPES.forEach(t => { const o = document.createElement("option"); o.value = t.id; o.textContent = t.label; $("htype").appendChild(o); });
-  $("htype").addEventListener("change", e => setOverride("homeType", e.target.value));
   $("sbin").addEventListener("change", e => setOverride("sizeBin", e.target.value));
   $("tou").addEventListener("change", e => setOverride("timeOfUse", e.target.checked));
 
@@ -254,7 +252,6 @@
 
     FIELDS.forEach(([id, key]) => { if (key !== skipKey || id === "heat") $(id).value = h[key]; });
     const sel = selection(r, state.overrides), lvlBins = binList(sel.lvl);
-    $("htype").value = sel.type;
     $("sbin").innerHTML = lvlBins.filter(b => !hasRS(r) || (cellOf(r, sel.type, sel.lvl, b) || {}).n)
       .map(b => `<option value="${b}"${b === sel.bin ? " selected" : ""}>${binLabel(b)} sq ft</option>`).join("");
     $("binNote").textContent = (sel.fellBack ? `ResStock has no ${typeLabel(sel.type).split(" (")[0].toLowerCase()} homes of ${binLabel(sel.want)} sq ft in ${r.name}, so we're showing the nearest group, ${binLabel(sel.bin)} sq ft. ` : "") +
@@ -263,7 +260,6 @@
     $("fuelPriceL").textContent = h.currentHeat === "electric" ? "Fuel price (same as electricity)" : `${f.short[0].toUpperCase() + f.short.slice(1)} ($ per ${f.unit})`;
     $("fuelPrice").disabled = h.currentHeat === "electric";
     $("tou").checked = !!h.timeOfUse;
-    document.querySelectorAll("#envSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.env === h.envelope));
     document.querySelectorAll("[data-src]").forEach(s => {
       const yours = s.dataset.src in state.overrides; s.textContent = yours ? "yours" : "typical"; s.classList.toggle("yours", yours);
     });
@@ -485,6 +481,15 @@
       b.setAttribute("aria-pressed", (b.dataset.reb === "1") === state.rebatesOn);
       b.onclick = () => { state.rebatesOn = b.dataset.reb === "1"; save(); renderResults(); };
     });
+    $("incSeg").querySelectorAll("button").forEach(b => {
+      b.setAttribute("aria-pressed", b.dataset.inc === state.income);
+      b.onclick = () => { state.income = b.dataset.inc; save(); renderResults(); };
+    });
+    $("incSeg").hidden = $("incL").hidden = false;
+    const incAmt = INCOME_USD[state.income];
+    $("incLede").textContent = !state.rebatesOn ? "Turn rebates on to count an income-based rebate."
+      : incAmt ? `Households in this range can qualify for up to ${money(incAmt)} more, counted above. Your income as a share of your area's median.`
+      : "Pick your range to count an income-based rebate, worth up to $8,000.";
     const row = (k, a, b, d, on) => `<tr class="${on ? "on" : ""}"><td>${k}</td><td>${a}</td><td>${b}</td><td class="diff">${d}</td></tr>`;
     const dlt = (x, y, fmt) => { const v = x - y; return v === 0 ? "—" : fmt(v); };
     $("rebCmp").innerHTML = [

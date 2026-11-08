@@ -397,13 +397,10 @@ details.fold .fs{font-size:13px}
         <h3 style="margin-top:10px">Describe your home</h3>
         <p class="muted" style="font-size:14px;margin-top:4px">Change anything that's different for you. Fields you don't touch keep the typical value.</p>
         <div class="form-grid">
-          <div class="f"><label for="htype">Home type <span class="src" data-src="homeType"></span></label><select id="htype"></select></div>
           <div class="f"><label for="sbin">Home size (sq ft) <span class="src" data-src="sizeBin"></span></label><select id="sbin"></select></div>
           <div class="f full"><p class="hint muted" id="binNote"></p></div>
           <div class="f full" id="resRef" aria-live="polite"></div>
           <div class="f"><label for="heat">Heating today <span class="src" data-src="currentHeat"></span></label><select id="heat"></select></div>
-          <div class="f full"><span class="lbl" id="envL">How well does it hold heat? <span class="src" data-src="envelope"></span></span>
-            <div class="seg" role="group" aria-labelledby="envL" id="envSeg"></div></div>
           <div class="f"><label for="tstat">Thermostat in winter (°F) <span class="src" data-src="thermostatF"></span></label><input id="tstat" type="number" min="55" max="78" step="1"></div>
           <div class="f full"><span class="lbl">Smart meter <span class="src" data-src="timeOfUse"></span></span>
             <label class="check"><input type="checkbox" id="tou"> I already have a smart meter (time-of-use rate)</label>
@@ -479,7 +476,10 @@ details.fold .fs{font-size:13px}
       <div class="whatif-row">
         <div><p class="wl">Rebates</p>
           <div class="seg" role="group" aria-label="Rebates on or off" id="rebSeg"><button data-reb="1">With rebates</button><button data-reb="0">Without rebates</button></div>
-          <p class="muted wn" id="rebLede"></p></div>
+          <p class="muted wn" id="rebLede"></p>
+          <p class="wl" style="margin-top:14px" id="incL">Income-based rebate: your income vs. area median</p>
+          <div class="seg seg3" role="group" aria-labelledby="incL" id="incSeg"><button data-inc="none">Over 150%</button><button data-inc="partial">80–150%</button><button data-inc="full">Under 80%</button></div>
+          <p class="muted wn" id="incLede"></p></div>
         <div><p class="wl">Smart meter</p>
           <div class="seg" role="group" aria-label="Smart meter on or off" id="meterSeg"><button data-meter="0">Heat pump only</button><button data-meter="1">Heat pump + smart meter</button></div>
           <p class="muted wn" id="meterLede"></p></div>

@@ -75,3 +75,5 @@ To filter by workstream: search the page for `| UI |`, `| Model |`, `| Data |` o
 | 2026-11-08 | repo | UI | Reworded "Cleaner heat" card heading and body (no gas-price framing) | Claude, for Gavin | this push | D-024 |
 | 2026-11-08 | repo | UI | Removed citation markers from the page; added docs/REFERENCES.md | Claude, for Gavin | this push | D-027 |
 | 2026-11-08 | repo | UI | Synced results page across cities: removed size picker, same headline form, same fold title | Claude, for Gavin | this push | D-028 |
+| 2026-11-08 | repo | UI | Added income-based rebate toggle (apply_rebate.py tiers); model-v1 accepts incomeUsd | Claude, for Gavin | this push | D-029 |
+| 2026-11-08 | repo | UI | Removed home type dropdown and heat-holding input from the home page | Claude, for Gavin | this push | D-030 |

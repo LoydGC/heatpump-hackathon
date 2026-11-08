@@ -32,7 +32,8 @@
     const inst = installed(sizeK, A);
     const rebate = sizeK ? (rec.centerpoint_rule ? A.rebate_xcel_usd + A.rebate_centerpoint_usd : A.rebate_xcel_usd) : 0;
     const credit = sizeK ? Math.max(0, inst - rebate - rec.up_front) : 0;   // AC credit scenario, backed out of up_front
-    const rebateUsed = sc.rebatesOn ? rebate : 0;
+    const incomeUsd = sc.rebatesOn && sizeK ? Math.max(0, Math.min(sc.incomeUsd || 0, inst - rebate)) : 0;   // income-based rebate, capped at the installed cost
+    const rebateUsed = sc.rebatesOn ? rebate + incomeUsd : 0;
     const net = sizeK ? inst - rebateUsed - credit : 0;
     const annualCost = rec.annual_cost, annualCo2Kg = rec.annual_co2_t * 1000;
     const save = baseCost - annualCost;
