@@ -14,6 +14,9 @@
   const blank = () => ({ regionId: null, maxStep: 0, overrides: {}, priority: 0.5, prioSet: false, sizeTons: null, usedTypical: true, rebatesOn: true, cold: false, acCredit: false });
   let state = blank();
   try { const s = JSON.parse(sessionStorage.getItem("hp-wizard")); if (s && (s.regionId === null || REGIONS[s.regionId])) state = Object.assign(blank(), s); } catch (e) {}
+  // A saved or tampered state can't unlock pages: no region means step 1 only; never past the last page.
+  state.maxStep = Math.max(0, Math.min(+state.maxStep || 0, 4));
+  if (!state.regionId) state.maxStep = 0;
   const save = () => { try { sessionStorage.setItem("hp-wizard", JSON.stringify(state)); } catch (e) {} };
   let current = 0;
 
@@ -134,7 +137,7 @@
 
   // ---------- Navigation ----------
   function go(i, push = true) {
-    i = Math.max(0, Math.min(i, state.maxStep));
+    i = Math.max(0, Math.min(Number.isInteger(i) ? i : 0, state.regionId ? state.maxStep : 0));
     current = i;
     document.querySelectorAll(".step").forEach((s, k) => s.classList.toggle("active", k === i));
     const navI = Math.min(i, 3); // the rebates page lives under step 4
