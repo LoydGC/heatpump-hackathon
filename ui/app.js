@@ -596,7 +596,7 @@
       "How long will the install take, and is a permit and inspection included?",
       "Can I get itemized quotes from at least two other installers to compare?"
     ];
-    const docs = ["Photo ID and proof you own the home", "Recent electric bill (and gas bill if you use gas) with account numbers", "Recent bill or delivery receipt for oil, propane or other fuel", "Photos of your current furnace or boiler, its nameplate, and your electrical panel", "Home age, floor plan or square footage, and notes on rooms that are too hot or cold", "Any past energy audit, insulation or air-sealing invoices", "Income documents, if you may qualify for income-based rebates", ...rb.paperwork.filter(p => !/income/i.test(p))];
+    const docs = ["Photo ID and proof you own the home", "Recent electric bill (and gas bill if you use gas) with account numbers", "Recent bill or delivery receipt for oil, propane or other fuel", "Photos of your current furnace or boiler, its nameplate, and your electrical panel", "Floor plan or square footage, and notes on rooms that are too hot or cold", "Any past energy audit, insulation or air-sealing invoices", "Income documents, if you may qualify for income-based rebates", ...rb.paperwork.filter(p => !/income/i.test(p))];
     const progs = rb.programs.map(p => `<tr><td><b>${esc(p.name)}</b><br><span style="font-size:9pt">${esc(p.level)}</span></td><td>${stat(p.status)}</td><td>${esc(p.amount)}${p.url ? `<br><span style="font-size:8.5pt;color:#555">${esc(p.url)}</span>` : ""}</td></tr>`).join("");
 
     $("report").innerHTML = `

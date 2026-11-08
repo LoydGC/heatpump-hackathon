@@ -159,6 +159,7 @@ v1 placeholders (from `model/README.md`): installed cost curve, rebates (verify)
 - Options: home type `sfd`/`sfa` (others disabled); size bins fine = 500-749, 750-999, 1000-1499, 1500-1999, 2000-2499, 2500-2999, 3000-3999; coarse = 0-1499 (excl. <500), 1500-2499, 2500-3999. 0-499 and 4000+ dropped by Gavin 2026-11-08.
 - `ui/resstock.js` (`window.RESSTOCK`) is generated: `python3 tools/build_resstock_ui.py <datasets/resstock dir> ui/resstock.js`. Per city (Minneapolis, Boston, Fairbanks) x type x bin: ResStock model count, weighted mean sq ft, weighted median kWh, therms, propane/oil kWh. Regenerate if the extracts change.
 - Model needs: v1 ignores these (fixed house). When the end model takes home type and size, read `inputs.home.homeType/sizeBin/floorAreaSqft`; `resstockRef` is a reference figure, never model output.
+- Vintage is deliberately not an input, a lookup key or displayed anywhere in the UI (Gavin 2026-11-08); heat loss = size x envelope factor only.
 - Thin (<5) cells are used silently; empty cells are disabled and the UI falls back to the nearest non-empty bin. Montréal has no ResStock data.
 
 ## Infra
