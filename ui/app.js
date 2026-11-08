@@ -87,12 +87,12 @@
   function refHtml(r, sel) {
     if (!hasRS(r)) return `<b>No ResStock reference for ${r.name}.</b> ResStock covers US homes only; ${r.name} uses placeholder values.`;
     const c = sel.cell, label = `${typeLabel(sel.type).split(" (")[0].toLowerCase()}, ${binLabel(sel.bin)} sq ft`;
-    if (!c || !c.n) return `<b>No ResStock homes</b> match that choice in ${r.name}.`;
+    if (!c || !c.n) return `<b>No ResStock reference</b> for that choice in ${r.name}.`;
     const fuel = [`${c.kwh.toLocaleString()} kWh electricity`];
     if (c.therms) fuel.push(`${c.therms.toLocaleString()} therms gas`);
     if (c.otherKwh) fuel.push(`${c.otherKwh.toLocaleString()} kWh of propane or fuel oil`);
-    return `<b>ResStock reference, not our model:</b> the median ${label} home in ${r.name} (${c.n} ResStock home${c.n > 1 ? "s" : ""}) uses about ${fuel.join(", ")} a year, all uses included.` +
-      (c.n < 5 ? " <b>Only a few homes in this group, so treat it as rough.</b>" : "");
+    return `<b>ResStock reference, not our model:</b> the median ${label} home in ${r.name} uses about ${fuel.join(", ")} a year, all uses included.` +
+      "";
   }
 
   // Typical (synthetic) home + regional prices, then the user's overrides on top.
@@ -283,7 +283,7 @@
     $("htype").value = sel.type;
     $("sbin").innerHTML = lvlBins.map(b => {
       const c = cellOf(r, sel.type, sel.lvl, b), n = c ? c.n : null;
-      const tag = !hasRS(r) ? "" : n === 0 ? " – no ResStock homes here" : n < 5 ? ` – only ${n} ResStock home${n > 1 ? "s" : ""}` : ` – ${n} ResStock homes`;
+      const tag = hasRS(r) && n === 0 ? " – not available here" : "";
       return `<option value="${b}"${n === 0 ? " disabled" : ""}${b === sel.bin ? " selected" : ""}>${binLabel(b)} sq ft${tag}</option>`;
     }).join("");
     document.querySelectorAll("#blSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.lvl === sel.lvl));
