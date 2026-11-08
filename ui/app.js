@@ -409,7 +409,7 @@
       });
     } else {
       pts.push({ x: out.lifetime.todayCo2Kg / 1000, y: out.lifetime.todayCostUsd, current: !out.sizeTons, label: "Keep today's heat" });
-      out.sizes.forEach(s => { const cur = out.nb ? s.profile === out.nb.profile : s.sizeTons === out.sizeTons, name = `${s.sizeTons}-ton heat pump`;
+      out.sizes.forEach(s => { const cur = out.nb ? !out.nb.keepFurnace && s.profile === out.nb.profile : s.sizeTons === out.sizeTons, name = `${s.sizeTons}-ton heat pump`;
         pts.push({ x: s.lifetimeCo2Kg / 1000, y: s.lifetimeCostUsd, current: cur, label: cur ? name : `${name}: ${dollars(s.lifetimeCostUsd)}, ${t(s.lifetimeCo2Kg / 1000)} t CO₂` }); });
     }
     $("trCard").hidden = pts.length < 2;
@@ -459,7 +459,7 @@
       b.onclick = () => { state.income = b.dataset.inc; save(); renderResults(); };
     });
     $("rebTotal").innerHTML = state.income !== "none"
-      ? `Income-based rebate: ${money(w.upfront.rebatesUsd)}<small>${w.sizeTons ? `Your upfront cost comes down to ${money(w.upfront.netUsd)}.` : "It comes off the cost of a heat pump. At this setting of the dial we suggest keeping your gas furnace, so nothing is counted yet."}</small>`
+      ? `Income-based rebate: ${money(w.upfront.rebatesUsd)}<small>${w.sizeTons ? `Your upfront cost comes down to ${money(w.upfront.netUsd)}.` : "It comes off the cost of a heat pump. At this setting of the dial we suggest keeping your gas furnace; the figures show the best heat pump for comparison."}</small>`
       : `Income-based rebate: none<small>Choose a range above if your household qualifies.</small>`;
     $("incBox").hidden = $("whatIf").hidden = false;
     $("incLede").textContent = state.income === "full" ? "Income at or under 80% of area median: the full rebate, up to $8,000, counted above."

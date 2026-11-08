@@ -99,33 +99,38 @@
       const same = rows.filter(r => Math.abs(r.p.nominalTons - inp.sizeTons) < 0.05);
       if (same.length) chosen = same.reduce((b, r) => r.grand < b.grand ? r : b);
     }
+    // No heat pump beats the furnace at this carbon price: the suggestion is to keep it (sizeTons 0), but the page still draws the
+    // best heat pump (lowest grand cost) against the furnace so both lines show.
+    const alt = chosen ? null : rows.filter(r => r.p.nominalTons > 0).reduce((b, r) => !b || r.grand < b.grand ? r : b, null);
+    const shown = chosen || alt;
     const mkMonthly = c => base.monthly.map((m, i) => ({ today: { costUsd: m.costUsd, co2Kg: m.co2Kg },
       heatPump: c ? { costUsd: c.s.monthly[i].costUsd, co2Kg: c.s.monthly[i].co2Kg } : { costUsd: m.costUsd, co2Kg: m.co2Kg } }));
     const heatKWh = home.demandBtu.reduce((a, b) => a + b, 0) * 10 / BTU_PER_KWH, peakKw = Math.max(...home.demandBtu) * 10 / BTU_PER_KWH;
     const sRow = c => c ? c.s : base;
-    const s = sRow(chosen), life = LIFE;
-    const upfront = chosen ? { installedUsd: chosen.cap, rebatesUsd: chosen.reb, netUsd: chosen.net } : { installedUsd: 0, rebatesUsd: 0, netUsd: 0 };
+    const s = sRow(shown), life = LIFE;
+    const upfront = shown ? { installedUsd: shown.cap, rebatesUsd: shown.reb, netUsd: shown.net } : { installedUsd: 0, rebatesUsd: 0, netUsd: 0 };
     const saveYr = base.usd - s.usd;
     return {
       schemaVersion: 1, isPlaceholder: false, modelVersion: "model.ipynb (Patrick O'Toole), run in the browser",
       recommendedSizeTons: winner ? r1(winner.p.nominalTons) : 0, sizeTons: chosen ? r1(chosen.p.nominalTons) : 0,
-      capacityKwAt5F: chosen ? interp(chosen.p.t, chosen.p.cap, 5) / BTU_PER_KWH : null, designLoadKw: peakKw, lifetimeYears: life,
+      capacityKwAt5F: shown ? interp(shown.p.t, shown.p.cap, 5) / BTU_PER_KWH : null, designLoadKw: peakKw, lifetimeYears: life,
       annual: {
         today: { costUsd: base.usd, co2Kg: base.kg, heatKWh },
-        heatPump: { costUsd: s.usd, co2Kg: s.kg, electricityKWh: s.kwh, heatPumpShare: chosen ? s.coverage : 0 }
+        heatPump: { costUsd: s.usd, co2Kg: s.kg, electricityKWh: s.kwh, heatPumpShare: shown ? s.coverage : 0 }
       },
-      monthly: mkMonthly(chosen), upfront,
-      paybackYears: chosen && saveYr > 0 ? chosen.net / saveYr : null,
+      monthly: mkMonthly(shown), upfront,
+      paybackYears: shown && saveYr > 0 ? shown.net / saveYr : null,
       lifetime: { costUsd: upfront.netUsd + life * s.usd, co2Kg: life * s.kg, todayCostUsd: life * base.usd, todayCo2Kg: life * base.kg },
       sizes: rows.map(r => ({ sizeTons: r1(r.p.nominalTons), lifetimeCostUsd: r.net + life * r.s.usd, lifetimeCo2Kg: life * r.s.kg, heatPumpShare: r.s.coverage,
                               paybackYears: r.opSave > 0 ? r.net / r.opSave : null, profile: r.p.id })),
       sweep,
-      nb: { carbonUsdPerTonne: price, rebateType: type, buildingId: home.buildingId, homeAreaSqft: home.areaSqft, profile: chosen ? chosen.p.id : null,
-            brand: chosen ? chosen.p.brand : null, grandCostUsd: chosen ? chosen.grand : baseGrand, baselineGrandCostUsd: baseGrand },
+      nb: { carbonUsdPerTonne: price, rebateType: type, buildingId: home.buildingId, homeAreaSqft: home.areaSqft, profile: shown ? shown.p.id : null, keepFurnace: !chosen, altTons: alt ? r1(alt.p.nominalTons) : null,
+            brand: shown ? shown.p.brand : null, grandCostUsd: chosen ? chosen.grand : baseGrand, baselineGrandCostUsd: baseGrand },
       notes: [
         "Runs the team's model.ipynb: a real ResStock home's hourly heating load and real Minneapolis weather, matched to AHRI-listed cold-climate heat pumps.",
         "The heat pump covers what it can at each outdoor temperature and your current system covers the rest.",
-        "Costs include a carbon price of $" + price + " per tonne; installed cost and rebates follow the notebook's formulas."
+        "Costs include a carbon price of $" + price + " per tonne; installed cost and rebates follow the notebook's formulas.",
+        ...(chosen ? [] : ["At this carbon price keeping your current heat is cheapest overall, so the charts compare it with the best heat pump option."])
       ]
     };
   }
