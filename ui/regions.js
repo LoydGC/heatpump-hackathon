@@ -69,6 +69,8 @@
 
 
   // ---------- Step 2 content ----------
+  // CARD RULE: kicker + heading must read as one sentence ("Big savings from replacing / Electric heat or propane"),
+  // and the body must directly support the heading. A card may not promise what its body does not show.
   // Every claim carries a tag: "research" (a cited study), "data" (the team's data pack, computed),
   // "reasoning" (our own inference, shown as such) or "gap" (not researched / not enough evidence).
   // Numbers in `src` index SOURCES below.
@@ -97,11 +99,11 @@
       headline: "Minneapolis is a very cold climate that heat pumps can handle, with backup.",
       design: { text: "−9 °F", label: "a very cold night (1-in-250 hours)", src: [7] },
       cards: [
-        { k: "Heat pumps excel at", h: "Most of your heating hours", tag: "data", src: [7, 3],
+        { k: "In your climate", h: "Most winter hours suit a heat pump", tag: "data", src: [7, 3],
           p: "In the team's typical-year weather file, about 90% of the heat a home needs falls on hours at or above 5 °F, and about 73% at or above 17 °F. Those are the temperatures where cold-climate units publish their ratings." },
-        { k: "Your climate is ideal for", h: "Replacing electric heat or propane", tag: "research", src: [2, 1],
+        { k: "Big savings from replacing", h: "Electric heat or propane", tag: "research", src: [2, 1],
           p: "A Minnesota field study of cold-climate heat pumps found about 55% energy-cost savings against electric resistance heat and about 40% against propane. Its guidance: size the unit to carry the whole home down to about 10 °F, and use backup below that." },
-        { k: "Where we expect less benefit", h: "Homes already heated with natural gas", tag: "reasoning", src: [7],
+        { k: "Little or no savings from replacing", h: "Natural gas", tag: "reasoning", src: [7],
           p: "Natural gas is cheap here: electricity costs about 4.5 times as much as gas per unit of heat. A heat pump delivering 2 to 3 units of heat per unit of electricity would likely raise the bill. It can still cut carbon, because the grid break-even is around 2.3 units. This is our own arithmetic from the team's price and emissions data; the Minnesota studies covered homes without gas, so we found no field result for gas-heated homes." }
       ],
       notes: [
@@ -115,11 +117,11 @@
       headline: "Boston is a good fit for a heat pump. What you replace decides the savings.",
       design: { text: "8 °F", label: "a very cold night (1-in-250 hours)", src: [8] },
       cards: [
-        { k: "Heat pumps excel at", h: "Replacing electric resistance heat", tag: "research", src: [4, 5],
+        { k: "In your climate", h: "Cold nights are within what heat pumps handle", tag: "reasoning", src: [8, 3, 2],
+          p: "Boston's coldest nights are around 8 °F. Cold-climate heat pumps are rated down to 5 °F and keep working well below that." },
+        { k: "Big savings from replacing", h: "Electric resistance heat", tag: "research", src: [4, 5],
           p: "A Massachusetts cost study found heat pumps about three times as efficient as electric resistance heat, with a payback near four years even without incentives. A Harvard study put the yearly savings for a typical electric-heated home at up to $2,900." },
-        { k: "Your climate is ideal for", h: "Handling the cold", tag: "reasoning", src: [8, 3, 2],
-          p: "Boston's coldest nights are around 8 °F. Cold-climate heat pumps are rated down to 5 °F and keep working well below that, so they can handle a typical Boston winter." },
-        { k: "Where we expect less benefit", h: "Homes heated with natural gas or oil", tag: "research", src: [5, 4],
+        { k: "Little or no savings from replacing", h: "Natural gas or oil", tag: "research", src: [5, 4],
           p: "The Harvard study found switching from natural gas typically raises yearly bills by about $300 to $500. For oil, bills fall only modestly, and the Synapse study put payback past 25 years without incentives. Rebates, cooling savings and a lower-priced electricity plan can change that." }
       ],
       notes: [
@@ -133,12 +135,12 @@
       design: null,
       specialist: "Fairbanks winters run far colder than the conditions most heat pump research covers. The published evidence we found says significant data gaps exist for very cold environments and that sizing and operation need careful attention. We can show a rough estimate, but please treat it as a starting point and talk to a local installer or the Alaska Center for Energy and Power before spending money.",
       cards: [
-        { k: "Heat pumps excel at", h: "Spring, fall and milder winter days", tag: "reasoning", src: [1],
+        { k: "In your climate", h: "Mild days suit a heat pump", tag: "reasoning", src: [1],
           p: "Newer cold-climate units run well at moderate temperatures, and can keep running down to about 0 to −13 °F. Fairbanks has many months in that range." },
-        { k: "Your climate is ideal for", h: "Not enough evidence", tag: "gap", src: [6],
-          p: "Alaska field and cold-chamber work shows heat pumps can stay efficient in very cold climates if used in the right situations and the right way, but gives no simple rule." },
-        { k: "Where we expect less benefit", h: "Deep winter", tag: "reasoning", src: [6, 1],
-          p: "In the coldest weeks, outdoor temperatures can drop well below what most units are rated for. Expect your current heat to carry much of the load then." }
+        { k: "On the coldest days", h: "Your current heat does most of the work", tag: "reasoning", src: [6, 1],
+          p: "In the coldest weeks, outdoor temperatures can drop well below what most units are rated for. Expect your current heat to carry much of the load then." },
+        { k: "Before you decide", h: "A specialist should check your home", tag: "gap", src: [6],
+          p: "Alaska field and cold-chamber work shows heat pumps can stay efficient in very cold climates if used in the right situations and the right way, but gives no simple rule." }
       ],
       notes: [{ tag: "gap", text: "Prices, rebates, grid carbon and climate numbers for Fairbanks in the results are rough placeholders.", src: [] }]
     }
