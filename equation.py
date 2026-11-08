@@ -3,7 +3,7 @@
 
 def capital_cost(size_kbtuh):
     """Installed cost ($) of a heat pump. size_kbtuh = nominal capacity in kBtu/h (valid 18-60)."""
-    return 68.09 * size_kbtuh + 5100
+    return 1196.1 * size_kbtuh + 768.87
 
 
 if __name__ == "__main__":
