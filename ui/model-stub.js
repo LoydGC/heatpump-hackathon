@@ -58,8 +58,8 @@
       heatPump: { costUsd: sum("heatPump", "costUsd"), co2Kg: sum("heatPump", "co2Kg"), electricityKWh: elec,
                   heatPumpShare: load ? hpHeat / load : 0 }
     };
-    const installedUsd = sizeTons * inp.costs.installedUsdPerTon;
-    const rebatesUsd = Math.min(inp.costs.rebatesUsd, installedUsd);
+    const installedUsd = sizeTons > 0 ? 1075.2 * sizeTons + 1193 : 0;   // model.ipynb capital_cost(tons)
+    const rt = inp.costs.rebateType, rebatesUsd = rt === 'full' ? Math.min(installedUsd, 8000) : rt === 'partial' ? Math.min(installedUsd / 2, 4000) : 0;   // model.ipynb get_rebate
     const netUsd = installedUsd - rebatesUsd;
     const save = annual.today.costUsd - annual.heatPump.costUsd;
     const life = inp.costs.lifetimeYears;

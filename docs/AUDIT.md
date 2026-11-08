@@ -87,3 +87,4 @@ To filter by workstream: search the page for `| UI |`, `| Model |`, `| Data |` o
 | 2026-11-08 | repo | UI | Rebates card with totals; removed More scenarios (winter, AC credit) | Claude, for Gavin | this push | D-034 |
 | 2026-11-08 | repo | UI | Fixed income rebate showing $0 when no heat pump is suggested | Claude, for Gavin | this push | D-034 |
 | 2026-11-08 | repo | UI | Rebates card shows only the income-based rebate | Claude, for Gavin | this push | D-034 |
+| 2026-11-08 | repo | UI | Renamed brand to ResiOpt (header, page title, report) | Claude, for Gavin | this push | D-035 |

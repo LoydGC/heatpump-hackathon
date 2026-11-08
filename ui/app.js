@@ -8,20 +8,23 @@
   const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const INSTALLED_USD_PER_TON = 5500;   // placeholder
   const LIFETIME_YEARS = 15;            // data.zip analysis_years
+  // Insulation slider: levels sit on the notebook's unified-R scale (model.ipynb calculate_unified_r); spoken equivalents below.
+  const INS_LEVELS = [2.5, 3.5, 4.5, 5], INS_LABELS = ["Not well", "Fair", "Decent", "Good"];
+  const ENV_R = { drafty: 2.5, average: 3.5, tight: 5 }, INS_W = { 2.5: 0.12, 3.5: 0.095, 4.5: 0.075, 5: 0.055 };   // stand-in heat loss, W per F per sq ft
   const PRICE_KEYS = ["electricityUsdPerKWh", "fuelUsdPerUnit", "rebatesUsd"];
 
   // ---------- State ----------
   // Income-based rebate tiers (HEAR as in apply_rebate.py): share of area median income -> rebate cap in dollars.
   const INCOME_USD = { none: 0, partial: 4000, full: 8000 };
-  const incomeUsd = () => state.regionId === "minneapolis" ? INCOME_USD[state.income] : 0;   // income tiers apply to Minneapolis only
-  const blank = () => ({ regionId: null, maxStep: 0, overrides: {}, priority: 0.5, prioSet: false, sizeTons: null, usedTypical: true, rebatesOn: true, income: "none", cold: false, acCredit: false });
+  const incomeUsd = () => INCOME_USD[state.income];   // used by model v1 only; other models compute the rebate from the notebook rule (rebateType)
+  const blank = () => ({ regionId: null, maxStep: 0, overrides: {}, priority: 0.5, prioSet: false, sizeTons: null, usedTypical: true, rebatesOn: true, income: "partial", cold: false, acCredit: false });
   let state = blank();
   try { const s = JSON.parse(sessionStorage.getItem("hp-wizard")); if (s && (s.regionId === null || REGIONS[s.regionId])) state = Object.assign(blank(), s); } catch (e) {}
   // A saved or tampered state can't unlock pages: no region means step 1 only; never past the last page.
   state.maxStep = Math.max(0, Math.min(+state.maxStep || 0, 4));
   if (!state.regionId) state.maxStep = 0;
   delete state.overrides.homeType; delete state.overrides.envelope; delete state.overrides.timeOfUse;  // home type and heat-holding inputs were removed from the page
-  if (!INCOME_USD.hasOwnProperty(state.income)) state.income = "none";
+  if (!INCOME_USD.hasOwnProperty(state.income)) state.income = "partial";   // model.ipynb rebate_type default
   state.cold = false; state.acCredit = false;   // the model scenarios (cold winter, AC credit) were removed
   state.rebatesOn = true;               // standard utility rebates are always counted; only the income-based one is a control
   state.sizeTons = null;                // no size picker any more; the suggestion follows the dial
@@ -32,12 +35,15 @@
 
   // ---------- Model v1 (Minneapolis) ----------
   const V1 = window.HeatPumpModelV1;
-  const DEFAULT_LAM_IDX = 10;                       // $500/t: about where the model's heat pump starts to win
+  const DEFAULT_LAM_IDX = 8;                        // $300/t: the notebook's default carbon price (dollars_per_ton_co2)
   const DIAL_STEPS = 12;                            // 13 slider positions = the model's lambda grid
+  const carbonUsd = () => Number.isFinite(state.carbonUsd) ? Math.min(300, Math.max(0, state.carbonUsd)) : 300;   // $ per tonne CO2, Patrick's notebook default 300
   const dialIdx = () => state.prioSet ? Math.round(state.priority * DIAL_STEPS) : (isV1(region()) ? DEFAULT_LAM_IDX : DIAL_STEPS / 2);  // stand-in default = balanced
-  const isV1 = r => !!r && r.id === V1.regionId && V1.loaded();
+  const USE_V1 = false;   // Gavin 2026-11-08: Sharvi's v1 is early-stage and non-authoritative; where models conflict, Patrick's notebook model wins
+  const NB = window.HeatPumpModelNB;   // Patrick's notebook model, used for Minneapolis
+  const isV1 = r => !!r && !!NB && r.id === NB.regionId;   // name kept: 'the city has a carbon-dollar dial and a keep-furnace answer'
   async function runModel(inp) {
-    if (inp.region.id === V1.regionId && V1.loaded()) {
+    if (USE_V1 && inp.region.id === V1.regionId && V1.loaded()) {
       const sc = inp.scenario;
       return V1.run(inp, { tariff: inp.prices.timeOfUse ? "tou" : "flat", weather: sc.coldWinter ? "tmy3_cold" : "tmyx_main",
                            credit: sc.acCredit ? 4000 : 0, controller: "smart", lamIdx: sc.lamIdx, rebatesOn: sc.rebatesOn, incomeUsd: sc.incomeUsd });
@@ -69,9 +75,9 @@
   const cellOf = (r, type, lvl, bin) => (RS.cells[r.id] || {})[`${type}|${lvl}|${bin}`] || null;
   const hasRS = r => !!RS.cells[r.id];
   function selection(r, ov) {
-    const type = ov.homeType || "sfd", lvl = "fine";  // 7 ResStock size bins only (the 4-group toggle was removed)
+    const type = ov.homeType || "sfd", lvl = "fine", own = ov.floorAreaSqft > 0 ? ov.floorAreaSqft : null;  // 7 ResStock size bins only (the 4-group toggle was removed)
     const list = binList(lvl), dflt = binFor(lvl, r.typicalHome.floorAreaSqft);
-    const want = list.includes(ov.sizeBin) ? ov.sizeBin : dflt;
+    const want = own ? binFor(lvl, own) : list.includes(ov.sizeBin) ? ov.sizeBin : dflt;
     let bin = want;
     if (hasRS(r) && !(cellOf(r, type, lvl, want) || {}).n) {
       const wi = list.indexOf(want);
@@ -79,7 +85,7 @@
       if (ok.length) bin = ok[0][0];
     }
     const cell = cellOf(r, type, lvl, bin), i = list.indexOf(bin);
-    return { type, lvl, want, bin, fellBack: bin !== want, cell, sqft: cell && cell.sqft ? cell.sqft : BIN_MID[lvl][i] };
+    return { type, lvl, want, bin, fellBack: bin !== want, cell, sqft: own || r.typicalHome.floorAreaSqft || (cell && cell.sqft ? cell.sqft : BIN_MID[lvl][i]) };
   }
   const typeLabel = id => (HOME_TYPES.find(t => t.id === id) || HOME_TYPES[0]).label;
   const selText = sel => `${typeLabel(sel.type).split(" (")[0].toLowerCase()}, ${binLabel(sel.bin)} sq ft`;
@@ -95,9 +101,10 @@
       "";
   }
 
+  const gasOnly = r => r && r.id === "minneapolis";   // the notebook models a home heated by natural gas today
   // Typical (synthetic) home + regional prices, then the user's overrides on top.
   function typical(r, ov) {
-    const heat = ov.currentHeat || r.typicalHome.currentHeat;
+    const heat = gasOnly(r) ? "gas" : ov.currentHeat || r.typicalHome.currentHeat;   // Minneapolis: natural gas today, no input (Gavin 2026-11-08)
     const sel = selection(r, ov), dsel = selection(r, {});
     const sqft = sel.sqft;
     const env = ov.envelope || r.typicalHome.envelope;
@@ -105,12 +112,13 @@
       floorAreaSqft: sqft,
       homeType: dsel.type, binLevel: dsel.lvl, sizeBin: dsel.bin,
       envelope: r.typicalHome.envelope,
-      currentHeat: r.typicalHome.currentHeat,
+      currentHeat: gasOnly(r) ? "gas" : r.typicalHome.currentHeat,
       thermostatF: r.typicalHome.thermostatF,
-      heatLossWPerF: Math.round(sqft * ENVELOPES[env].wPerFPerSqft / 5) * 5,
+      insulationR: ENV_R[r.typicalHome.envelope],
+      heatLossWPerF: Math.round(sqft * INS_W[ov.insulationR ?? ENV_R[env]] / 5) * 5,
       electricityUsdPerKWh: r.electricityUsdPerKWh,
       fuelUsdPerUnit: heat === "electric" ? (ov.electricityUsdPerKWh ?? r.electricityUsdPerKWh) : r.fuelPrices[heat],
-      rebatesUsd: r.rebatesUsd + (heat === "gas" && r.rebateIfGasBackupUsd ? r.rebateIfGasBackupUsd : 0),
+      rebatesUsd: 0,   // rebates follow the notebook rule: none / partial / full (see rebateType)
       installedUsdPerTon: INSTALLED_USD_PER_TON,
       timeOfUse: false
     };
@@ -119,6 +127,7 @@
     const r = region(), d = typical(r, state.overrides);
     const h = Object.assign({}, d, state.overrides);
     const sel = selection(r, state.overrides);   // home type and size come from the dropdowns; sq ft is derived
+    if (gasOnly(r)) h.currentHeat = "gas";
     h.floorAreaSqft = d.floorAreaSqft; h.homeType = sel.type; h.binLevel = sel.lvl; h.sizeBin = sel.bin;
     return h;
   }
@@ -129,17 +138,17 @@
     return {
       schemaVersion: 1,
       region: { id: r.id, name: r.full, designTempF: r.designTempF, monthlyMeanF: r.monthlyMeanF, monthlySdF: r.monthlySdF, dataStatus: r.dataStatus },
-      home: { source: Object.keys(state.overrides).length ? "custom" : "typical", floorAreaSqft: h.floorAreaSqft, envelope: h.envelope,
+      home: { source: Object.keys(state.overrides).length ? "custom" : "typical", floorAreaSqft: h.floorAreaSqft, envelope: h.envelope, insulationR: h.insulationR,
               homeType: h.homeType, sizeBin: h.sizeBin, binLevel: h.binLevel,
               resstockRef: (c => c && c.n ? { n: c.n, medianKWh: c.kwh, medianTherms: c.therms, medianOtherFuelKWh: c.otherKwh } : null)(selection(r, state.overrides).cell),
               heatLossWPerF: h.heatLossWPerF, thermostatF: h.thermostatF, currentHeat: h.currentHeat },
       prices: { electricityUsdPerKWh: h.electricityUsdPerKWh, fuelUsdPerUnit: fuelPrice, fuelUnit: f.unit, timeOfUse: tou == null ? !!h.timeOfUse : tou,
                 fuelUsdPerKWhHeat: fuelPrice / (f.kwh * f.eff) },
       emissions: { gridKgCo2PerKWh: r.gridKgCo2PerKWh, fuelKgCo2PerUnit: fuelCo2, fuelKgCo2PerKWhHeat: fuelCo2 / (f.kwh * f.eff) },
-      costs: { installedUsdPerTon: h.installedUsdPerTon, rebatesUsd: (rebatesOn ? h.rebatesUsd : 0) + incomeUsd(), lifetimeYears: LIFETIME_YEARS },
+      costs: { installedUsdPerTon: h.installedUsdPerTon, rebatesUsd: 0, rebateType: rebatesOn ? state.income : "none", lifetimeYears: LIFETIME_YEARS },
       priority: state.prioSet ? state.priority : (isV1(r) ? DEFAULT_LAM_IDX / DIAL_STEPS : state.priority),
       sizeTons: sizeTons ?? null,
-      scenario: { coldWinter: state.cold, acCredit: state.acCredit, rebatesOn, incomeUsd: incomeUsd(), lamIdx: lamIdx ?? dialIdx() }  // used by model v1
+      scenario: { coldWinter: state.cold, acCredit: state.acCredit, rebatesOn, incomeUsd: incomeUsd(), lamIdx: lamIdx ?? dialIdx(), carbonUsd: carbonUsd() }  // used by model v1
     };
   }
 
@@ -225,24 +234,25 @@
   const heatSel = $("heat");
   Object.entries(FUELS).forEach(([k, f]) => { const o = document.createElement("option"); o.value = k; o.textContent = f.label; heatSel.appendChild(o); });
   const FIELDS = [ // [inputId, key, parse]
-    ["heat", "currentHeat", String], ["tstat", "thermostatF", Number],
-    ["elec", "electricityUsdPerKWh", Number], ["fuelPrice", "fuelUsdPerUnit", Number], ["rebates", "rebatesUsd", Number],
-    ["costTon", "installedUsdPerTon", Number], ["ua", "heatLossWPerF", Number]
+    ["heat", "currentHeat", String], ["sqft", "floorAreaSqft", Number], ["tstat", "thermostatF", Number],
+    ["elec", "electricityUsdPerKWh", Number], ["fuelPrice", "fuelUsdPerUnit", Number],
+    ["ua", "heatLossWPerF", Number]
   ];
   function setOverride(key, val) {
     const r = region(), d = typical(r, state.overrides);
     if (key === "currentHeat") { delete state.overrides.fuelUsdPerUnit; delete state.overrides.rebatesUsd; }
-    if (key === "floorAreaSqft" || key === "envelope" || key === "homeType" || key === "sizeBin" || key === "binLevel") delete state.overrides.heatLossWPerF;
+    if (key === "floorAreaSqft" || key === "envelope" || key === "insulationR" || key === "homeType" || key === "sizeBin" || key === "binLevel") delete state.overrides.heatLossWPerF;
     if (val === "" || val == null || (typeof val === "number" && !isFinite(val)) || val === d[key]) delete state.overrides[key];
     else state.overrides[key] = val;
     state.sizeTons = null;
     renderHome(key); save();
   }
+  $("ins").addEventListener("input", e => setOverride("insulationR", INS_LEVELS[+e.target.value]));
+  $("income").addEventListener("change", e => { state.income = e.target.value; state.sizeTons = null; save(); });
   FIELDS.forEach(([id, key, parse]) => {
     $(id).addEventListener("change", e => setOverride(key, e.target.value === "" ? "" : parse(e.target.value)));
   });
   // Home type + size dropdowns (ResStock options)
-  $("sbin").addEventListener("change", e => setOverride("sizeBin", e.target.value));
 
   function renderHome(skipKey) {
     const r = region(); if (!r) return;
@@ -252,10 +262,11 @@
     const td = typical(r, {});
 
 
+    { const k = Math.max(0, INS_LEVELS.indexOf(h.insulationR)); $("ins").value = k; $("insVal").textContent = INS_LABELS[k]; }
+    $("income").value = state.income;
+    $("ua").closest(".f").hidden = isV1(r);
+    $("heat").closest(".f").hidden = gasOnly(r);   // the notebook model takes heating load from the matched ResStock home, not a heat-loss number
     FIELDS.forEach(([id, key]) => { if (key !== skipKey || id === "heat") $(id).value = h[key]; });
-    const sel = selection(r, state.overrides), lvlBins = binList(sel.lvl);
-    $("sbin").innerHTML = lvlBins.filter(b => !hasRS(r) || (cellOf(r, sel.type, sel.lvl, b) || {}).n)
-      .map(b => `<option value="${b}"${b === sel.bin ? " selected" : ""}>${binLabel(b)} sq ft</option>`).join("");
     $("fuelPriceL").textContent = h.currentHeat === "electric" ? "Fuel price (same as electricity)" : `${f.short[0].toUpperCase() + f.short.slice(1)} ($ per ${f.unit})`;
     $("fuelPrice").disabled = h.currentHeat === "electric";
     document.querySelectorAll("[data-src]").forEach(s => {
@@ -287,16 +298,17 @@
 
     $("h3").textContent = custom ? `Your heat pump report for your ${r.name} home` : `Heat pump report for a typical ${r.name} home`;
     const rsel = selection(r, state.overrides);
-    const v1 = out.v1, v1Failed = r.id === V1.regionId && !v1;
+    const v1 = out.v1, v1Failed = USE_V1 && r.id === V1.regionId && !v1;
 
 
     const a = out.annual, cut = a.today.co2Kg - a.heatPump.co2Kg, saveYr = a.today.costUsd - a.heatPump.costUsd;
     // One explicit suggestion for every city (no size picker); the dial on page 3 is the control.
     $("rSizeBox").hidden = true; document.querySelector(".reco").classList.add("single");
-    if (v1 && !out.sizeTons) {
+    if (isV1(r) && !out.sizeTons) {
       $("rReco").textContent = "Keep your gas furnace for now";
-    } else if (v1) {
-      $("rReco").textContent = `A ${out.sizeTons}-ton (${v1.sizeKbtuh},000 BTU/h) cold-climate heat pump`;
+    } else if (out.nb && out.nb.winnerJson && out.nb.isWinner) {   // the notebook's winner.json row is the suggestion
+      const W = out.nb.winnerJson;
+      $("rReco").textContent = `A ${W.nominal_tons.toFixed(2)}-ton (${Math.round(W.nominal_tons * 12)},000 BTU/h) cold-climate heat pump`;
     } else {
       $("rReco").textContent = `A ${out.sizeTons}-ton (${Math.round(out.sizeTons * 12)},000 BTU/h) cold-climate heat pump`;
     }
@@ -336,16 +348,21 @@
       ["", !out.sizeTons ? "CO₂ change per year" : cut >= 0 ? "CO₂ cut per year" : "CO₂ added per year", tonnes(cut), !out.sizeTons ? "no heat pump at this setting" : a.today.co2Kg ? `${pct(Math.abs(cut) / a.today.co2Kg)} ${cut >= 0 ? "less" : "more"} than today` : ""]
     ].map(([c, k, v, s]) => `<div class="tile ${c}"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join("");
 
-    $("lgNow2").textContent = "Keep " + f.short;
-    const yrs = Array.from({ length: life + 1 }, (_, y) => y);
-    HPCharts.lineChart($("chCum"), {
-      labels: yrs.map(String), xEvery: 5, ariaLabel: "Cumulative spending over time",
-      tipLabel: i => `After ${i} year${i === 1 ? "" : "s"}`,
-      series: [{ name: "Keep today's", color: cNow, values: yrs.map(y => y * a.today.costUsd) }, { name: "Heat pump", color: cHp, values: yrs.map(y => up.netUsd + y * a.heatPump.costUsd) }],
-      marker: out.paybackYears != null && out.paybackYears <= life ? { index: out.paybackYears, text: "Break even" } : null,
-      fmt: (v, tip) => tip ? money(v) : "$" + kFmt(v)
-    });
-    $("cumSub").textContent = `Upfront costs plus bills, by year`;
+    const nbw = out.nb && out.nb.winnerJson;
+    if (nbw) {   // Patrick's notebook: lead with grand_operating_savings (bills + carbon at the dial's price) and show the winner.json row
+      $("winnerFold").hidden = false;
+      const fx = (v, d = 0) => v == null ? "none" : Number(v).toLocaleString(undefined, { maximumFractionDigits: d, minimumFractionDigits: d });
+      $("winnerNote").textContent = out.nb.isWinner ? `Winner at $${out.nb.carbonUsdPerTonne} per tonne of CO₂: the heat pump with the lowest grand operating cost among those that save money.`
+        : `No heat pump has positive grand operating savings at $${out.nb.carbonUsdPerTonne} per tonne, so there is no winner. This is the lowest-cost heat pump, shown for comparison.`;
+      $("winnerTbl").innerHTML = [["machine_profile", nbw.machine_profile], ["nominal_tons", fx(nbw.nominal_tons, 2)], ["hp_coverage_pct", fx(nbw.hp_coverage_pct, 1)],
+        ["total_elec_kwh", fx(nbw.total_elec_kwh)], ["total_gas_therms", fx(nbw.total_gas_therms)], ["total_operating_cost", "$" + fx(nbw.total_operating_cost, 2)],
+        ["total_co2_kg", fx(nbw.total_co2_kg)], ["capital_cost_usd", "$" + fx(nbw.capital_cost_usd, 2)], ["rebate_usd", "$" + fx(nbw.rebate_usd, 2)],
+        ["grand_operating_cost", "$" + fx(nbw.grand_operating_cost, 2)], ["ng_baseline_grand_cost", "$" + fx(nbw.ng_baseline_grand_cost, 2)],
+        ["grand_operating_savings", "$" + fx(nbw.grand_operating_savings, 2)], ["net_capital_cost_usd", "$" + fx(nbw.net_capital_cost_usd, 2)],
+        ["grand_payback", nbw.grand_payback == null ? "none" : fx(nbw.grand_payback, 1) + " years"],
+        ...(out.nb.home ? [["matched home (find_closest_row)", `ResStock ${out.nb.home.building_id}: ${fx(out.nb.home.area)} sq ft, ${out.nb.home.heating_fuel}, ${fx(out.nb.home.heating_setpoint)} °F, unified R ${fx(out.nb.home.unified_r_value, 2)}${out.nb.home.fuel_fallback ? " (no home with your fuel; matched among gas homes)" : ""}`]] : [])].map(([k, v]) => `<tr><td><code>${k}</code></td><td>${v}</td></tr>`).join("");
+      $("sumTiles").insertAdjacentHTML("afterbegin", `<div class="tile hero-t"><div class="k">Grand operating savings</div><div class="v">${money(nbw.grand_operating_savings)} / yr</div><div class="s">bills plus CO₂ at $${out.nb.carbonUsdPerTonne}/t, vs ${f.short}${out.nb.isWinner ? "" : " (no winner at this price)"}</div></div>`);
+    } else $("winnerFold").hidden = true;
     HPCharts.lineChart($("chBill"), {
       labels: MON, ariaLabel: "Monthly heating bill",
       series: [{ name: "Today", color: cNow, values: out.monthly.map(m => m.today.costUsd) }, { name: "Heat pump", color: cHp, values: out.monthly.map(m => m.heatPump.costUsd) }],
@@ -354,7 +371,7 @@
     $("mTable").innerHTML = out.monthly.map((m, i) => `<tr><td>${MON[i]}</td><td>${money(m.today.costUsd)}</td><td>${money(m.heatPump.costUsd)}</td><td>${Math.round(m.today.co2Kg).toLocaleString()} kg</td><td>${Math.round(m.heatPump.co2Kg).toLocaleString()} kg</td></tr>`).join("");
 
     // Size trade-off (placeholder regions) or the dial sweep (model v1)
-    const isSweep = !!out.v1;
+    const isSweep = !!out.sweep;
     $("sizeCharts").hidden = isSweep; $("lamTable").hidden = !isSweep;
     $("sizeFoldH").textContent = "Other sizes and settings";
     $("sizeFoldS").textContent = isSweep ? "what the model suggests at every dial setting" : "how bigger and smaller units compare";
@@ -389,14 +406,15 @@
   const sizeLabel = k => k ? `${k / 12}-ton hybrid heat pump` : "Keep the gas furnace";
   const dollars = v => "$" + Math.round(v).toLocaleString();
   function dialSetText(idx) {
-    if (isV1(region())) return `${dollars(V1.lambdas()[idx])} per tonne of CO₂`;
+    if (isV1(region())) return `${dollars(carbonUsd())} per tonne of CO₂`;
     return idx === 0 ? "Lowest total cost" : idx === DIAL_STEPS ? "Lowest carbon" : idx < DIAL_STEPS / 2 ? "Leaning toward lower cost" : idx > DIAL_STEPS / 2 ? "Leaning toward lower carbon" : "A balance of cost and carbon";
   }
-  $("dial").addEventListener("input", e => {
-    state.priority = +e.target.value / DIAL_STEPS; state.prioSet = true; state.sizeTons = null; save();
-    $("dialVal").textContent = dialSetText(+e.target.value);
+  ["dial"].forEach(id => $(id).addEventListener("input", e => {
+    if (isV1(region())) state.carbonUsd = +e.target.value;
+    else { state.priority = +e.target.value / DIAL_STEPS; state.prioSet = true; }
+    state.sizeTons = null; save(); renderDial();
     if (current === 3) renderResults();
-  });
+  }));
   // Cost-versus-carbon trade-off: one dot per option the model considered (v1: one per dial setting; stand-in: one per size).
   function renderTradeoff(out) {
     const life = out.lifetimeYears, t = v => Math.round(v).toLocaleString();
@@ -410,24 +428,33 @@
         pts.push({ x: r.lifetimeCo2T, y: r.lifetimeCostUsd, current: cur, label: cur ? name : `${name}: ${dollars(r.lifetimeCostUsd)}, ${t(r.lifetimeCo2T)} t CO₂` });
       });
     } else {
-      pts.push({ x: out.lifetime.todayCo2Kg / 1000, y: out.lifetime.todayCostUsd, label: "Keep today's heat" });
-      out.sizes.forEach(s => { const cur = s.sizeTons === out.sizeTons, name = `${s.sizeTons}-ton heat pump`;
-        pts.push({ x: s.lifetimeCo2Kg / 1000, y: s.lifetimeCostUsd, current: cur, label: cur ? name : `${name}: ${dollars(s.lifetimeCostUsd)}, ${t(s.lifetimeCo2Kg / 1000)} t CO₂` }); });
+      pts.push({ x: out.lifetime.todayCo2Kg / 1000, y: out.lifetime.todayCostUsd, current: !out.sizeTons, label: "Keep today's heat",
+        tip: out.nb ? { title: "Keep the gas furnace", lines: [[`${life}-yr cost`, dollars(out.lifetime.todayCostUsd)], [`${life}-yr CO₂`, `${t(out.lifetime.todayCo2Kg / 1000)} t`]] } : null });
+      out.sizes.forEach(s => { const cur = out.nb ? !out.nb.keepFurnace && s.profile === out.nb.profile : s.sizeTons === out.sizeTons, name = `${s.sizeTons}-ton heat pump`;
+        pts.push({ x: s.lifetimeCo2Kg / 1000, y: s.lifetimeCostUsd, current: cur, label: cur ? name : `${name}: ${dollars(s.lifetimeCostUsd)}, ${t(s.lifetimeCo2Kg / 1000)} t CO₂`,
+          tip: s.profile ? { title: `${s.brand.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, c => c.toUpperCase())} ${s.profile}`, lines: [
+            ["Size", `${s.tonsExact.toFixed(2)} tons`], ["Covers", `${Math.round(s.heatPumpShare * 100)}% of heat`],
+            [`${life}-yr cost`, dollars(s.lifetimeCostUsd)], [`${life}-yr CO₂`, `${t(s.lifetimeCo2Kg / 1000)} t`],
+            ["Grand savings", `${s.grandSavingsUsd < 0 ? "−" : ""}${dollars(Math.abs(s.grandSavingsUsd))} / yr`]] } : null }); });
     }
     $("trCard").hidden = pts.length < 2;
     if (pts.length < 2) return;
     HPCharts.tradeoffChart($("chTrade"), { points: pts, ariaLabel: `Lifetime cost versus lifetime CO2 over ${life} years for each option`,
       xFmt: v => t(v), yFmt: v => "$" + kFmt(v), xTitle: `CO₂ over ${life} years (tonnes)`, yTitle: `Cost over ${life} years` });
   }
-  function renderDial() { const idx = dialIdx(); $("dial").value = idx; $("dialVal").textContent = dialSetText(idx); }
+  function renderDial() {
+    const nb = isV1(region());
+    ["dial"].forEach(id => { const el = $(id); el.max = nb ? 300 : DIAL_STEPS; el.step = nb ? 10 : 1; el.value = nb ? carbonUsd() : dialIdx(); });
+    ["dialVal"].forEach(id => { $(id).textContent = dialSetText(nb ? 0 : dialIdx()); });
+  }
   function renderLamTable(out) {
-    const rows = V1.sweep(out.v1.scenario);
+    const rows = out.sweep;
     $("lamTable").innerHTML = `<p class="muted" style="max-width:70ch;margin:-4px 0 12px">Each row is one setting of the dial, with what the model recommends there. Your current setting is highlighted. Costs are ${out.lifetimeYears}-year totals with the model's own rebate assumption.</p>
       <div class="table-scroll"><table class="lamtbl"><thead><tr><th>Dial ($ per tonne CO₂)</th><th>Model picks</th><th>${out.lifetimeYears}-yr cost</th><th>${out.lifetimeYears}-yr CO₂</th><th>$ per tonne avoided</th></tr></thead><tbody>${
-      rows.map(r => `<tr class="${r.lamIdx === out.v1.lamIdx ? "cur" : ""}"><td>${dollars(r.lam)}</td><td>${sizeLabel(r.sizeKbtuh)}</td><td>${dollars(r.lifetimeCostUsd)}</td><td>${r.lifetimeCo2T.toFixed(0)} t</td><td>${r.usdPerTonne != null ? dollars(r.usdPerTonne) : "—"}</td></tr>`).join("")}</tbody></table></div>`;
+      rows.map(r => `<tr class="${r.lam === out.nb.carbonUsdPerTonne ? "cur" : ""}"><td>${dollars(r.lam)}</td><td>${r.sizeTons ? r.sizeTons + "-ton hybrid heat pump" : "Keep the gas furnace"}</td><td>${dollars(r.lifetimeCostUsd)}</td><td>${r.lifetimeCo2T.toFixed(0)} t</td><td>${r.usdPerTonne != null ? dollars(r.usdPerTonne) : "—"}</td></tr>`).join("")}</tbody></table></div>`;
   }
   // The model data loads asynchronously; refresh results once it is there.
-  V1.ready.then(ok => { if (ok && region()) { renderDial(); if (current === 3 || current === 4) renderResults(); } });
+  
 
   // ---------- Rebates section ----------
   const RB = window.HP_REBATES;
@@ -445,7 +472,7 @@
     const { w, wo } = await bothRebateCases(out);
     const reb = w.upfront.rebatesUsd, life = out.lifetimeYears;
     $("rebLede").textContent = reb > 0
-      ? `Counting about ${money(Math.min(h.rebatesUsd, w.upfront.installedUsd))} off the upfront cost.`
+      ? `Counting about ${money(reb)} off the upfront cost.`
       : `No rebates counted for this home. Add one under "Prices, rebates and other details" on the home step.`;
     $("rebSeg").querySelectorAll("button").forEach(b => {
       b.setAttribute("aria-pressed", (b.dataset.reb === "1") === state.rebatesOn);
@@ -455,13 +482,12 @@
       b.setAttribute("aria-pressed", b.dataset.inc === state.income);
       b.onclick = () => { state.income = b.dataset.inc; save(); renderResults(); };
     });
-    $("rebTotal").innerHTML = incomeUsd()
-      ? `Income-based rebate: ${money(incomeUsd())}<small>${w.sizeTons ? `Your upfront cost comes down to ${money(w.upfront.netUsd)}.` : "It comes off the cost of a heat pump. At this setting of the dial we suggest keeping your gas furnace, so nothing is counted yet."}</small>`
-      : `Income-based rebate: none<small>Choose a range above if your household qualifies.</small>`;
-    $("incBox").hidden = $("whatIf").hidden = r.id !== "minneapolis"; 
-    const incAmt = incomeUsd();
-    $("incLede").textContent = incAmt === 8000 ? "Income at or under 80% of area median: the full $8,000 rebate, counted above."
-      : incAmt === 4000 ? "Income between 80% and 150% of area median: half the rebate, $4,000, counted above."
+    $("rebTotal").innerHTML = state.income !== "none"
+      ? `Income-based rebate: ${money(w.upfront.rebatesUsd)}<small>${w.sizeTons ? `Your upfront cost comes down to ${money(w.upfront.netUsd)}.` : "It comes off the cost of a heat pump. At this setting of the dial we suggest keeping your gas furnace; the figures show the best heat pump for comparison."}</small>`
+      : `Income-based rebate: none`;
+    $("incBox").hidden = $("whatIf").hidden = false;
+    $("incLede").textContent = state.income === "full" ? "Income at or under 80% of area median: the full rebate, up to $8,000."
+      : state.income === "partial" ? "Income between 80% and 150% of area median: half the cost, up to $4,000."
       : "Income over 150% of area median: no income-based rebate.";
     const row = (k, a, b, d, on) => `<tr class="${on ? "on" : ""}"><td>${k}</td><td>${a}</td><td>${b}</td><td class="diff">${d}</td></tr>`;
     const dlt = (x, y, fmt) => { const v = x - y; return v === 0 ? "—" : fmt(v); };
@@ -509,15 +535,14 @@
     const stat = id => (RB.STATUS[id] || id);
     const ov0 = state.overrides;
     const rows = [
-      ["Home type and size", selText(selection(r, ov0)).replace(/^./, c => c.toUpperCase()), "sizeBin"],
-      ["How well it holds heat", ENVELOPES[h.envelope].label, "envelope"],
+      ["Home type and size", `${Math.round(selection(r, ov0).sqft).toLocaleString()} sq ft`, "sizeBin"],
+      ["How well insulated", INS_LABELS[Math.max(0, INS_LEVELS.indexOf(h.insulationR))], "insulationR"],
       ["Current heating", f.label, "currentHeat"],
       ["Winter thermostat", `${h.thermostatF} °F`, "thermostatF"],
       ["Heat loss", `${h.heatLossWPerF} W per °F`, "heatLossWPerF"],
       ["Electricity price", `$${h.electricityUsdPerKWh.toFixed(3)} per kWh`, "electricityUsdPerKWh"],
       ...(h.currentHeat === "electric" ? [] : [[`${f.short[0].toUpperCase() + f.short.slice(1)} price`, `$${h.fuelUsdPerUnit.toFixed(2)} per ${f.unit}`, "fuelUsdPerUnit"]]),
-      ["Rebates", money(h.rebatesUsd), "rebatesUsd"],
-      ["Installed cost", `$${h.installedUsdPerTon.toLocaleString()} per ton`, "installedUsdPerTon"]
+      ["Income range", { full: "80% of area median or less", partial: "80–150% of area median", none: "Over 150% of area median" }[state.income], "income"]
     ];
     const questions = [
       "Will you do a full Manual J load calculation for my home, and can I have a copy?",
@@ -537,7 +562,7 @@
     $("report").innerHTML = `
       <header><p style="font-weight:700;color:#3E5A33">Heat pump request sheet · for your installer</p>
         <h1>${esc(r.full)}</h1>
-        <p>Prepared ${esc(date)} with the Heat Pump Guide (prototype). ${Object.keys(ov).length ? `${Object.keys(ov).length} detail${Object.keys(ov).length > 1 ? "s" : ""} entered by the homeowner; the rest are typical values for the area.` : "All home details are typical values for the area; the homeowner has not yet entered their own."}</p></header>
+        <p>Prepared ${esc(date)} with ResiOpt. ${Object.keys(ov).length ? `${Object.keys(ov).length} detail${Object.keys(ov).length > 1 ? "s" : ""} entered by the homeowner; the rest are typical values for the area.` : "All home details are typical values for the area; the homeowner has not yet entered their own."}</p></header>
 
       <div class="warn"><b>Next step: your installer.</b> Bring this report to a licensed installer, who will run the load calculation (ACCA Manual J) and system design to confirm the equipment.</div>
 
@@ -571,7 +596,7 @@
 
       <section><h2>4. Rebates I may qualify for</h2>
         <table><thead><tr><th>Program</th><th>Status</th><th>What it pays / where</th></tr></thead><tbody>${progs}</tbody></table>
-        <p style="margin-top:4pt"><b>Rebates counted in the numbers below:</b> ${money(h.rebatesUsd)} total.</p>
+        <p style="margin-top:4pt"><b>Rebates counted in the numbers below:</b> ${money(w.upfront.rebatesUsd)} total.</p>
         <p><b>Paperwork to bring or ask the installer about:</b></p>
         <ul>${rb.paperwork.map(p => `<li>${esc(p)}</li>`).join("")}</ul></section>
 

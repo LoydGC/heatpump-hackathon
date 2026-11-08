@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Heat Pump Guide</title>
+<title>ResiOpt</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -116,6 +116,7 @@ button,select,input{font:inherit;color:inherit}
 .f .hint{font-size:13px;margin-top:4px}
 .f.full{grid-column:1/-1}
 .seg{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--panel)}
+.seg[hidden]{display:none}
 .seg button{flex:1;border:0;background:none;padding:8px 4px;cursor:pointer;font-weight:600;font-size:14px}
 .seg button small{font-weight:500;font-size:12px}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--panel);border-radius:999px}
@@ -157,7 +158,7 @@ details.more summary{cursor:pointer;font-weight:700}
 .chart-host{position:relative}
 svg.chart{width:100%;height:auto;display:block;overflow:visible}
 svg.chart .tick{font-size:12px;fill:var(--muted)}
-svg.chart .end-label{font-size:12px;fill:var(--ink);font-weight:600}
+svg.chart .end-label{font-size:12px;fill:var(--ink);font-weight:600;pointer-events:none}
 svg.chart .marker-label{fill:var(--ink);font-weight:600}
 .tip{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;box-shadow:0 8px 20px -10px rgba(0,0,0,.35);min-width:170px;z-index:2}
 .tip b{display:block;margin-bottom:2px}
@@ -267,7 +268,7 @@ details.fold .fs{font-size:13px}
   <header class="top">
     <div class="brand">
       <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4c6 6 9 10 9 15a9 9 0 0 1-18 0c0-5 3-9 9-15z" fill="var(--hp)"/><path d="M16 27V14m0 6 4-4m-4 1-3-3" stroke="var(--panel)" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
-      Heat Pump Guide
+      ResiOpt
     </div>
     <nav aria-label="Progress">
       <ol class="steps" id="steps">
@@ -382,7 +383,7 @@ details.fold .fs{font-size:13px}
       <h3 id="dialH">What matters more to you?</h3>
       <div class="dial-row">
         <span class="dl">Lowest cost</span>
-        <input id="dial" type="range" min="0" max="12" step="1" value="10" aria-labelledby="dialH" aria-describedby="dialVal">
+        <input id="dial" type="range" min="0" max="300" step="10" value="300" aria-labelledby="dialH" aria-describedby="dialVal">
         <span class="dl">Most CO₂ cut</span>
       </div>
       <p class="dial-val" id="dialVal" aria-live="polite"></p>
@@ -401,8 +402,10 @@ details.fold .fs{font-size:13px}
         <h3 style="margin-top:10px">Describe your home</h3>
         <p class="muted" style="font-size:14px;margin-top:4px">Change anything that's different for you. Fields you don't touch keep the typical value.</p>
         <div class="form-grid">
-          <div class="f"><label for="sbin">Home size (sq ft) <span class="src" data-src="sizeBin"></span></label><select id="sbin"></select></div>
+          <div class="f"><label for="sqft">Home size (sq ft) <span class="src" data-src="floorAreaSqft"></span></label><input id="sqft" type="number" min="500" max="4000" step="50"></div>
           <div class="f"><label for="heat">Heating today <span class="src" data-src="currentHeat"></span></label><select id="heat"></select></div>
+          <div class="f"><label for="ins">How well insulated is your house? <span class="src" data-src="insulationR"></span></label><input id="ins" type="range" min="0" max="3" step="1" value="1" aria-describedby="insVal"><p class="hint" id="insVal" style="font-weight:600;color:var(--accent)"></p></div>
+          <div class="f"><label for="income">Household income vs. area median</label><select id="income"><option value="full">80% or less (full rebate, up to $8,000)</option><option value="partial">80–150% (half the cost, up to $4,000)</option><option value="none">Over 150% (no income-based rebate)</option></select></div>
           <div class="f"><label for="tstat">Thermostat in winter (°F) <span class="src" data-src="thermostatF"></span></label><input id="tstat" type="number" min="55" max="78" step="1"></div>
         </div>
 
@@ -411,8 +414,6 @@ details.fold .fs{font-size:13px}
           <div class="form-grid">
             <div class="f"><label for="elec">Electricity ($/kWh) <span class="src" data-src="electricityUsdPerKWh"></span></label><input id="elec" type="number" min="0" step="0.01"></div>
             <div class="f"><label for="fuelPrice"><span id="fuelPriceL">Fuel price</span> <span class="src" data-src="fuelUsdPerUnit"></span></label><input id="fuelPrice" type="number" min="0" step="0.01"></div>
-            <div class="f"><label for="rebates">Rebates you expect ($) <span class="src" data-src="rebatesUsd"></span></label><input id="rebates" type="number" min="0" step="100"></div>
-            <div class="f"><label for="costTon">Installed cost ($ per ton) <span class="src" data-src="installedUsdPerTon"></span></label><input id="costTon" type="number" min="0" step="250"></div>
             <div class="f"><label for="ua">Heat loss (W per °F) <span class="src" data-src="heatLossWPerF"></span></label><input id="ua" type="number" min="20" step="5"><p class="hint muted">Set from your home's size and construction. Change it if you have an energy audit.</p></div>
           </div>
         </details>
@@ -454,12 +455,6 @@ details.fold .fs{font-size:13px}
     <div class="results-charts" style="margin-top:6px">
       <div class="charts2">
         <div class="chart-card">
-          <h3>Total spent over time</h3>
-          <p class="sub" id="cumSub">Upfront costs plus bills, by year</p>
-          <div class="legend"><span><i style="border-color:var(--c-now)"></i><span id="lgNow2">Keep today's heat</span></span><span><i style="border-color:var(--c-hp)"></i>Heat pump</span></div>
-          <div id="chCum"></div>
-        </div>
-        <div class="chart-card">
           <h3>Heating bill by month</h3>
           <p class="sub">Dollars per month</p>
           <div class="legend"><span><i style="border-color:var(--c-now)"></i><span id="lgNow3">Today</span></span><span><i style="border-color:var(--c-hp)"></i>With heat pump</span></div>
@@ -471,10 +466,9 @@ details.fold .fs{font-size:13px}
 
     <div class="card whatif" id="whatIf">
       <h3>Rebates</h3>
-      <p class="muted" style="margin:-2px 0 14px" id="rebIntro">Pick your household income compared with your area median to add an income-based rebate.</p>
       <div id="stdBox" hidden><div class="seg" id="rebSeg"><button data-reb="1"></button><button data-reb="0"></button></div><p id="rebLede"></p></div>
-      <div id="incBox"><p class="wl" id="incL">Income-based rebate <span class="muted" style="font-weight:500">(your household income vs. area median)</span></p>
-        <div class="seg seg3" role="group" aria-labelledby="incL" id="incSeg"><button data-inc="full">80% or less<br><small>$8,000</small></button><button data-inc="partial">80–150%<br><small>$4,000</small></button><button data-inc="none">Over 150%<br><small>None</small></button></div>
+      <div id="incBox"><p class="wl" id="incL" hidden>Income-based rebate</p>
+        <div class="seg seg3" role="group" aria-labelledby="incL" id="incSeg" hidden><button data-inc="full">80% or less<br><small>up to $8,000</small></button><button data-inc="partial">80–150%<br><small>up to $4,000</small></button><button data-inc="none">Over 150%<br><small>None</small></button></div>
         <p class="muted wn" id="incLede"></p></div>
       <div class="reb-total" id="rebTotal"></div>
     </div>
@@ -490,6 +484,10 @@ details.fold .fs{font-size:13px}
     </div>
 
     <h2 class="more-h">Want the details?</h2>
+    <details class="fold" id="winnerFold" hidden>
+      <summary><span class="fh">Model output</span><span class="muted fs">the notebook's winner.json</span></summary>
+      <div class="fold-body"><p class="muted" id="winnerNote" style="margin-bottom:10px;max-width:70ch"></p><div class="card" style="padding:12px 16px"><div class="table-scroll"><table id="winnerTbl"></table></div></div></div>
+    </details>
     <details class="fold">
       <summary><span class="fh">Carbon (CO₂)</span><span class="muted fs">monthly CO₂ and 15-year totals</span></summary>
       <div class="fold-body">
@@ -564,6 +562,8 @@ details.fold .fs{font-size:13px}
 <script src="ui/rebates.js"></script>
 <script src="ui/model-stub.js"></script>
 <script src="ui/model-patrick.js"></script>
+<script src="ui/notebook-data.js"></script>
+<script src="ui/model-notebook.js"></script>
 <script src="ui/model-v1.js"></script>
 <script src="ui/charts.js"></script>
 <script src="ui/app.js"></script>

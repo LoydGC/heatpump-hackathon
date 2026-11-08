@@ -1,5 +1,9 @@
 # Heat Pump Sizing in Cold Climates
 
+[![Live demo: ResiOpt](https://img.shields.io/badge/Live%20demo-ResiOpt-2e7d32?style=for-the-badge&logo=vercel&logoColor=white)](https://heatpump-hackathon.vercel.app)
+
+### 👉 **Live demo: [ResiOpt — heatpump-hackathon.vercel.app](https://heatpump-hackathon.vercel.app)**
+
 MIT Climate Hackathon, COMSOL challenge.
 
 ## Challenge statement
