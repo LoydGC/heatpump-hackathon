@@ -48,7 +48,7 @@
       fuelPrices: { gas: 1.03, oil: 4.00, propane: 2.50, electric: 0.1644, wood: 300, kerosene: 4.30 }, // gas: EIA winter avg $10.65/Mcf; others placeholder
       rebatesUsd: 2000,                  // Xcel cold-climate ducted rebate; +$1,100 CenterPoint if gas furnace kept
       rebateIfGasBackupUsd: 1100,
-      typicalHome: { floorAreaSqft: 2000, envelope: "average", currentHeat: "gas", thermostatF: 68,
+      typicalHome: { floorAreaSqft: 2000, envelope: "tight", currentHeat: "gas", thermostatF: 68,
                      why: "a mid-century house with a natural gas furnace, the most common setup in the area" }
     },
     fairbanks: {

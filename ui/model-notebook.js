@@ -69,14 +69,12 @@
   }
 
   // Notebook's find_closest_row idea: the exported ResStock home (typical insulation) nearest to the home size.
-  function pickHome(sqft) {
-    const bins = Object.entries(D.binMidSqft), bin = bins.reduce((b, e) => Math.abs(e[1] - sqft) < Math.abs(b[1] - sqft) ? e : b)[0];
-    return D.homes[D.grid.ref[bin]];
-  }
+  // Synced to the notebook: it hardcodes ResStock building 274938, so the page uses that home for Minneapolis (size does not change it).
+  function pickHome() { return D.homes[D.notebookHome]; }
 
   function run(inp) {
     if (inp.region.id !== "minneapolis") return Prev.run(inp);
-    const home = pickHome(inp.home.floorAreaSqft), k = home.unifiedR / (inp.home.insulationR || 3.5), aux = auxPerBtu(inp);
+    const home = pickHome(inp.home.floorAreaSqft), k = 5 / (inp.home.insulationR || 5), aux = auxPerBtu(inp);
     const sc = inp.scenario || {}, price = Number.isFinite(sc.carbonUsd) ? sc.carbonUsd : LAMBDAS[Number.isInteger(sc.lamIdx) ? sc.lamIdx : 8];
     const { base, hp } = allSims(home, inp, aux, k), type = inp.costs.rebateType || "none";
     const rowsAt = pr => {
