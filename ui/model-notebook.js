@@ -149,7 +149,7 @@
       grandSavingsUsd: shown ? shown.grandSave : 0,
       lifetime: { costUsd: upfront.netUsd + life * s.usd, co2Kg: life * s.kg, todayCostUsd: life * base.usd, todayCo2Kg: life * base.kg },
       sizes: rows.map(r => ({ sizeTons: r1(r.p.nominalTons), lifetimeCostUsd: r.net + life * r.s.usd, lifetimeCo2Kg: life * r.s.kg, heatPumpShare: r.s.coverage,
-                              paybackYears: r.opSave > 0 ? r.net / r.opSave : null, profile: r.p.id })),
+                              paybackYears: r.opSave > 0 ? r.net / r.opSave : null, profile: r.p.id, brand: r.p.brand, tonsExact: r.p.nominalTons, grandSavingsUsd: r.grandSave })),
       sweep,
       nb: { winnerJson: shown ? {   // same keys as the notebook's winner.json row
               machine_profile: shown.p.id, nominal_tons: shown.p.nominalTons, hp_coverage_pct: shown.s.coverage * 100,

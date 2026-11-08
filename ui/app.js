@@ -428,9 +428,14 @@
         pts.push({ x: r.lifetimeCo2T, y: r.lifetimeCostUsd, current: cur, label: cur ? name : `${name}: ${dollars(r.lifetimeCostUsd)}, ${t(r.lifetimeCo2T)} t CO₂` });
       });
     } else {
-      pts.push({ x: out.lifetime.todayCo2Kg / 1000, y: out.lifetime.todayCostUsd, current: !out.sizeTons, label: "Keep today's heat" });
+      pts.push({ x: out.lifetime.todayCo2Kg / 1000, y: out.lifetime.todayCostUsd, current: !out.sizeTons, label: "Keep today's heat",
+        tip: out.nb ? { title: "Keep the gas furnace", lines: [[`${life}-yr cost`, dollars(out.lifetime.todayCostUsd)], [`${life}-yr CO₂`, `${t(out.lifetime.todayCo2Kg / 1000)} t`]] } : null });
       out.sizes.forEach(s => { const cur = out.nb ? !out.nb.keepFurnace && s.profile === out.nb.profile : s.sizeTons === out.sizeTons, name = `${s.sizeTons}-ton heat pump`;
-        pts.push({ x: s.lifetimeCo2Kg / 1000, y: s.lifetimeCostUsd, current: cur, label: cur ? name : `${name}: ${dollars(s.lifetimeCostUsd)}, ${t(s.lifetimeCo2Kg / 1000)} t CO₂` }); });
+        pts.push({ x: s.lifetimeCo2Kg / 1000, y: s.lifetimeCostUsd, current: cur, label: cur ? name : `${name}: ${dollars(s.lifetimeCostUsd)}, ${t(s.lifetimeCo2Kg / 1000)} t CO₂`,
+          tip: s.profile ? { title: `${s.brand.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, c => c.toUpperCase())} ${s.profile}`, lines: [
+            ["Size", `${s.tonsExact.toFixed(2)} tons`], ["Covers", `${Math.round(s.heatPumpShare * 100)}% of heat`],
+            [`${life}-yr cost`, dollars(s.lifetimeCostUsd)], [`${life}-yr CO₂`, `${t(s.lifetimeCo2Kg / 1000)} t`],
+            ["Grand savings", `${s.grandSavingsUsd < 0 ? "−" : ""}${dollars(Math.abs(s.grandSavingsUsd))} / yr`]] } : null }); });
     }
     $("trCard").hidden = pts.length < 2;
     if (pts.length < 2) return;

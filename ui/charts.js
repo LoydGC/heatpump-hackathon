@@ -112,17 +112,34 @@
     pts.filter(p => !p.current).sort((a, b) => dom(b) - dom(a)).forEach(p => {
       const d = dom(p); if (d) nDom++;
       const g = el("circle", { cx: X(p.x), cy: Y(p.y), r: 5, fill: d ? "#CBC9B8" : "var(--panel)", stroke: d ? "#A9A794" : "var(--c-hp)", "stroke-width": 2, opacity: 1 }, svg);
-      el("title", {}, g).textContent = d ? p.label + " (greyed out: another option is cheaper and cleaner)" : p.label;
+      g.__pt = p; if (d && p.tip) p.tip.lines = p.tip.lines.concat([["", "Greyed out: another option is cheaper and cleaner"]]);
+      if (!p.tip) el("title", {}, g).textContent = d ? p.label + " (greyed out: another option is cheaper and cleaner)" : p.label;
+    });
+    pts.filter(p => p.current).forEach(p => {
+      const g = el("circle", { cx: X(p.x), cy: Y(p.y), r: 8, fill: "var(--accent)", stroke: "var(--panel)", "stroke-width": 2 }, svg);
+      g.__pt = p; if (!p.tip) el("title", {}, g).textContent = p.label;
+      const left = X(p.x) > m.l + iw * 0.6;
+      el("text", { x: X(p.x) + (left ? -14 : 14), y: Y(p.y) - 12, "text-anchor": left ? "end" : "start", class: "end-label" }, svg).textContent = p.label;
+    });
+    // Hover / focus tooltip with the model details (p.tip = {title, lines:[[k, v]]}); falls back to the native <title>.
+    const tip = document.createElement("div"); tip.className = "tip"; tip.hidden = true; host.appendChild(tip);
+    svg.querySelectorAll("circle").forEach((c, i) => {
+      const p = c.__pt; if (!p || !p.tip) return;
+      const show = () => {
+        tip.innerHTML = `<b>${p.tip.title}</b>` + p.tip.lines.map(([k, v]) => `<div>${k}<span>${v}</span></div>`).join("");
+        tip.hidden = false;
+        const hb = host.getBoundingClientRect(), cb = c.getBoundingClientRect();
+        let x = cb.left - hb.left + cb.width / 2 + 12, y = cb.bottom - hb.top + 6;   // below the circle, clear of its label
+        if (x + tip.offsetWidth > hb.width) x = cb.left - hb.left - tip.offsetWidth - 12;
+        tip.style.left = Math.max(0, x) + "px"; tip.style.top = Math.max(0, y) + "px";
+      };
+      c.setAttribute("tabindex", "0"); c.style.cursor = "pointer";
+      c.addEventListener("mouseenter", show); c.addEventListener("focus", show);
+      c.addEventListener("mouseleave", () => tip.hidden = true); c.addEventListener("blur", () => tip.hidden = true);
     });
     const lg = document.createElement("div"); lg.className = "legend"; lg.style.marginTop = "6px";
     lg.innerHTML = `<span><i style="border-color:var(--c-hp)"></i>Worth considering</span><span><i style="border-color:#A9A794"></i>Greyed out (${nDom}): another option is both cheaper and cleaner</span>`;
     host.appendChild(lg);
-    pts.filter(p => p.current).forEach(p => {
-      const g = el("circle", { cx: X(p.x), cy: Y(p.y), r: 8, fill: "var(--accent)", stroke: "var(--panel)", "stroke-width": 2 }, svg);
-      el("title", {}, g).textContent = p.label;
-      const left = X(p.x) > m.l + iw * 0.6;
-      el("text", { x: X(p.x) + (left ? -14 : 14), y: Y(p.y) - 12, "text-anchor": left ? "end" : "start", class: "end-label" }, svg).textContent = p.label;
-    });
   }
 
   window.HPCharts = { lineChart, tradeoffChart };
