@@ -17,6 +17,7 @@
   // A saved or tampered state can't unlock pages: no region means step 1 only; never past the last page.
   state.maxStep = Math.max(0, Math.min(+state.maxStep || 0, 4));
   if (!state.regionId) state.maxStep = 0;
+  state.sizeTons = null;                // no size picker any more; the suggestion follows the dial
   const save = () => { try { sessionStorage.setItem("hp-wizard", JSON.stringify(state)); } catch (e) {} };
   let current = 0;
 
@@ -297,17 +298,16 @@
 
 
     const a = out.annual, cut = a.today.co2Kg - a.heatPump.co2Kg, saveYr = a.today.costUsd - a.heatPump.costUsd;
-    $("rSizeBox").hidden = !!v1; document.querySelector(".reco").classList.toggle("single", !!v1);
+    // One explicit suggestion for every city (no size picker); the dial on page 3 is the control.
+    $("rSizeBox").hidden = true; document.querySelector(".reco").classList.add("single");
     if (v1 && !out.sizeTons) {
       $("rReco").textContent = "Keep your gas furnace for now";
     } else if (v1) {
       $("rReco").textContent = `A ${out.sizeTons}-ton (${v1.sizeKbtuh},000 BTU/h) cold-climate heat pump`;
     } else {
-      $("rReco").textContent = `A ${out.sizeTons}-ton cold-climate heat pump`;
+      $("rReco").textContent = `A ${out.sizeTons}-ton (${Math.round(out.sizeTons * 12)},000 BTU/h) cold-climate heat pump`;
     }
     renderDial(); renderTradeoff(out);
-    if (!v1) $("rSizes").innerHTML = out.sizes.map(s => `<button data-size="${s.sizeTons}" aria-pressed="${s.sizeTons === out.sizeTons}">${s.sizeTons} t${s.sizeTons === out.recommendedSizeTons ? '<span class="star" aria-label="suggested">★</span>' : ""}</button>`).join("");
-    if (!v1) $("rSizes").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { state.sizeTons = +b.dataset.size; save(); renderResults(); }));
 
     // CO2
     const cars = Math.abs(cut) / 4600;
@@ -363,8 +363,8 @@
     // Size trade-off (placeholder regions) or the dial sweep (model v1)
     const isSweep = !!out.v1;
     $("sizeCharts").hidden = isSweep; $("lamTable").hidden = !isSweep;
-    $("sizeFoldH").textContent = isSweep ? "How the recommendation changes with the dial" : "Bigger or smaller?";
-    $("sizeFoldS").textContent = isSweep ? "every setting of the CO₂ dial" : "heat pump size trade-offs";
+    $("sizeFoldH").textContent = "Other sizes and settings";
+    $("sizeFoldS").textContent = isSweep ? "what the model suggests at every dial setting" : "how bigger and smaller units compare";
     if (isSweep) renderLamTable(out); else {
     $("lifeYrs").textContent = life;
     const sIdx = out.sizes.findIndex(s => s.sizeTons === out.sizeTons);
