@@ -23,7 +23,7 @@
   // A saved or tampered state can't unlock pages: no region means step 1 only; never past the last page.
   state.maxStep = Math.max(0, Math.min(+state.maxStep || 0, 4));
   if (!state.regionId) state.maxStep = 0;
-  delete state.overrides.homeType; delete state.overrides.envelope; delete state.overrides.currentHeat; delete state.overrides.timeOfUse;  // home type and heat-holding inputs were removed from the page
+  delete state.overrides.homeType; delete state.overrides.envelope; delete state.overrides.timeOfUse;  // home type and heat-holding inputs were removed from the page
   if (!INCOME_USD.hasOwnProperty(state.income)) state.income = "partial";   // model.ipynb rebate_type default
   state.cold = false; state.acCredit = false;   // the model scenarios (cold winter, AC credit) were removed
   state.rebatesOn = true;               // standard utility rebates are always counted; only the income-based one is a control
@@ -59,8 +59,8 @@
   // That extract is the definitive reference for the Boston typical home (Gavin, 2026-11-08); see docs/DECISIONS.md D-025.
   const TB = RS.typical && RS.typical.boston;
   if (TB) Object.assign(REGIONS.boston.typicalHome, {
-    floorAreaSqft: TB.sqft, currentHeat: "gas", envelope: TB.envelope,
-    why: `a typical Boston single-family home from ResStock: about ${(Math.round(TB.sqft / 50) * 50).toLocaleString()} sq ft, drafty, heated by natural gas`
+    floorAreaSqft: TB.sqft, currentHeat: TB.fuel, envelope: TB.envelope,
+    why: `a typical Boston single-family home from ResStock: about ${(Math.round(TB.sqft / 50) * 50).toLocaleString()} sq ft, drafty, heated by ${FUELS[TB.fuel].short}`
   });
   const HOME_TYPES = [
     { id: "sfd", label: "Single-family detached", rs: "Single-Family Detached", on: true },
@@ -101,9 +101,10 @@
       "";
   }
 
+  const gasOnly = r => r && r.id === "minneapolis";   // the notebook models a home heated by natural gas today
   // Typical (synthetic) home + regional prices, then the user's overrides on top.
   function typical(r, ov) {
-    const heat = "gas";   // Gavin 2026-11-08: every home is assumed to heat with natural gas today
+    const heat = gasOnly(r) ? "gas" : ov.currentHeat || r.typicalHome.currentHeat;   // Minneapolis: natural gas today, no input (Gavin 2026-11-08)
     const sel = selection(r, ov), dsel = selection(r, {});
     const sqft = sel.sqft;
     const env = ov.envelope || r.typicalHome.envelope;
@@ -111,7 +112,7 @@
       floorAreaSqft: sqft,
       homeType: dsel.type, binLevel: dsel.lvl, sizeBin: dsel.bin,
       envelope: r.typicalHome.envelope,
-      currentHeat: "gas",
+      currentHeat: gasOnly(r) ? "gas" : r.typicalHome.currentHeat,
       thermostatF: r.typicalHome.thermostatF,
       insulationR: ENV_R[r.typicalHome.envelope],
       heatLossWPerF: Math.round(sqft * INS_W[ov.insulationR ?? ENV_R[env]] / 5) * 5,
@@ -126,6 +127,7 @@
     const r = region(), d = typical(r, state.overrides);
     const h = Object.assign({}, d, state.overrides);
     const sel = selection(r, state.overrides);   // home type and size come from the dropdowns; sq ft is derived
+    if (gasOnly(r)) h.currentHeat = "gas";
     h.floorAreaSqft = d.floorAreaSqft; h.homeType = sel.type; h.binLevel = sel.lvl; h.sizeBin = sel.bin;
     return h;
   }
@@ -232,7 +234,7 @@
   const heatSel = $("heat");
   Object.entries(FUELS).forEach(([k, f]) => { const o = document.createElement("option"); o.value = k; o.textContent = f.label; heatSel.appendChild(o); });
   const FIELDS = [ // [inputId, key, parse]
-    ["sqft", "floorAreaSqft", Number], ["tstat", "thermostatF", Number],
+    ["heat", "currentHeat", String], ["sqft", "floorAreaSqft", Number], ["tstat", "thermostatF", Number],
     ["elec", "electricityUsdPerKWh", Number], ["fuelPrice", "fuelUsdPerUnit", Number],
     ["ua", "heatLossWPerF", Number]
   ];
@@ -262,7 +264,8 @@
 
     { const k = Math.max(0, INS_LEVELS.indexOf(h.insulationR)); $("ins").value = k; $("insVal").textContent = INS_LABELS[k]; }
     $("income").value = state.income;
-    $("ua").closest(".f").hidden = isV1(r);   // the notebook model takes heating load from the matched ResStock home, not a heat-loss number
+    $("ua").closest(".f").hidden = isV1(r);
+    $("heat").closest(".f").hidden = gasOnly(r);   // the notebook model takes heating load from the matched ResStock home, not a heat-loss number
     FIELDS.forEach(([id, key]) => { if (key !== skipKey || id === "heat") $(id).value = h[key]; });
     $("fuelPriceL").textContent = h.currentHeat === "electric" ? "Fuel price (same as electricity)" : `${f.short[0].toUpperCase() + f.short.slice(1)} ($ per ${f.unit})`;
     $("fuelPrice").disabled = h.currentHeat === "electric";

@@ -402,7 +402,7 @@ details.fold .fs{font-size:13px}
         <p class="muted" style="font-size:14px;margin-top:4px">Change anything that's different for you. Fields you don't touch keep the typical value.</p>
         <div class="form-grid">
           <div class="f"><label for="sqft">Home size (sq ft) <span class="src" data-src="floorAreaSqft"></span></label><input id="sqft" type="number" min="500" max="4000" step="50"></div>
-          <div class="f" hidden><label for="heat">Heating today</label><select id="heat"></select></div>
+          <div class="f"><label for="heat">Heating today <span class="src" data-src="currentHeat"></span></label><select id="heat"></select></div>
           <div class="f"><label for="ins">How well insulated is your house? <span class="src" data-src="insulationR"></span></label><input id="ins" type="range" min="0" max="3" step="1" value="1" aria-describedby="insVal"><p class="hint" id="insVal" style="font-weight:600;color:var(--accent)"></p></div>
           <div class="f"><label for="income">Household income vs. area median</label><select id="income"><option value="full">80% or less (full rebate, up to $8,000)</option><option value="partial">80–150% (half the cost, up to $4,000)</option><option value="none">Over 150% (no income-based rebate)</option></select></div>
           <div class="f"><label for="tstat">Thermostat in winter (°F) <span class="src" data-src="thermostatF"></span></label><input id="tstat" type="number" min="55" max="78" step="1"></div>
