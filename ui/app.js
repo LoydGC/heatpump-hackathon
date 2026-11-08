@@ -399,15 +399,7 @@
   function renderTradeoff(out) {
     const life = out.lifetimeYears, t = v => Math.round(v).toLocaleString();
     let pts = [];
-    if (out.sweep) {
-      const seen = new Set();
-      out.sweep.forEach(r => {
-        const cur = r.lam === out.nb.carbonUsdPerTonne, k = `${r.sizeTons}|${Math.round(r.lifetimeCostUsd)}|${Math.round(r.lifetimeCo2T)}`;
-        if (seen.has(k) && !cur) return; seen.add(k);
-        const name = r.sizeTons ? `${r.sizeTons}-ton heat pump` : "Keep the furnace";
-        pts.push({ x: r.lifetimeCo2T, y: r.lifetimeCostUsd, current: cur, label: cur ? name : `${name} at ${dollars(r.lam)}/t: ${dollars(r.lifetimeCostUsd)}, ${t(r.lifetimeCo2T)} t CO₂` });
-      });
-    } else if (out.v1) {
+    if (out.v1) {
       const seen = new Set();
       V1.sweep(out.v1.scenario).forEach(r => {
         const cur = r.lamIdx === out.v1.lamIdx, k = `${r.sizeKbtuh}|${Math.round(r.lifetimeCostUsd)}|${Math.round(r.lifetimeCo2T)}`;
@@ -416,8 +408,8 @@
         pts.push({ x: r.lifetimeCo2T, y: r.lifetimeCostUsd, current: cur, label: cur ? name : `${name}: ${dollars(r.lifetimeCostUsd)}, ${t(r.lifetimeCo2T)} t CO₂` });
       });
     } else {
-      pts.push({ x: out.lifetime.todayCo2Kg / 1000, y: out.lifetime.todayCostUsd, label: "Keep today's heat" });
-      out.sizes.forEach(s => { const cur = s.sizeTons === out.sizeTons, name = `${s.sizeTons}-ton heat pump`;
+      pts.push({ x: out.lifetime.todayCo2Kg / 1000, y: out.lifetime.todayCostUsd, current: !out.sizeTons, label: "Keep today's heat" });
+      out.sizes.forEach(s => { const cur = out.nb ? s.profile === out.nb.profile : s.sizeTons === out.sizeTons, name = `${s.sizeTons}-ton heat pump`;
         pts.push({ x: s.lifetimeCo2Kg / 1000, y: s.lifetimeCostUsd, current: cur, label: cur ? name : `${name}: ${dollars(s.lifetimeCostUsd)}, ${t(s.lifetimeCo2Kg / 1000)} t CO₂` }); });
     }
     $("trCard").hidden = pts.length < 2;

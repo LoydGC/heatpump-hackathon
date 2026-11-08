@@ -104,7 +104,7 @@
     el("line", { x1: m.l, x2: m.l + iw, y1: m.t + ih, y2: m.t + ih, stroke: "var(--axis)" }, svg);
     el("text", { x: m.l + iw / 2, y: H - 6, "text-anchor": "middle", class: "tick" }, svg).textContent = o.xTitle;
     const yt = el("text", { x: 14, y: m.t + ih / 2, "text-anchor": "middle", class: "tick", transform: `rotate(-90 14 ${m.t + ih / 2})` }, svg); yt.textContent = o.yTitle;
-    el("polyline", { points: pts.map(p => `${X(p.x)},${Y(p.y)}`).join(" "), fill: "none", stroke: "var(--c-hp)", "stroke-width": 2, "stroke-linejoin": "round", opacity: 0.6 }, svg);
+    el("polyline", { points: (() => { let lo = Infinity; return pts.filter(p => p.y < lo && (lo = p.y, true)); })().map(p => `${X(p.x)},${Y(p.y)}`).join(" ")  /* line joins only the best options: nothing else is both cheaper and cleaner */, fill: "none", stroke: "var(--c-hp)", "stroke-width": 2, "stroke-linejoin": "round", opacity: 0.6 }, svg);
     pts.forEach(p => {
       if (p.current) return;
       const g = el("circle", { cx: X(p.x), cy: Y(p.y), r: 5, fill: "var(--panel)", stroke: "var(--c-hp)", "stroke-width": 2 }, svg);
