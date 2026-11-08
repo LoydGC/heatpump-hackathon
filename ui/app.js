@@ -300,6 +300,9 @@
     $("rSizeBox").hidden = true; document.querySelector(".reco").classList.add("single");
     if (isV1(r) && !out.sizeTons) {
       $("rReco").textContent = "Keep your gas furnace for now";
+    } else if (out.nb && out.nb.winnerJson && out.nb.isWinner) {   // the notebook's winner.json row is the suggestion
+      const W = out.nb.winnerJson;
+      $("rReco").textContent = `${out.nb.brand.replace(/_/g, " ").toLowerCase().replace(/^./, c => c.toUpperCase())} ${W.machine_profile}: a ${W.nominal_tons.toFixed(2)}-ton (${Math.round(W.nominal_tons * 12)},000 BTU/h) cold-climate heat pump`;
     } else {
       $("rReco").textContent = `A ${out.sizeTons}-ton (${Math.round(out.sizeTons * 12)},000 BTU/h) cold-climate heat pump`;
     }
@@ -339,16 +342,20 @@
       ["", !out.sizeTons ? "CO₂ change per year" : cut >= 0 ? "CO₂ cut per year" : "CO₂ added per year", tonnes(cut), !out.sizeTons ? "no heat pump at this setting" : a.today.co2Kg ? `${pct(Math.abs(cut) / a.today.co2Kg)} ${cut >= 0 ? "less" : "more"} than today` : ""]
     ].map(([c, k, v, s]) => `<div class="tile ${c}"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join("");
 
-    $("lgNow2").textContent = "Keep " + f.short;
-    const yrs = Array.from({ length: life + 1 }, (_, y) => y);
-    HPCharts.lineChart($("chCum"), {
-      labels: yrs.map(String), xEvery: 5, ariaLabel: "Cumulative spending over time",
-      tipLabel: i => `After ${i} year${i === 1 ? "" : "s"}`,
-      series: [{ name: "Keep today's", color: cNow, values: yrs.map(y => y * a.today.costUsd) }, { name: "Heat pump", color: cHp, values: yrs.map(y => up.netUsd + y * a.heatPump.costUsd) }],
-      marker: out.paybackYears != null && out.paybackYears <= life ? { index: out.paybackYears, text: "Break even" } : null,
-      fmt: (v, tip) => tip ? money(v) : "$" + kFmt(v)
-    });
-    $("cumSub").textContent = `Upfront costs plus bills, by year`;
+    const nbw = out.nb && out.nb.winnerJson;
+    if (nbw) {   // Patrick's notebook: lead with grand_operating_savings (bills + carbon at the dial's price) and show the winner.json row
+      $("winnerFold").hidden = false;
+      const fx = (v, d = 0) => v == null ? "none" : Number(v).toLocaleString(undefined, { maximumFractionDigits: d, minimumFractionDigits: d });
+      $("winnerNote").textContent = out.nb.isWinner ? `Winner at $${out.nb.carbonUsdPerTonne} per tonne of CO₂: the heat pump with the lowest grand operating cost among those that save money.`
+        : `No heat pump has positive grand operating savings at $${out.nb.carbonUsdPerTonne} per tonne, so there is no winner. This is the lowest-cost heat pump, shown for comparison.`;
+      $("winnerTbl").innerHTML = [["machine_profile", nbw.machine_profile], ["nominal_tons", fx(nbw.nominal_tons, 2)], ["hp_coverage_pct", fx(nbw.hp_coverage_pct, 1)],
+        ["total_elec_kwh", fx(nbw.total_elec_kwh)], ["total_gas_therms", fx(nbw.total_gas_therms)], ["total_operating_cost", "$" + fx(nbw.total_operating_cost, 2)],
+        ["total_co2_kg", fx(nbw.total_co2_kg)], ["capital_cost_usd", "$" + fx(nbw.capital_cost_usd, 2)], ["rebate_usd", "$" + fx(nbw.rebate_usd, 2)],
+        ["grand_operating_cost", "$" + fx(nbw.grand_operating_cost, 2)], ["ng_baseline_grand_cost", "$" + fx(nbw.ng_baseline_grand_cost, 2)],
+        ["grand_operating_savings", "$" + fx(nbw.grand_operating_savings, 2)], ["net_capital_cost_usd", "$" + fx(nbw.net_capital_cost_usd, 2)],
+        ["grand_payback", nbw.grand_payback == null ? "none" : fx(nbw.grand_payback, 1) + " years"]].map(([k, v]) => `<tr><td><code>${k}</code></td><td>${v}</td></tr>`).join("");
+      $("sumTiles").insertAdjacentHTML("afterbegin", `<div class="tile hero-t"><div class="k">Grand operating savings</div><div class="v">${money(nbw.grand_operating_savings)} / yr</div><div class="s">bills plus CO₂ at $${out.nb.carbonUsdPerTonne}/t, vs ${f.short}${out.nb.isWinner ? "" : " (no winner at this price)"}</div></div>`);
+    } else $("winnerFold").hidden = true;
     HPCharts.lineChart($("chBill"), {
       labels: MON, ariaLabel: "Monthly heating bill",
       series: [{ name: "Today", color: cNow, values: out.monthly.map(m => m.today.costUsd) }, { name: "Heat pump", color: cHp, values: out.monthly.map(m => m.heatPump.costUsd) }],

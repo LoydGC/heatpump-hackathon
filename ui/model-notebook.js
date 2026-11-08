@@ -121,12 +121,19 @@
         heatPump: { costUsd: s.usd, co2Kg: s.kg, electricityKWh: s.kwh, heatPumpShare: shown ? s.coverage : 0 }
       },
       monthly: mkMonthly(shown), upfront,
-      paybackYears: shown && saveYr > 0 ? shown.net / saveYr : null,
+      paybackYears: shown && shown.grandSave > 0 ? shown.net / shown.grandSave : null,   // notebook grand_payback = net capital / grand operating savings
+      grandSavingsUsd: shown ? shown.grandSave : 0,
       lifetime: { costUsd: upfront.netUsd + life * s.usd, co2Kg: life * s.kg, todayCostUsd: life * base.usd, todayCo2Kg: life * base.kg },
       sizes: rows.map(r => ({ sizeTons: r1(r.p.nominalTons), lifetimeCostUsd: r.net + life * r.s.usd, lifetimeCo2Kg: life * r.s.kg, heatPumpShare: r.s.coverage,
                               paybackYears: r.opSave > 0 ? r.net / r.opSave : null, profile: r.p.id })),
       sweep,
-      nb: { carbonUsdPerTonne: price, rebateType: type, buildingId: home.buildingId, homeAreaSqft: home.areaSqft, loadScale: k, profile: shown ? shown.p.id : null, keepFurnace: !chosen, altTons: alt ? r1(alt.p.nominalTons) : null,
+      nb: { winnerJson: shown ? {   // same keys as the notebook's winner.json row
+              machine_profile: shown.p.id, nominal_tons: shown.p.nominalTons, hp_coverage_pct: shown.s.coverage * 100,
+              total_elec_kwh: shown.s.kwh, total_gas_therms: aux.therm ? shown.s.auxBtu / FURNACE_EFF / 1e5 : shown.s.auxBtu / 1e5,
+              total_operating_cost: shown.s.usd, total_co2_kg: shown.s.kg, capital_cost_usd: shown.cap, rebate_usd: shown.reb,
+              grand_operating_cost: shown.grand, grand_operating_savings: shown.grandSave, net_capital_cost_usd: shown.net,
+              grand_payback: shown.grandSave > 0 ? shown.net / shown.grandSave : null, ng_baseline_grand_cost: baseGrand } : null,
+            isWinner: !!chosen && chosen === winner, carbonUsdPerTonne: price, rebateType: type, buildingId: home.buildingId, homeAreaSqft: home.areaSqft, loadScale: k, profile: shown ? shown.p.id : null, keepFurnace: !chosen, altTons: alt ? r1(alt.p.nominalTons) : null,
             brand: shown ? shown.p.brand : null, grandCostUsd: chosen ? chosen.grand : baseGrand, baselineGrandCostUsd: baseGrand },
       notes: [
         "Runs the team's model.ipynb: a real ResStock home's hourly heating load and real Minneapolis weather, matched to AHRI-listed cold-climate heat pumps.",

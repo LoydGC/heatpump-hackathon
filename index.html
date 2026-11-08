@@ -461,12 +461,6 @@ details.fold .fs{font-size:13px}
     <div class="results-charts" style="margin-top:6px">
       <div class="charts2">
         <div class="chart-card">
-          <h3>Total spent over time</h3>
-          <p class="sub" id="cumSub">Upfront costs plus bills, by year</p>
-          <div class="legend"><span><i style="border-color:var(--c-now)"></i><span id="lgNow2">Keep today's heat</span></span><span><i style="border-color:var(--c-hp)"></i>Heat pump</span></div>
-          <div id="chCum"></div>
-        </div>
-        <div class="chart-card">
           <h3>Heating bill by month</h3>
           <p class="sub">Dollars per month</p>
           <div class="legend"><span><i style="border-color:var(--c-now)"></i><span id="lgNow3">Today</span></span><span><i style="border-color:var(--c-hp)"></i>With heat pump</span></div>
@@ -497,6 +491,10 @@ details.fold .fs{font-size:13px}
     </div>
 
     <h2 class="more-h">Want the details?</h2>
+    <details class="fold" id="winnerFold" hidden>
+      <summary><span class="fh">Model output</span><span class="muted fs">the notebook's winner.json</span></summary>
+      <div class="fold-body"><p class="muted" id="winnerNote" style="margin-bottom:10px;max-width:70ch"></p><div class="card" style="padding:12px 16px"><div class="table-scroll"><table id="winnerTbl"></table></div></div></div>
+    </details>
     <details class="fold">
       <summary><span class="fh">Carbon (CO₂)</span><span class="muted fs">monthly CO₂ and 15-year totals</span></summary>
       <div class="fold-body">
