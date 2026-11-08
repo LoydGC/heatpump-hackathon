@@ -285,7 +285,6 @@
 
     $("h3").textContent = custom ? `Your heat pump report for your ${r.name} home` : `Heat pump report for a typical ${r.name} home`;
     const rsel = selection(r, state.overrides);
-    $("rRef").innerHTML = refHtml(r, rsel);
     const v1 = out.v1, v1Failed = r.id === V1.regionId && !v1;
 
 
