@@ -263,13 +263,7 @@
     $("qpRegion").textContent = r.name;
     $("qpWhy").textContent = `We'll model ${r.typicalHome.why}.`;
     const td = typical(r, {});
-    $("qpList").innerHTML = [
-      `${selText(selection(r, {})).replace(/^./, c => c.toUpperCase())}, ${ENVELOPES[td.envelope].label.toLowerCase()}`,
-      `Heated today by ${FUELS[td.currentHeat].short}`,
-      `Thermostat at ${td.thermostatF} °F`,
-      `Local prices: electricity $${td.electricityUsdPerKWh.toFixed(2)}/kWh${td.currentHeat !== "electric" ? `, ${FUELS[td.currentHeat].short} $${td.fuelUsdPerUnit.toFixed(2)}/${FUELS[td.currentHeat].unit}` : ""}`,
-      `Rebates: $${td.rebatesUsd.toLocaleString()}`
-    ].map(x => `<li>${x}</li>`).join("");
+
 
     FIELDS.forEach(([id, key]) => { if (key !== skipKey || id === "heat") $(id).value = h[key]; });
     const sel = selection(r, state.overrides), lvlBins = binList(sel.lvl);
