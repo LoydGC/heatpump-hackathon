@@ -329,14 +329,14 @@
     const lifeSave = life * saveYr - up.netUsd;
     $("moneyTiles").innerHTML = [
       ["hero-t", "Yearly heating bill", `${money(a.heatPump.costUsd)}`, `vs ${money(a.today.costUsd)} today · ${saveYr >= 0 ? money(saveYr) + " saved" : money(-saveYr) + " more"} per year`],
-      ["", "Upfront, after rebates", money(up.netUsd), `${money(up.installedUsd)} installed − ${money(up.rebatesUsd)} rebates`],
+      ["", "Upfront costs, after rebates", money(up.netUsd), `${money(up.installedUsd)} installed − ${money(up.rebatesUsd)} rebates`],
       ["", "Pays for itself in", paybackLabel(out), out.paybackYears != null ? `heat pumps last about ${life} years` : "bills don't drop enough to repay the upfront cost"],
       ["", `Over ${life} years`, (lifeSave >= 0 ? "" : "") + money(Math.abs(lifeSave)), lifeSave >= 0 ? "saved overall, after upfront cost" : "more overall, after upfront cost"]
     ].map(([c, k, v, s]) => `<div class="tile ${c}"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join("");
 
     $("sumTiles").innerHTML = [
       ["hero-t", "Yearly heating bill", money(a.heatPump.costUsd), `vs ${money(a.today.costUsd)} today · ${saveYr >= 0 ? money(saveYr) + " saved" : money(-saveYr) + " more"} per year`],
-      ["", "Upfront, after rebates", money(up.netUsd), `${money(up.installedUsd)} installed − ${money(up.rebatesUsd)} rebates`],
+      ["", "Upfront costs, after rebates", money(up.netUsd), `${money(up.installedUsd)} installed − ${money(up.rebatesUsd)} rebates`],
       ["", "Pays for itself in", paybackLabel(out), !out.sizeTons ? "no heat pump at this setting" : out.paybackYears != null ? `heat pumps last about ${life} years` : "bills don't drop enough to repay the cost"],
       ["", !out.sizeTons ? "CO₂ change per year" : cut >= 0 ? "CO₂ cut per year" : "CO₂ added per year", tonnes(cut), !out.sizeTons ? "no heat pump at this setting" : a.today.co2Kg ? `${pct(Math.abs(cut) / a.today.co2Kg)} ${cut >= 0 ? "less" : "more"} than today` : ""]
     ].map(([c, k, v, s]) => `<div class="tile ${c}"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join("");
@@ -350,7 +350,7 @@
       marker: out.paybackYears != null && out.paybackYears <= life ? { index: out.paybackYears, text: "Break even" } : null,
       fmt: (v, tip) => tip ? money(v) : "$" + kFmt(v)
     });
-    $("cumSub").textContent = `Upfront cost plus heating bills, year by year (years on the bottom)`;
+    $("cumSub").textContent = `Upfront costs plus heating bills, year by year (years on the bottom)`;
     HPCharts.lineChart($("chBill"), {
       labels: MON, ariaLabel: "Monthly heating bill",
       series: [{ name: "Today", color: cNow, values: out.monthly.map(m => m.today.costUsd) }, { name: "Heat pump", color: cHp, values: out.monthly.map(m => m.heatPump.costUsd) }],
@@ -486,7 +486,7 @@
     const row = (k, a, b, d, on) => `<tr class="${on ? "on" : ""}"><td>${k}</td><td>${a}</td><td>${b}</td><td class="diff">${d}</td></tr>`;
     const dlt = (x, y, fmt) => { const v = x - y; return v === 0 ? "—" : fmt(v); };
     $("rebCmp").innerHTML = [
-      row("Upfront cost (after rebates)", money(wo.upfront.netUsd), money(w.upfront.netUsd), dlt(wo.upfront.netUsd, w.upfront.netUsd, v => money(-v))),
+      row("Upfront costs (after rebates)", money(wo.upfront.netUsd), money(w.upfront.netUsd), dlt(wo.upfront.netUsd, w.upfront.netUsd, v => money(-v))),
       row("Break-even (pays for itself)", paybackTxt(wo), paybackTxt(w),
           wo.paybackYears != null && w.paybackYears != null ? dlt(wo.paybackYears, w.paybackYears, v => (v > 0 ? "−" : "+") + Math.abs(v).toFixed(1) + " years") : "—"),
       row(`Total cost over ${life} years`, money(wo.lifetime.costUsd), money(w.lifetime.costUsd), dlt(wo.lifetime.costUsd, w.lifetime.costUsd, v => money(-v))),
@@ -600,7 +600,7 @@
         <table><thead><tr><th></th><th>Without rebates</th><th>With rebates</th></tr></thead><tbody>
           <tr><td>Installed price (${out.sizeTons} tons)</td><td>${money(wo.upfront.installedUsd)}</td><td>${money(w.upfront.installedUsd)}</td></tr>
           <tr><td>Rebates</td><td>$0</td><td>−${money(w.upfront.rebatesUsd)}</td></tr>
-          <tr><td>Upfront cost after rebates</td><td>${money(wo.upfront.netUsd)}</td><td>${money(w.upfront.netUsd)}</td></tr>
+          <tr><td>Upfront costs after rebates</td><td>${money(wo.upfront.netUsd)}</td><td>${money(w.upfront.netUsd)}</td></tr>
           <tr><td>Break-even</td><td>${pay(wo)}</td><td>${pay(w)}</td></tr>
           <tr><td>Total cost over ${life} years</td><td>${money(wo.lifetime.costUsd)}</td><td>${money(w.lifetime.costUsd)}</td></tr>
           <tr><td>Yearly heating bill: today → heat pump</td><td colspan="2">${money(a.today.costUsd)} → ${money(a.heatPump.costUsd)}</td></tr>
