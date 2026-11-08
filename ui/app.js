@@ -10,22 +10,6 @@
   const LIFETIME_YEARS = 15;            // data.zip analysis_years
   const PRICE_KEYS = ["electricityUsdPerKWh", "fuelUsdPerUnit", "rebatesUsd"];
 
-  // ---------- Theme (same ?theme= values as before) ----------
-  (() => {
-    const valid = ["lichen", "sand", "sage", "paper"];
-    let t = new URLSearchParams(location.search).get("theme");
-    if (!valid.includes(t)) { try { t = localStorage.getItem("hp-theme"); } catch (e) {} }
-    if (!valid.includes(t)) t = "lichen";
-    const apply = v => {
-      if (v === "lichen") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", v);
-      document.querySelectorAll("[data-theme-btn]").forEach(b => b.setAttribute("aria-pressed", b.dataset.themeBtn === v));
-      try { localStorage.setItem("hp-theme", v); } catch (e) {}
-      const u = new URL(location.href); u.searchParams.set("theme", v); history.replaceState(null, "", u);
-    };
-    document.querySelectorAll("[data-theme-btn]").forEach(b => b.addEventListener("click", () => { apply(b.dataset.themeBtn); if (current === 3) renderResults(); }));
-    apply(t);
-  })();
-
   // ---------- State ----------
   const blank = () => ({ regionId: null, maxStep: 0, overrides: {}, priority: 0.5, prioSet: false, sizeTons: null, usedTypical: true, rebatesOn: true, cold: false, acCredit: false });
   let state = blank();

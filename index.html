@@ -6,31 +6,16 @@
 <title>Heat Pump Guide</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Lora:wght@500;600;700&family=Young+Serif&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   color-scheme:light;
   --bg:#ECEEE3; --panel:#F7F7F0; --ink:#2E2B22; --muted:#6A6656; --line:#D6D6C6;
   --hp:#4E7040; --hp-soft:#DCE5CF; --base:#A08C74; --focus:#3F6E8C; --accent:#3E5A33;
   --display:"Fraunces",Georgia,serif;
-  /* chart data colors: validated pair (dataviz validator, all four theme surfaces) */
+  /* chart data colors: validated pair (dataviz validator) */
   --c-now:#C27E26; --c-hp:#00806A; --grid:#E2E2D6; --axis:#B9B7A6;
   --r:18px; --r-sm:12px;
-}
-:root[data-theme="sand"]{
-  --bg:#F2EADC; --panel:#FBF6EE; --ink:#3A2E24; --muted:#76665A; --line:#E0D3C0;
-  --hp:#6F8442; --hp-soft:#E8E2C9; --base:#B39E86; --accent:#9A5636; --grid:#EBE1D2; --axis:#C9B9A3;
-  --display:"Young Serif",Georgia,serif;
-}
-:root[data-theme="sage"]{
-  --bg:#E8EEEA; --panel:#F8FBF9; --ink:#22302B; --muted:#5E6E67; --line:#CFDAD4;
-  --hp:#4F8A72; --hp-soft:#D6E7DE; --base:#9EA69C; --accent:#2F5E50; --grid:#E1E9E4; --axis:#B5C3BB;
-  --display:"Lora",Georgia,serif;
-}
-:root[data-theme="paper"]{
-  --bg:#F4F0E6; --panel:#FFFDF7; --ink:#2F2A1F; --muted:#6F6857; --line:#E2DCCB;
-  --hp:#5D7A34; --hp-soft:#ECE8D2; --base:#C1A777; --accent:#8A6417; --grid:#ECE7DA; --axis:#CFC6B0;
-  --display:"Fraunces",Georgia,serif;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -44,9 +29,8 @@ p{margin:0}
 .muted{color:var(--muted)}
 button,select,input{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
-[data-theme="sage"] h1{word-spacing:-.12em;font-weight:700}
 
-/* Top bar: brand, steps, theme */
+/* Top bar: brand, steps */
 .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:26px}
 .brand{font-family:var(--display);font-weight:700;font-size:18px;display:flex;align-items:center;gap:8px}
 .brand svg{width:26px;height:26px}
@@ -57,9 +41,6 @@ button,select,input{font:inherit;color:inherit}
 .steps button[aria-current="step"] .n,.steps button.done .n{background:var(--accent);color:var(--panel)}
 .steps button:disabled{cursor:not-allowed;opacity:.45}
 @media (max-width:640px){.steps .t{display:none}.steps button{padding:6px}}
-.themes{display:flex;gap:6px;align-items:center;font-size:13px}
-.themes button{width:22px;height:22px;border-radius:50%;border:1px solid rgba(0,0,0,.15);cursor:pointer;padding:0}
-.themes button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--ink)}
 
 .step{display:none;animation:rise .35s ease both}
 .step.active{display:block}
@@ -293,12 +274,6 @@ details.fold .fs{font-size:13px}
         <li><button data-go="3"><span class="n">4</span><span class="t">Results</span></button></li>
       </ol>
     </nav>
-    <div class="themes" role="group" aria-label="Color theme">
-      <button data-theme-btn="lichen" title="Lichen &amp; moss" aria-label="Lichen and moss theme" style="background:linear-gradient(135deg,#ECEEE3 50%,#3E5A33 50%)"></button>
-      <button data-theme-btn="sand" title="Sand &amp; clay" aria-label="Sand and clay theme" style="background:linear-gradient(135deg,#F2EADC 50%,#9A5636 50%)"></button>
-      <button data-theme-btn="sage" title="Sage &amp; mist" aria-label="Sage and mist theme" style="background:linear-gradient(135deg,#E8EEEA 50%,#2F5E50 50%)"></button>
-      <button data-theme-btn="paper" title="Warm paper" aria-label="Warm paper theme" style="background:linear-gradient(135deg,#F4F0E6 50%,#8A6417 50%)"></button>
-    </div>
   </header>
 
   <!-- STEP 1: where -->

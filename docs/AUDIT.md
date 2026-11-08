@@ -60,3 +60,4 @@ To filter by workstream: search the page for `| UI |`, `| Model |`, `| Data |` o
 | 2026-11-08 | merge | Infra | Merged dashboard branch (wizard, ResStock dropdowns, climate page) and comparables research into `main`; no deploy | Claude, for Gavin | this push | |
 | 2026-11-08 | repo | UI | Fast-forwarded branch onto main (cf872ba); removed Size groups toggle; Boston typical home now built from the Boston ResStock extract | Claude, for Gavin | this push | D-025 |
 | 2026-11-08 | repo | Data | Added `docs/REFERENCE_FACTS.md`: guaranteed facts from the ResStock extracts (Boston typical home, bins, medians) | Claude, for Gavin | this push | D-025 |
+| 2026-11-08 | repo | UI | Removed theme switcher and sand/sage/paper themes; green lichen theme only | Claude, for Gavin | this push | D-005 |
