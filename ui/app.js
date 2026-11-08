@@ -297,15 +297,10 @@
     $("rSizeBox").hidden = !!v1; document.querySelector(".reco").classList.toggle("single", !!v1);
     if (v1 && !out.sizeTons) {
       $("rReco").textContent = "Keep your gas furnace for now";
-      $("rRecoSub").textContent = `At $${v1.lam.toLocaleString()} per tonne of CO₂ the model finds a heat pump costs more than it's worth. Turn the dial below up to see when that changes.`;
     } else if (v1) {
       $("rReco").textContent = `A ${out.sizeTons}-ton (${v1.sizeKbtuh},000 BTU/h) cold-climate heat pump`;
-      $("rRecoSub").textContent = `It would cover about ${pct(a.heatPump.heatPumpShare)} of your heating, with your ${backup} as backup. ` +
-        (v1.centerpointRule ? "A smart controller picks the heat pump or the furnace hour by hour, and the heat pump runs whenever it's above 40 °F, as CenterPoint's rebate requires." : "A smart controller picks the heat pump or the furnace hour by hour.");
     } else {
       $("rReco").textContent = `A ${out.sizeTons}-ton cold-climate heat pump`;
-      $("rRecoSub").textContent = `It would cover about ${pct(a.heatPump.heatPumpShare)} of your heating, with your ${backup} as backup for the coldest hours.` +
-        (out.sizeTons !== out.recommendedSizeTons ? ` For your priorities we'd suggest ${out.recommendedSizeTons} tons.` : "");
     }
     renderDial(out);
     if (!v1) $("rSizes").innerHTML = out.sizes.map(s => `<button data-size="${s.sizeTons}" aria-pressed="${s.sizeTons === out.sizeTons}">${s.sizeTons} t${s.sizeTons === out.recommendedSizeTons ? '<span class="star" aria-label="suggested">★</span>' : ""}</button>`).join("");

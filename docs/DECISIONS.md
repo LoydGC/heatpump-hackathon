@@ -280,3 +280,5 @@ _D-005 update (2026-11-08):_ Gavin: keep only the green "lichen" theme. The them
 _D-020 update (2026-11-08):_ Gavin: no citation list. Each numbered citation on the climate page is now a direct link (new tab) to its source; citations whose source has no URL (team data) show no marker. The Sources section and its tag legend are removed. Source data stays in `ui/regions.js` (`SOURCES`).
 
 _D-018 update (2026-11-08):_ Gavin: "less words is better words" on the results page. Removed the subtitle under the title, the model v1 / placeholder-numbers banner, and the notes list at the bottom. This overrides the earlier instruction to keep model v1 caveats visible on the page; the caveats are kept in `docs/REFERENCE_FACTS.md` ("Not guaranteed") and the installer report. The "ResStock reference" line stays, without its extra "comparison only" sentence.
+
+_D-018 update (2026-11-08):_ Gavin: removed the line under the suggestion headline (e.g. "It would cover about 89% of your heating…"). The headline recommendation stays.
