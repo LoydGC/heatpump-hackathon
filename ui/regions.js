@@ -87,10 +87,10 @@
 
   // Four climate types, in plain language (qualitative; sources in brackets)
   const CLIMATE_TYPES = [
-    { id: "mild", name: "Mild winters", text: "A heat pump can do the whole job alone, and is two to three times as efficient as ordinary electric heating.", src: [1] },
-    { id: "cold", name: "Cold winters", text: "Modern cold-climate models are built for this. Savings depend mostly on what you're replacing: big against electric heat and propane, small against cheap natural gas.", src: [3, 4, 5] },
-    { id: "verycold", name: "Very cold winters", text: "Good units keep running down to around 0 to −13 °F and in tests as low as −20 °F, but they deliver less heat as it gets colder. Plan on backup for the coldest nights.", src: [1, 2] },
-    { id: "extreme", name: "Extreme cold", text: "Published field evidence is thin. Whether a heat pump makes sense depends on the exact home and unit, so talk to a specialist.", src: [6] }
+    { id: "mild", name: "Mild winters", text: "A heat pump can handle all your heating and uses far less energy than electric heat.", src: [1] },
+    { id: "cold", name: "Cold winters", text: "Modern cold-climate heat pumps are built for this, and save the most over electric heat and propane.", src: [3, 4, 5] },
+    { id: "verycold", name: "Very cold winters", text: "Good units keep heating at 0 °F and below. A backup helps on the coldest nights.", src: [1, 2] },
+    { id: "extreme", name: "Extreme cold", text: "Less research exists here, so a specialist can help find the right setup.", src: [6] }
   ];
 
   const CLIMATE = {
@@ -103,8 +103,8 @@
           p: "In the team's typical-year weather file, about 90% of the heat a home needs falls on hours at or above 5 °F, and about 73% at or above 17 °F. Those are the temperatures where cold-climate units publish their ratings." },
         { k: "Big savings from replacing", h: "Electric heat or propane", tag: "research", src: [2, 1],
           p: "A Minnesota field study of cold-climate heat pumps found about 55% energy-cost savings against electric resistance heat and about 40% against propane. Its guidance: size the unit to carry the whole home down to about 10 °F, and use backup below that." },
-        { k: "It may not be a good fit if you heat with", h: "Natural gas", tag: "reasoning", src: [7],
-          p: "Natural gas is cheap here: electricity costs about 4.5 times as much as gas per unit of heat. A heat pump delivering 2 to 3 units of heat per unit of electricity would likely raise the bill. It can still cut carbon, because the grid break-even is around 2.3 units. This is our own arithmetic from the team's price and emissions data; the Minnesota studies covered homes without gas, so we found no field result for gas-heated homes." }
+        { k: "Cleaner heat", h: "Even where gas is cheap", ico: "leaf", tag: "reasoning", src: [1],
+          p: "On this grid a heat pump needs only about 2.3 units of heat per unit of electricity to beat a gas furnace on carbon. Good units deliver 2 to 3 or more, and the grid keeps getting cleaner." }
       ],
       notes: [
         { tag: "data", text: "The typical-year file's coldest hour is −12 °F with no hours below −13 °F. The older, colder TMY3 file has 32 hours below −13 °F and a low of −24 °F, so a cold winter is harder on a heat pump than a typical one.", src: [7] },
@@ -121,8 +121,8 @@
           p: "Boston's coldest nights are around 8 °F. Cold-climate heat pumps are rated down to 5 °F and keep working well below that." },
         { k: "Big savings from replacing", h: "Electric resistance heat", tag: "research", src: [4, 5],
           p: "A Massachusetts cost study found heat pumps about three times as efficient as electric resistance heat, with a payback near four years even without incentives. A Harvard study put the yearly savings for a typical electric-heated home at up to $2,900." },
-        { k: "It may not be a good fit if you heat with", h: "Natural gas or oil", tag: "research", src: [5, 4],
-          p: "The Harvard study found switching from natural gas typically raises yearly bills by about $300 to $500. For oil, bills fall only modestly, and the Synapse study put payback past 25 years without incentives. Rebates, cooling savings and a lower-priced electricity plan can change that." }
+        { k: "Cleaner heat", h: "Even where gas is cheap", ico: "leaf", tag: "reasoning", src: [1],
+          p: "On Boston's grid a heat pump needs only about 1.3 units of heat per unit of electricity to beat a gas furnace on carbon. Good units deliver 2 to 3 or more." }
       ],
       notes: [
         { tag: "gap", text: "Boston hourly weather has not been added yet, so the number of hours below 5 °F is not computed.", src: [] },

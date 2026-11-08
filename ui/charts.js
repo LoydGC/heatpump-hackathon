@@ -80,5 +80,43 @@
     svg.addEventListener("blur", hide);
   }
 
-  window.HPCharts = { lineChart };
+
+  /**
+   * tradeoffChart(host, opts): one dot per option, x = lifetime CO2, y = lifetime cost; lower-left is better.
+   * opts: { points:[{x, y, label, current?}], xFmt, yFmt, xTitle, yTitle, ariaLabel }
+   */
+  function tradeoffChart(host, o) {
+    host.innerHTML = ""; host.classList.add("chart-host");
+    const W = 640, H = 300, m = { l: 70, r: 24, t: 16, b: 52 }, iw = W - m.l - m.r, ih = H - m.t - m.b;
+    const pts = o.points.slice().sort((a, b) => a.x - b.x);
+    const xs = pts.map(p => p.x), ys = pts.map(p => p.y);
+    const pad = (a, b) => { const d = (b - a) || Math.abs(b) * 0.1 || 1; return [a - d * 0.12, b + d * 0.12]; };
+    let [x0, x1] = pad(Math.min(...xs), Math.max(...xs)), [y0, y1] = pad(Math.min(...ys), Math.max(...ys));
+    const xs_ = niceStep((x1 - x0) / 5), ys_ = niceStep((y1 - y0) / 4);
+    x0 = Math.floor(x0 / xs_) * xs_; x1 = Math.ceil(x1 / xs_) * xs_; y0 = Math.floor(y0 / ys_) * ys_; y1 = Math.ceil(y1 / ys_) * ys_;
+    const X = v => m.l + iw * (v - x0) / (x1 - x0), Y = v => m.t + ih * (1 - (v - y0) / (y1 - y0));
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, class: "chart", role: "img", "aria-label": o.ariaLabel || "" }, host);
+    for (let v = y0; v <= y1 + 1e-9; v += ys_) {
+      el("line", { x1: m.l, x2: m.l + iw, y1: Y(v), y2: Y(v), stroke: "var(--grid)", "stroke-width": 1 }, svg);
+      el("text", { x: m.l - 8, y: Y(v) + 4, "text-anchor": "end", class: "tick" }, svg).textContent = o.yFmt(v);
+    }
+    for (let v = x0; v <= x1 + 1e-9; v += xs_) el("text", { x: X(v), y: m.t + ih + 18, "text-anchor": "middle", class: "tick" }, svg).textContent = o.xFmt(v);
+    el("line", { x1: m.l, x2: m.l + iw, y1: m.t + ih, y2: m.t + ih, stroke: "var(--axis)" }, svg);
+    el("text", { x: m.l + iw / 2, y: H - 6, "text-anchor": "middle", class: "tick" }, svg).textContent = o.xTitle;
+    const yt = el("text", { x: 14, y: m.t + ih / 2, "text-anchor": "middle", class: "tick", transform: `rotate(-90 14 ${m.t + ih / 2})` }, svg); yt.textContent = o.yTitle;
+    el("polyline", { points: pts.map(p => `${X(p.x)},${Y(p.y)}`).join(" "), fill: "none", stroke: "var(--c-hp)", "stroke-width": 2, "stroke-linejoin": "round", opacity: 0.6 }, svg);
+    pts.forEach(p => {
+      if (p.current) return;
+      const g = el("circle", { cx: X(p.x), cy: Y(p.y), r: 5, fill: "var(--panel)", stroke: "var(--c-hp)", "stroke-width": 2 }, svg);
+      el("title", {}, g).textContent = p.label;
+    });
+    pts.filter(p => p.current).forEach(p => {
+      const g = el("circle", { cx: X(p.x), cy: Y(p.y), r: 8, fill: "var(--accent)", stroke: "var(--panel)", "stroke-width": 2 }, svg);
+      el("title", {}, g).textContent = p.label;
+      const left = X(p.x) > m.l + iw * 0.6;
+      el("text", { x: X(p.x) + (left ? -14 : 14), y: Y(p.y) - 12, "text-anchor": left ? "end" : "start", class: "end-label" }, svg).textContent = p.label;
+    });
+  }
+
+  window.HPCharts = { lineChart, tradeoffChart };
 })();

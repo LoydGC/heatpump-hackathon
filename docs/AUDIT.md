@@ -58,3 +58,15 @@ To filter by workstream: search the page for `| UI |`, `| Model |`, `| Data |` o
 | 2026-11-08 | repo | UI | Rewrote climate cards (all three regions) under the kicker+heading+body flow rule | Claude, for Gavin | this push | D-024 |
 | 2026-11-07 | repo | Data | Added docs/COMPARABLES.md and docs/comparables.html: comparable heat pump products research (no PR, no deploy; docs/ excluded from deploys) | Claude, for Gavin | this push | |
 | 2026-11-08 | merge | Infra | Merged dashboard branch (wizard, ResStock dropdowns, climate page) and comparables research into `main`; no deploy | Claude, for Gavin | this push | |
+| 2026-11-08 | repo | UI | Fast-forwarded branch onto main (cf872ba); removed Size groups toggle; Boston typical home now built from the Boston ResStock extract | Claude, for Gavin | this push | D-025 |
+| 2026-11-08 | repo | Data | Added `docs/REFERENCE_FACTS.md`: guaranteed facts from the ResStock extracts (Boston typical home, bins, medians) | Claude, for Gavin | this push | D-025 |
+| 2026-11-08 | repo | UI | Removed theme switcher and sand/sage/paper themes; green lichen theme only | Claude, for Gavin | this push | D-005 |
+| 2026-11-08 | repo | UI | Climate citations now link directly to sources; Sources list removed | Claude, for Gavin | this push | D-020 |
+| 2026-11-08 | repo | UI | Results page: removed subtitle, placeholder/model banner and notes list | Claude, for Gavin | this push | D-018 |
+| 2026-11-08 | repo | UI | Added cost-versus-carbon trade-off chart to results page (`ui/charts.js` tradeoffChart) | Claude, for Gavin | this push | D-018 |
+| 2026-11-08 | repo | UI | Moved the cost-vs-carbon dial to the home step under a new title; removed from results | Claude, for Gavin | this push | D-019 |
+| 2026-11-08 | repo | UI | Climate illustration: outdoor heat pump unit at half size, refrigerant lines re-attached | Claude, for Gavin | this push | |
+| 2026-11-08 | repo | UI | Removed the "may not be a good fit" climate card (Minneapolis, Boston); card grid now fits 2 or 3 cards | Claude, for Gavin | this push | D-024 |
+| 2026-11-08 | repo | UI | Shortened the four climate-type blurbs | Claude, for Gavin | this push | D-024 |
+| 2026-11-08 | repo | UI | Added "Cleaner heat / Even where gas is cheap" card (Minneapolis, Boston); R-07 in REFERENCE_FACTS | Claude, for Gavin | this push | D-024 |
+| 2026-11-08 | repo | UI | Removed the "modern cold-climate models" paragraph from the heat pump definition | Claude, for Gavin | this push | |
