@@ -401,7 +401,7 @@ details.fold .fs{font-size:13px}
         <h3 style="margin-top:10px">Describe your home</h3>
         <p class="muted" style="font-size:14px;margin-top:4px">Change anything that's different for you. Fields you don't touch keep the typical value.</p>
         <div class="form-grid">
-          <div class="f"><label for="sbin">Home size (sq ft) <span class="src" data-src="sizeBin"></span></label><select id="sbin"></select></div>
+          <div class="f"><label for="sqft">Home size (sq ft) <span class="src" data-src="floorAreaSqft"></span></label><input id="sqft" type="number" min="500" max="4000" step="50"></div>
           <div class="f"><label for="heat">Heating today <span class="src" data-src="currentHeat"></span></label><select id="heat"></select></div>
           <div class="f"><label for="tstat">Thermostat in winter (°F) <span class="src" data-src="thermostatF"></span></label><input id="tstat" type="number" min="55" max="78" step="1"></div>
         </div>
@@ -411,8 +411,6 @@ details.fold .fs{font-size:13px}
           <div class="form-grid">
             <div class="f"><label for="elec">Electricity ($/kWh) <span class="src" data-src="electricityUsdPerKWh"></span></label><input id="elec" type="number" min="0" step="0.01"></div>
             <div class="f"><label for="fuelPrice"><span id="fuelPriceL">Fuel price</span> <span class="src" data-src="fuelUsdPerUnit"></span></label><input id="fuelPrice" type="number" min="0" step="0.01"></div>
-            <div class="f"><label for="rebates">Rebates you expect ($) <span class="src" data-src="rebatesUsd"></span></label><input id="rebates" type="number" min="0" step="100"></div>
-            <div class="f"><label for="costTon">Installed cost ($ per ton) <span class="src" data-src="installedUsdPerTon"></span></label><input id="costTon" type="number" min="0" step="250"></div>
             <div class="f"><label for="ua">Heat loss (W per °F) <span class="src" data-src="heatLossWPerF"></span></label><input id="ua" type="number" min="20" step="5"><p class="hint muted">Set from your home's size and construction. Change it if you have an energy audit.</p></div>
           </div>
         </details>
@@ -474,7 +472,7 @@ details.fold .fs{font-size:13px}
       <p class="muted" style="margin:-2px 0 14px" id="rebIntro">Pick your household income compared with your area median to add an income-based rebate.</p>
       <div id="stdBox" hidden><div class="seg" id="rebSeg"><button data-reb="1"></button><button data-reb="0"></button></div><p id="rebLede"></p></div>
       <div id="incBox"><p class="wl" id="incL">Income-based rebate <span class="muted" style="font-weight:500">(your household income vs. area median)</span></p>
-        <div class="seg seg3" role="group" aria-labelledby="incL" id="incSeg"><button data-inc="full">80% or less<br><small>$8,000</small></button><button data-inc="partial">80–150%<br><small>$4,000</small></button><button data-inc="none">Over 150%<br><small>None</small></button></div>
+        <div class="seg seg3" role="group" aria-labelledby="incL" id="incSeg"><button data-inc="full">80% or less<br><small>up to $8,000</small></button><button data-inc="partial">80–150%<br><small>up to $4,000</small></button><button data-inc="none">Over 150%<br><small>None</small></button></div>
         <p class="muted wn" id="incLede"></p></div>
       <div class="reb-total" id="rebTotal"></div>
     </div>

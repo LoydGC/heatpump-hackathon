@@ -13,7 +13,7 @@
   // ---------- State ----------
   // Income-based rebate tiers (HEAR as in apply_rebate.py): share of area median income -> rebate cap in dollars.
   const INCOME_USD = { none: 0, partial: 4000, full: 8000 };
-  const incomeUsd = () => state.regionId === "minneapolis" ? INCOME_USD[state.income] : 0;   // income tiers apply to Minneapolis only
+  const incomeUsd = () => INCOME_USD[state.income];   // used by model v1 only; other models compute the rebate from the notebook rule (rebateType)
   const blank = () => ({ regionId: null, maxStep: 0, overrides: {}, priority: 0.5, prioSet: false, sizeTons: null, usedTypical: true, rebatesOn: true, income: "none", cold: false, acCredit: false });
   let state = blank();
   try { const s = JSON.parse(sessionStorage.getItem("hp-wizard")); if (s && (s.regionId === null || REGIONS[s.regionId])) state = Object.assign(blank(), s); } catch (e) {}
@@ -32,7 +32,7 @@
 
   // ---------- Model v1 (Minneapolis) ----------
   const V1 = window.HeatPumpModelV1;
-  const DEFAULT_LAM_IDX = 10;                       // $500/t: about where the model's heat pump starts to win
+  const DEFAULT_LAM_IDX = 8;                        // $300/t: the notebook's default carbon price (dollars_per_ton_co2)
   const DIAL_STEPS = 12;                            // 13 slider positions = the model's lambda grid
   const dialIdx = () => state.prioSet ? Math.round(state.priority * DIAL_STEPS) : (isV1(region()) ? DEFAULT_LAM_IDX : DIAL_STEPS / 2);  // stand-in default = balanced
   const isV1 = r => !!r && r.id === V1.regionId && V1.loaded();
@@ -69,9 +69,9 @@
   const cellOf = (r, type, lvl, bin) => (RS.cells[r.id] || {})[`${type}|${lvl}|${bin}`] || null;
   const hasRS = r => !!RS.cells[r.id];
   function selection(r, ov) {
-    const type = ov.homeType || "sfd", lvl = "fine";  // 7 ResStock size bins only (the 4-group toggle was removed)
+    const type = ov.homeType || "sfd", lvl = "fine", own = ov.floorAreaSqft > 0 ? ov.floorAreaSqft : null;  // 7 ResStock size bins only (the 4-group toggle was removed)
     const list = binList(lvl), dflt = binFor(lvl, r.typicalHome.floorAreaSqft);
-    const want = list.includes(ov.sizeBin) ? ov.sizeBin : dflt;
+    const want = own ? binFor(lvl, own) : list.includes(ov.sizeBin) ? ov.sizeBin : dflt;
     let bin = want;
     if (hasRS(r) && !(cellOf(r, type, lvl, want) || {}).n) {
       const wi = list.indexOf(want);
@@ -79,7 +79,7 @@
       if (ok.length) bin = ok[0][0];
     }
     const cell = cellOf(r, type, lvl, bin), i = list.indexOf(bin);
-    return { type, lvl, want, bin, fellBack: bin !== want, cell, sqft: cell && cell.sqft ? cell.sqft : BIN_MID[lvl][i] };
+    return { type, lvl, want, bin, fellBack: bin !== want, cell, sqft: own || (cell && cell.sqft ? cell.sqft : BIN_MID[lvl][i]) };
   }
   const typeLabel = id => (HOME_TYPES.find(t => t.id === id) || HOME_TYPES[0]).label;
   const selText = sel => `${typeLabel(sel.type).split(" (")[0].toLowerCase()}, ${binLabel(sel.bin)} sq ft`;
@@ -110,7 +110,7 @@
       heatLossWPerF: Math.round(sqft * ENVELOPES[env].wPerFPerSqft / 5) * 5,
       electricityUsdPerKWh: r.electricityUsdPerKWh,
       fuelUsdPerUnit: heat === "electric" ? (ov.electricityUsdPerKWh ?? r.electricityUsdPerKWh) : r.fuelPrices[heat],
-      rebatesUsd: r.rebatesUsd + (heat === "gas" && r.rebateIfGasBackupUsd ? r.rebateIfGasBackupUsd : 0),
+      rebatesUsd: 0,   // rebates follow the notebook rule: none / partial / full (see rebateType)
       installedUsdPerTon: INSTALLED_USD_PER_TON,
       timeOfUse: false
     };
@@ -136,7 +136,7 @@
       prices: { electricityUsdPerKWh: h.electricityUsdPerKWh, fuelUsdPerUnit: fuelPrice, fuelUnit: f.unit, timeOfUse: tou == null ? !!h.timeOfUse : tou,
                 fuelUsdPerKWhHeat: fuelPrice / (f.kwh * f.eff) },
       emissions: { gridKgCo2PerKWh: r.gridKgCo2PerKWh, fuelKgCo2PerUnit: fuelCo2, fuelKgCo2PerKWhHeat: fuelCo2 / (f.kwh * f.eff) },
-      costs: { installedUsdPerTon: h.installedUsdPerTon, rebatesUsd: (rebatesOn ? h.rebatesUsd : 0) + incomeUsd(), lifetimeYears: LIFETIME_YEARS },
+      costs: { installedUsdPerTon: h.installedUsdPerTon, rebatesUsd: 0, rebateType: rebatesOn ? state.income : "none", lifetimeYears: LIFETIME_YEARS },
       priority: state.prioSet ? state.priority : (isV1(r) ? DEFAULT_LAM_IDX / DIAL_STEPS : state.priority),
       sizeTons: sizeTons ?? null,
       scenario: { coldWinter: state.cold, acCredit: state.acCredit, rebatesOn, incomeUsd: incomeUsd(), lamIdx: lamIdx ?? dialIdx() }  // used by model v1
@@ -225,9 +225,9 @@
   const heatSel = $("heat");
   Object.entries(FUELS).forEach(([k, f]) => { const o = document.createElement("option"); o.value = k; o.textContent = f.label; heatSel.appendChild(o); });
   const FIELDS = [ // [inputId, key, parse]
-    ["heat", "currentHeat", String], ["tstat", "thermostatF", Number],
-    ["elec", "electricityUsdPerKWh", Number], ["fuelPrice", "fuelUsdPerUnit", Number], ["rebates", "rebatesUsd", Number],
-    ["costTon", "installedUsdPerTon", Number], ["ua", "heatLossWPerF", Number]
+    ["heat", "currentHeat", String], ["sqft", "floorAreaSqft", Number], ["tstat", "thermostatF", Number],
+    ["elec", "electricityUsdPerKWh", Number], ["fuelPrice", "fuelUsdPerUnit", Number],
+    ["ua", "heatLossWPerF", Number]
   ];
   function setOverride(key, val) {
     const r = region(), d = typical(r, state.overrides);
@@ -242,7 +242,6 @@
     $(id).addEventListener("change", e => setOverride(key, e.target.value === "" ? "" : parse(e.target.value)));
   });
   // Home type + size dropdowns (ResStock options)
-  $("sbin").addEventListener("change", e => setOverride("sizeBin", e.target.value));
 
   function renderHome(skipKey) {
     const r = region(); if (!r) return;
@@ -253,9 +252,6 @@
 
 
     FIELDS.forEach(([id, key]) => { if (key !== skipKey || id === "heat") $(id).value = h[key]; });
-    const sel = selection(r, state.overrides), lvlBins = binList(sel.lvl);
-    $("sbin").innerHTML = lvlBins.filter(b => !hasRS(r) || (cellOf(r, sel.type, sel.lvl, b) || {}).n)
-      .map(b => `<option value="${b}"${b === sel.bin ? " selected" : ""}>${binLabel(b)} sq ft</option>`).join("");
     $("fuelPriceL").textContent = h.currentHeat === "electric" ? "Fuel price (same as electricity)" : `${f.short[0].toUpperCase() + f.short.slice(1)} ($ per ${f.unit})`;
     $("fuelPrice").disabled = h.currentHeat === "electric";
     document.querySelectorAll("[data-src]").forEach(s => {
@@ -445,7 +441,7 @@
     const { w, wo } = await bothRebateCases(out);
     const reb = w.upfront.rebatesUsd, life = out.lifetimeYears;
     $("rebLede").textContent = reb > 0
-      ? `Counting about ${money(Math.min(h.rebatesUsd, w.upfront.installedUsd))} off the upfront cost.`
+      ? `Counting about ${money(reb)} off the upfront cost.`
       : `No rebates counted for this home. Add one under "Prices, rebates and other details" on the home step.`;
     $("rebSeg").querySelectorAll("button").forEach(b => {
       b.setAttribute("aria-pressed", (b.dataset.reb === "1") === state.rebatesOn);
@@ -455,13 +451,12 @@
       b.setAttribute("aria-pressed", b.dataset.inc === state.income);
       b.onclick = () => { state.income = b.dataset.inc; save(); renderResults(); };
     });
-    $("rebTotal").innerHTML = incomeUsd()
-      ? `Income-based rebate: ${money(incomeUsd())}<small>${w.sizeTons ? `Your upfront cost comes down to ${money(w.upfront.netUsd)}.` : "It comes off the cost of a heat pump. At this setting of the dial we suggest keeping your gas furnace, so nothing is counted yet."}</small>`
+    $("rebTotal").innerHTML = state.income !== "none"
+      ? `Income-based rebate: ${money(w.upfront.rebatesUsd)}<small>${w.sizeTons ? `Your upfront cost comes down to ${money(w.upfront.netUsd)}.` : "It comes off the cost of a heat pump. At this setting of the dial we suggest keeping your gas furnace, so nothing is counted yet."}</small>`
       : `Income-based rebate: none<small>Choose a range above if your household qualifies.</small>`;
-    $("incBox").hidden = $("whatIf").hidden = r.id !== "minneapolis"; 
-    const incAmt = incomeUsd();
-    $("incLede").textContent = incAmt === 8000 ? "Income at or under 80% of area median: the full $8,000 rebate, counted above."
-      : incAmt === 4000 ? "Income between 80% and 150% of area median: half the rebate, $4,000, counted above."
+    $("incBox").hidden = $("whatIf").hidden = false;
+    $("incLede").textContent = state.income === "full" ? "Income at or under 80% of area median: the full rebate, up to $8,000, counted above."
+      : state.income === "partial" ? "Income between 80% and 150% of area median: half the cost, up to $4,000, counted above."
       : "Income over 150% of area median: no income-based rebate.";
     const row = (k, a, b, d, on) => `<tr class="${on ? "on" : ""}"><td>${k}</td><td>${a}</td><td>${b}</td><td class="diff">${d}</td></tr>`;
     const dlt = (x, y, fmt) => { const v = x - y; return v === 0 ? "—" : fmt(v); };
@@ -509,15 +504,14 @@
     const stat = id => (RB.STATUS[id] || id);
     const ov0 = state.overrides;
     const rows = [
-      ["Home type and size", selText(selection(r, ov0)).replace(/^./, c => c.toUpperCase()), "sizeBin"],
+      ["Home type and size", `${Math.round(selection(r, ov0).sqft).toLocaleString()} sq ft`, "sizeBin"],
       ["How well it holds heat", ENVELOPES[h.envelope].label, "envelope"],
       ["Current heating", f.label, "currentHeat"],
       ["Winter thermostat", `${h.thermostatF} °F`, "thermostatF"],
       ["Heat loss", `${h.heatLossWPerF} W per °F`, "heatLossWPerF"],
       ["Electricity price", `$${h.electricityUsdPerKWh.toFixed(3)} per kWh`, "electricityUsdPerKWh"],
       ...(h.currentHeat === "electric" ? [] : [[`${f.short[0].toUpperCase() + f.short.slice(1)} price`, `$${h.fuelUsdPerUnit.toFixed(2)} per ${f.unit}`, "fuelUsdPerUnit"]]),
-      ["Rebates", money(h.rebatesUsd), "rebatesUsd"],
-      ["Installed cost", `$${h.installedUsdPerTon.toLocaleString()} per ton`, "installedUsdPerTon"]
+      ["Income range", { full: "80% of area median or less", partial: "80–150% of area median", none: "Over 150% of area median" }[state.income], "income"]
     ];
     const questions = [
       "Will you do a full Manual J load calculation for my home, and can I have a copy?",
@@ -571,7 +565,7 @@
 
       <section><h2>4. Rebates I may qualify for</h2>
         <table><thead><tr><th>Program</th><th>Status</th><th>What it pays / where</th></tr></thead><tbody>${progs}</tbody></table>
-        <p style="margin-top:4pt"><b>Rebates counted in the numbers below:</b> ${money(h.rebatesUsd)} total.</p>
+        <p style="margin-top:4pt"><b>Rebates counted in the numbers below:</b> ${money(w.upfront.rebatesUsd)} total.</p>
         <p><b>Paperwork to bring or ask the installer about:</b></p>
         <ul>${rb.paperwork.map(p => `<li>${esc(p)}</li>`).join("")}</ul></section>
 

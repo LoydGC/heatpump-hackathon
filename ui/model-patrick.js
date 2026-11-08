@@ -34,6 +34,8 @@
     return (cache[region.id] = { temps, month });
   }
 
+  const nbCapital = t => t > 0 ? 1075.2 * t + 1193 : 0;   // model.ipynb capital_cost(tons)
+  const nbRebate = (cost, type) => type === 'full' ? Math.min(cost, 8000) : type === 'partial' ? Math.min(cost / 2, 4000) : 0;   // model.ipynb get_rebate
   function interp(xs, ys, x) {
     if (x <= xs[0]) return ys[0]; if (x >= xs[xs.length - 1]) return ys[ys.length - 1];
     for (let i = 1; i < xs.length; i++) if (x <= xs[i]) return ys[i - 1] + (ys[i] - ys[i - 1]) * (x - xs[i - 1]) / (xs[i] - xs[i - 1]);
@@ -74,7 +76,7 @@
       today: { costUsd: sum("today", "costUsd"), co2Kg: sum("today", "co2Kg"), heatKWh: r.load },
       heatPump: { costUsd: sum("heatPump", "costUsd"), co2Kg: sum("heatPump", "co2Kg"), electricityKWh: r.elec, heatPumpShare: r.load ? r.hpHeat / r.load : 0 }
     };
-    const installedUsd = sizeTons * inp.costs.installedUsdPerTon, rebatesUsd = Math.min(inp.costs.rebatesUsd, installedUsd), netUsd = installedUsd - rebatesUsd;
+    const installedUsd = nbCapital(sizeTons), rebatesUsd = nbRebate(installedUsd, inp.costs.rebateType), netUsd = installedUsd - rebatesUsd;
     const save = annual.today.costUsd - annual.heatPump.costUsd, life = inp.costs.lifetimeYears;
     return {
       sizeTons, monthly: r.monthly, annual, upfront: { installedUsd, rebatesUsd, netUsd }, paybackYears: save > 0 ? netUsd / save : null,
