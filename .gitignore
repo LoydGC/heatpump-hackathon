@@ -33,3 +33,7 @@ desktop.ini
 id_rsa*
 secrets.*
 .npmrc
+
+# Gurobi license (never commit)
+gurobi.lic
+*.lic
