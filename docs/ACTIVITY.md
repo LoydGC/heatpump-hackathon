@@ -2,7 +2,7 @@
 
 > **Auto-generated, do not edit by hand.** Regenerate with `update-activity-windows.bat` / `update-activity-mac.command` (double-click) or `python tools/activity.py`, then commit. Workstreams come from the folder map in [WORKSTREAMS.md](WORKSTREAMS.md). Hand-written records are in [AUDIT.md](AUDIT.md) and [DECISIONS.md](DECISIONS.md).
 
-Generated 2026-11-07 22:04 UTC from 12 branches, 33 commits (merge commits excluded). A commit touching several workstreams counts once for each.
+Generated 2026-11-07 22:10 UTC from 10 branches, 35 commits (merge commits excluded). A commit touching several workstreams counts once for each.
 
 ## By workstream
 
@@ -10,15 +10,15 @@ Generated 2026-11-07 22:04 UTC from 12 branches, 33 commits (merge commits exclu
 |---|---|---|---|
 | UI | 10 | Claude | 2026-11-07 |
 | Model | 1 | sharvis3 | 2026-11-07 |
-| Data | 7 | Claude, Matteo-P58, sharvis3 | 2026-11-07 |
-| Infra | 24 | Claude, Gavin Loyd | 2026-11-07 |
+| Data | 8 | Claude, Matteo-P58, sharvis3 | 2026-11-07 |
+| Infra | 26 | Claude, Gavin Loyd | 2026-11-07 |
 
 ## By author
 
 | Author | UI | Model | Data | Infra | Other | Last commit |
 |---|---|---|---|---|---|---|
+| Claude | 10 |  | 4 | 25 |  | 2026-11-07 |
 | sharvis3 |  | 1 | 3 |  |  | 2026-11-07 |
-| Claude | 10 |  | 3 | 23 |  | 2026-11-07 |
 | Gavin Loyd |  |  |  | 1 |  | 2026-11-07 |
 | Matteo-P58 |  |  | 1 |  |  | 2026-11-07 |
 
@@ -28,15 +28,13 @@ Commits not yet on `main`. Branches at 0 are fully merged.
 
 | Branch | Not on main | Workstreams | Authors | Last commit | Last message |
 |---|---|---|---|---|---|
-| `claude/project-thread-6h36e8` | 6 | UI, Infra | Claude | 2026-11-07 | Results: high-level first, details folded; rebates explainer on its own page |
+| `claude/project-thread-6h36e8` | 7 | UI, Infra | Claude | 2026-11-07 | Resolve merge in AUDIT.md and regenerate ACTIVITY.md |
 | `claude/project-thread-czssmr` | 1 | Infra | Claude | 2026-11-07 | Add comparable products research (COMPARABLES.md and comparables.html) |
 | `claude/project-thread-ez6q50` | 1 | UI, Infra | Claude | 2026-11-07 | Rebuild dashboard as gated 4-step wizard with placeholder model stub |
 | `claude/project-thread-yrtzah` | 0 | — | — | 2026-11-07 | Add .vercelignore so deploys upload only site files |
 | `claude/project-thread-5j68ss` | 0 | — | — | 2026-11-07 | Regenerate docs/ACTIVITY.md |
 | `claude/project-thread-73yxqe` | 0 | — | — | 2026-11-07 | Add Vercel Hobby guardrails doc and .gitignore for secrets |
 | `claude/project-thread-fr56yz` | 0 | — | — | 2026-11-07 | Replace dark mode with four light organic theme options |
-| `claude/project-thread-v8ph55` | 0 | — | — | 2026-11-07 | Merge branch 'main' of https://github.com/LoydGC/heatpump-hackathon |
-| `work` | 0 | — | — | 2026-11-07 | Merge branch 'main' of https://github.com/LoydGC/heatpump-hackathon |
 | `claude/project-thread-qsvufv` | 0 | — | — | 2026-11-07 | Add DATASETS.md: weather, NREL home energy, fuel cost and emissions sources |
 | `claude/project-thread-7tez5a` | 0 | — | — | 2026-11-07 | Strip repo to challenge statement only |
 
@@ -44,6 +42,8 @@ Commits not yet on `main`. Branches at 0 are fully merged.
 
 | Date | Commit | Workstreams | Author | Where | Message |
 |---|---|---|---|---|---|
+| 2026-11-07 | `caf39aa` | Infra | Claude | `claude/project-thread-6h36e8` | Resolve merge in AUDIT.md and regenerate ACTIVITY.md |
+| 2026-11-07 | `77da7a1` | Data, Infra | Claude | main | Restore data/processed and data/scripts; fix folder references |
 | 2026-11-07 | `1c420fe` | UI, Infra | Claude | `claude/project-thread-6h36e8` | Results: high-level first, details folded; rebates explainer on its own page |
 | 2026-11-07 | `62a7c1d` | UI, Infra | Claude | `claude/project-thread-6h36e8` | Front page: new headline with location question as subheader |
 | 2026-11-07 | `597dcf0` | UI, Infra | Claude | `claude/project-thread-6h36e8` | Add heat pump vs heat pump + smart meter comparison to results |
@@ -97,6 +97,7 @@ Commits not yet on `main`. Branches at 0 are fully merged.
 
 ## Data: all commits
 
+- 2026-11-07 `77da7a1` Claude: Restore data/processed and data/scripts; fix folder references (`data/README.md`, `data/processed/hp_carrier_37MUHAQ_heating_curves.csv`, `data/processed/miso_hourly_grid_carbon_2025.csv`, `data/processed/model_inputs_minneapolis.json`, `data/processed/msp_weather_TMY3.csv` +4 more)
 - 2026-11-07 `03f1f59` sharvis3: model_v1 (`data/models/model_v1/.gitignore`, `data/models/model_v1/README.md`, `data/models/model_v1/check_data.py`, `data/models/model_v1/data.py`, `data/models/model_v1/export_frontend.py` +28 more)
 - 2026-11-07 `49460e6` sharvis3: added data, removed zip (`data.zip`, `data/raw/ashrae/ASHRAE_MINNEAPOLIS-ST_PAUL_INTL_AP.pdf`, `data/raw/eia/Table_1.11_Heating_Degree-Days_by_Census_Division.xlsx`, `data/raw/emissions/emission_factors.csv`, `data/raw/grid/miso_part1.txt` +70 more)
 - 2026-11-07 `b7e8b32` sharvis3: Add files via upload (`data.zip`)
@@ -107,6 +108,8 @@ Commits not yet on `main`. Branches at 0 are fully merged.
 
 ## Infra: all commits
 
+- 2026-11-07 `caf39aa` Claude: Resolve merge in AUDIT.md and regenerate ACTIVITY.md (`docs/ACTIVITY.md`, `docs/AUDIT.md`)
+- 2026-11-07 `77da7a1` Claude: Restore data/processed and data/scripts; fix folder references (`.vercelignore`, `README.md`, `docs/ACTIVITY.md`, `docs/AUDIT.md`, `docs/DECISIONS.md` +2 more)
 - 2026-11-07 `1c420fe` Claude: Results: high-level first, details folded; rebates explainer on its own page (`docs/ACTIVITY.md`, `docs/AUDIT.md`, `docs/DECISIONS.md`)
 - 2026-11-07 `62a7c1d` Claude: Front page: new headline with location question as subheader (`docs/ACTIVITY.md`, `docs/AUDIT.md`)
 - 2026-11-07 `597dcf0` Claude: Add heat pump vs heat pump + smart meter comparison to results (`docs/ACTIVITY.md`, `docs/AUDIT.md`, `docs/DECISIONS.md`)

@@ -34,6 +34,12 @@ Add a row here with each new entry.
 | D-011 | 2026-11-07 | Infra | Deploys upload only site files (`.vercelignore`) | active |
 | D-012 | 2026-11-07 | Infra | Broaden `.gitignore` beyond secrets | active |
 | D-013 | 2026-11-07 | Data | Restore data/processed and scripts; deploy `frontend_data.json` | active |
+| D-014 | 2026-11-07 | UI | Replace single dashboard with a gated 4-step guided flow | active |
+| D-015 | 2026-11-07 | UI | Rebates section: cost effect and sources, with verify caveats | active |
+| D-016 | 2026-11-07 | UI | Installer report via browser print, no library | active |
+| D-017 | 2026-11-07 | UI | Smart meter is a simple toggle for now; flesh out later | active |
+| D-018 | 2026-11-07 | UI | Results show high-level answers first; rebate explainer on its own page | active |
+| D-019 | 2026-11-07 | UI | Map the front end to model v1 for Minneapolis; add carbon-price dial | active |
 
 ## How to add an entry
 
@@ -154,4 +160,51 @@ Anyone (teammate or Claude thread) who makes a decision that affects the repo, t
 - **Verified:** `pytest` in `model/` passes (6 tests); re-running `python3 sweep.py` reproduces the committed `model/results/sweep.csv` exactly (max difference 0.0). The `.vercelignore` re-include is **not tested on Vercel**: after the next manual deploy, check that `/model/results/frontend_data.json` returns 200.
 - **Decided by:** Gavin.
 - **Refs:** this push, `.vercelignore`, `data/README.md`.
+### D-014 · 2026-11-07 · Replace single dashboard with a gated 4-step guided flow
+- **Workstream:** UI
+- **Decision:** `index.html` is now a wizard: 1 location ("Where is your home for a heat pump?"), 2 plain-language climate summary with a heat pump illustration, 3 home details (optional; location alone gives a typical synthetic home for the region), 4 results separated into Carbon, Money and Bigger-or-smaller sections with charts. Back navigation works; forward only through completed steps; changing an earlier answer updates later pages. Supported regions: Boston, Minneapolis–St. Paul, Montréal, Fairbanks (typed city/ZIP is matched to these; no geocoding service, so other places are unsupported). Results come from a placeholder model behind `window.HeatPumpModel`; the handoff shape is in `docs/INTERFACES.md`. Still static, no build step; same four light themes via `?theme=`.
+- **Why:** Gavin wanted a human-friendly, guided experience instead of an inputs-and-chart dashboard.
+- **Decided by:** Gavin.
+- **Refs:** branch `claude/project-thread-ez6q50`.
+- **Status:** active (numbers are placeholders until the Model workstream plugs in)
+
+### D-015 · 2026-11-07 · Rebates section: show cost effect and explain sources, with verify caveats
+- **Workstream:** UI
+- **Decision:** Results page gets a Rebates section: a With/Without rebates toggle that re-runs the model (the toggle drives the whole page), an always-visible side-by-side table (upfront, break-even, lifetime cost, saved vs today), a plain-language "where rebates come from" explainer, and per-region program cards (Mass Save, Xcel/CenterPoint, Hydro-Québec LogisVert, AHFC) with official links. Content lives in `ui/rebates.js` as snapshots dated 2026-11-07. Findings flagged: federal 25C ended 12/31/2025; DOE reportedly ended fuel-switching use of IRA home rebates (June 2026, trade press); Alaska's program not launched; CenterPoint page showed $400 vs $1,100 in data.zip. Calculator rebate defaults were NOT changed.
+- **Why:** Gavin wanted rebate effects on cost metrics and a qualitative explanation of where rebates come from.
+- **Decided by:** Gavin (request); Claude (content and layout).
+- **Refs:** branch `claude/project-thread-6h36e8`.
+- **Status:** active (Data workstream should verify and own the figures)
+
+### D-016 · 2026-11-07 · Installer report via browser print, no library
+- **Workstream:** UI
+- **Decision:** "Download your report (PDF)" fills a hidden `#report` element and calls `window.print()`; a `@media print` stylesheet hides everything else, so "Save as PDF" in the print dialog gives a clean Letter-size document. No PDF library, CDN, secrets or server. Report covers location and design temp, home details tagged typical vs user-entered, load and size range, backup heat, rebates and paperwork, cost and CO2 with/without rebates, installer questions, document checklist, and a not-a-Manual-J disclaimer.
+- **Why:** Static-site constraint (Vercel Hobby), no paid services, smallest dependency footprint. Tradeoff: user must choose "Save as PDF" in the dialog.
+- **Decided by:** Gavin (request); Claude (approach).
+- **Refs:** branch `claude/project-thread-6h36e8`.
 - **Status:** active
+
+### D-017 · 2026-11-07 · Smart meter stays a simple toggle for now
+- **Workstream:** UI
+- **Decision:** The smart meter is a visible checkbox on the Your home step (`inputs.prices.timeOfUse`; the stub applies 10% cheaper electricity). No usage-data upload or Green Button support yet. **TODO (needs fleshing out):** define what a smart meter changes (real time-of-use rates per utility from the Data pack, hourly usage to calibrate heat loss, optional upload of Green Button/CSV or monthly totals), and have the Model use hourly prices instead of the flat 10%.
+- **Why:** Gavin: not ready for the upload idea; just a toggle for now.
+- **Decided by:** Gavin.
+- **Refs:** branch `claude/project-thread-6h36e8`.
+- **Update (same day):** Gavin wants the framing "heat pump + meter vs heat pump + no meter" (you're already doing this, why not add a meter). Results now have an "Add a smart meter?" side-by-side (bill, break-even, lifetime cost) and a toggle that applies it page-wide; the home-step checkbox means "I already have one". Still the flat 10% placeholder, meter cost assumed zero.
+- **Status:** active (open TODO)
+
+### D-018 · 2026-11-07 · Results: high level first; rebate explainer on a separate page
+- **Workstream:** UI
+- **Decision:** Results page shows only the suggestion, four headline tiles (yearly bill, upfront after rebates, break-even, CO2 cut per year), a "What if..." row (rebates on/off, smart meter on/off), the PDF button and a "Learn about rebates" button. Carbon, Money, the rebate/meter comparison tables and "Bigger or smaller?" are collapsed sections. The qualitative rebate content (sources, regional programs, links, caveat) is a separate sub-page `#rebates` reached only from results (it counts as step 4 in the nav; direct links fall back if results were not reached) with a back button.
+- **Why:** Gavin: the results page was overwhelming; rebate details should be a page you choose to visit.
+- **Decided by:** Gavin.
+- **Refs:** branch `claude/project-thread-6h36e8`.
+- **Status:** active
+
+### D-019 · 2026-11-07 · Map the front end to model v1 (Minneapolis); carbon-price dial
+- **Workstream:** UI
+- **Decision:** For Minneapolis the results page reads `model/results/frontend_data.json` (adapter `ui/model-v1.js`); Boston, Montréal and Fairbanks keep the placeholder stub, and the page labels which is which. New "How much do you care about CO2?" dial on results snaps to the model's lambda grid ($0 to $1,000 per tonne) and shows the recommendation, whether a heat pump beats gas, and $/tonne; a table shows every setting. Smart meter toggle maps to flat vs time-of-use tariff; winter and AC-replacement toggles map to the weather and credit axes. The UI states everywhere (results banner, notes, footer, PDF, INTERFACES.md) that **v1 is not exactly what the end model will be, but is closer to what the team is thinking**, and lists its placeholder inputs: installed cost, rebates, TOU rates, AC credit, average (not marginal) grid intensity, discount rate 0, one fixed house. Field mapping is in INTERFACES.md ("Model v1 mapping"). Default dial position is $500/t (about where the heat pump starts to win), not the lowest setting.
+- **Why:** Gavin: v1 is closer to the intended model; map the front end to it and add a slider.
+- **Decided by:** Gavin (request); Claude (mapping).
+- **Refs:** branch `claude/project-thread-6h36e8`; model by sharvis3.
+- **Status:** active (supersede when the end model lands)
