@@ -71,3 +71,4 @@ To filter by workstream: search the page for `| UI |`, `| Model |`, `| Data |` o
 | 2026-11-08 | repo | UI | Added "Cleaner heat / Even where gas is cheap" card (Minneapolis, Boston); R-07 in REFERENCE_FACTS | Claude, for Gavin | this push | D-024 |
 | 2026-11-08 | repo | UI | Removed the "modern cold-climate models" paragraph from the heat pump definition | Claude, for Gavin | this push | |
 | 2026-11-08 | repo | UI | Moved cumulative-cost and monthly-bill charts and the monthly table out of the Money fold onto the results page | Claude, for Gavin | this push | D-018 |
+| 2026-11-08 | repo | UI | Hardened wizard step gating (hash, saved state) | Claude, for Gavin | this push | D-026 |
