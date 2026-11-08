@@ -48,7 +48,7 @@
       fuelPrices: { gas: 1.20, oil: 4.00, propane: 2.50, electric: 0.12, wood: 300, kerosene: 4.30 }, // gas and electric: model.ipynb defaults ($1.20/therm, $0.12/kWh); others placeholder
       rebatesUsd: 2000,                  // Xcel cold-climate ducted rebate; +$1,100 CenterPoint if gas furnace kept
       rebateIfGasBackupUsd: 1100,
-      typicalHome: { floorAreaSqft: 2000, envelope: "tight", currentHeat: "gas", thermostatF: 68,
+      typicalHome: { floorAreaSqft: 1500, envelope: "drafty", currentHeat: "gas", thermostatF: 68,   // model.ipynb defaults: square_footage 1500, set point 68, natural gas; insulation 2.5 (Not well)
                      why: "a mid-century house with a natural gas furnace, the most common setup in the area" }
     },
     fairbanks: {

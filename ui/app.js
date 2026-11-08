@@ -17,14 +17,14 @@
   // Income-based rebate tiers (HEAR as in apply_rebate.py): share of area median income -> rebate cap in dollars.
   const INCOME_USD = { none: 0, partial: 4000, full: 8000 };
   const incomeUsd = () => INCOME_USD[state.income];   // used by model v1 only; other models compute the rebate from the notebook rule (rebateType)
-  const blank = () => ({ regionId: null, maxStep: 0, overrides: {}, priority: 0.5, prioSet: false, sizeTons: null, usedTypical: true, rebatesOn: true, income: "none", cold: false, acCredit: false });
+  const blank = () => ({ regionId: null, maxStep: 0, overrides: {}, priority: 0.5, prioSet: false, sizeTons: null, usedTypical: true, rebatesOn: true, income: "partial", cold: false, acCredit: false });
   let state = blank();
   try { const s = JSON.parse(sessionStorage.getItem("hp-wizard")); if (s && (s.regionId === null || REGIONS[s.regionId])) state = Object.assign(blank(), s); } catch (e) {}
   // A saved or tampered state can't unlock pages: no region means step 1 only; never past the last page.
   state.maxStep = Math.max(0, Math.min(+state.maxStep || 0, 4));
   if (!state.regionId) state.maxStep = 0;
   delete state.overrides.homeType; delete state.overrides.envelope; delete state.overrides.timeOfUse;  // home type and heat-holding inputs were removed from the page
-  if (!INCOME_USD.hasOwnProperty(state.income)) state.income = "none";
+  if (!INCOME_USD.hasOwnProperty(state.income)) state.income = "partial";   // model.ipynb rebate_type default
   state.cold = false; state.acCredit = false;   // the model scenarios (cold winter, AC credit) were removed
   state.rebatesOn = true;               // standard utility rebates are always counted; only the income-based one is a control
   state.sizeTons = null;                // no size picker any more; the suggestion follows the dial
@@ -85,7 +85,7 @@
       if (ok.length) bin = ok[0][0];
     }
     const cell = cellOf(r, type, lvl, bin), i = list.indexOf(bin);
-    return { type, lvl, want, bin, fellBack: bin !== want, cell, sqft: own || (cell && cell.sqft ? cell.sqft : BIN_MID[lvl][i]) };
+    return { type, lvl, want, bin, fellBack: bin !== want, cell, sqft: own || r.typicalHome.floorAreaSqft || (cell && cell.sqft ? cell.sqft : BIN_MID[lvl][i]) };
   }
   const typeLabel = id => (HOME_TYPES.find(t => t.id === id) || HOME_TYPES[0]).label;
   const selText = sel => `${typeLabel(sel.type).split(" (")[0].toLowerCase()}, ${binLabel(sel.bin)} sq ft`;
@@ -246,6 +246,7 @@
     renderHome(key); save();
   }
   $("ins").addEventListener("input", e => setOverride("insulationR", INS_LEVELS[+e.target.value]));
+  $("income").addEventListener("change", e => { state.income = e.target.value; state.sizeTons = null; save(); });
   FIELDS.forEach(([id, key, parse]) => {
     $(id).addEventListener("change", e => setOverride(key, e.target.value === "" ? "" : parse(e.target.value)));
   });
@@ -260,6 +261,8 @@
 
 
     { const k = Math.max(0, INS_LEVELS.indexOf(h.insulationR)); $("ins").value = k; $("insVal").textContent = INS_LABELS[k]; }
+    $("income").value = state.income;
+    $("ua").closest(".f").hidden = isV1(r);   // the notebook model takes heating load from the matched ResStock home, not a heat-loss number
     FIELDS.forEach(([id, key]) => { if (key !== skipKey || id === "heat") $(id).value = h[key]; });
     $("fuelPriceL").textContent = h.currentHeat === "electric" ? "Fuel price (same as electricity)" : `${f.short[0].toUpperCase() + f.short.slice(1)} ($ per ${f.unit})`;
     $("fuelPrice").disabled = h.currentHeat === "electric";
@@ -302,7 +305,7 @@
       $("rReco").textContent = "Keep your gas furnace for now";
     } else if (out.nb && out.nb.winnerJson && out.nb.isWinner) {   // the notebook's winner.json row is the suggestion
       const W = out.nb.winnerJson;
-      $("rReco").textContent = `${out.nb.brand.replace(/_/g, " ").toLowerCase().replace(/^./, c => c.toUpperCase())} ${W.machine_profile}: a ${W.nominal_tons.toFixed(2)}-ton (${Math.round(W.nominal_tons * 12)},000 BTU/h) cold-climate heat pump`;
+      $("rReco").textContent = `${out.nb.brand.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, c => c.toUpperCase())} ${W.machine_profile}: a ${W.nominal_tons.toFixed(2)}-ton (${Math.round(W.nominal_tons * 12)},000 BTU/h) cold-climate heat pump`;
     } else {
       $("rReco").textContent = `A ${out.sizeTons}-ton (${Math.round(out.sizeTons * 12)},000 BTU/h) cold-climate heat pump`;
     }
@@ -353,7 +356,8 @@
         ["total_co2_kg", fx(nbw.total_co2_kg)], ["capital_cost_usd", "$" + fx(nbw.capital_cost_usd, 2)], ["rebate_usd", "$" + fx(nbw.rebate_usd, 2)],
         ["grand_operating_cost", "$" + fx(nbw.grand_operating_cost, 2)], ["ng_baseline_grand_cost", "$" + fx(nbw.ng_baseline_grand_cost, 2)],
         ["grand_operating_savings", "$" + fx(nbw.grand_operating_savings, 2)], ["net_capital_cost_usd", "$" + fx(nbw.net_capital_cost_usd, 2)],
-        ["grand_payback", nbw.grand_payback == null ? "none" : fx(nbw.grand_payback, 1) + " years"]].map(([k, v]) => `<tr><td><code>${k}</code></td><td>${v}</td></tr>`).join("");
+        ["grand_payback", nbw.grand_payback == null ? "none" : fx(nbw.grand_payback, 1) + " years"],
+        ...(out.nb.home ? [["matched home (find_closest_row)", `ResStock ${out.nb.home.building_id}: ${fx(out.nb.home.area)} sq ft, ${out.nb.home.heating_fuel}, ${fx(out.nb.home.heating_setpoint)} °F, unified R ${fx(out.nb.home.unified_r_value, 2)}${out.nb.home.fuel_fallback ? " (no home with your fuel; matched among gas homes)" : ""}`]] : [])].map(([k, v]) => `<tr><td><code>${k}</code></td><td>${v}</td></tr>`).join("");
       $("sumTiles").insertAdjacentHTML("afterbegin", `<div class="tile hero-t"><div class="k">Grand operating savings</div><div class="v">${money(nbw.grand_operating_savings)} / yr</div><div class="s">bills plus CO₂ at $${out.nb.carbonUsdPerTonne}/t, vs ${f.short}${out.nb.isWinner ? "" : " (no winner at this price)"}</div></div>`);
     } else $("winnerFold").hidden = true;
     HPCharts.lineChart($("chBill"), {

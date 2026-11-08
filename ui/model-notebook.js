@@ -11,10 +11,12 @@
 //  - capital_cost = 1075.2 x tons + 1193;  get_rebate: full = min(cost, 8000), partial = min(cost/2, 4000), none = 0.
 //  - grand operating cost = operating cost + CO2 kg x ($ per tonne) / 1000.
 //  - Winner = lowest grand operating cost among heat pumps with positive grand savings vs. NG only.
+// Inputs from page 3, mapped to the notebook's parameters (model/optimize.py is the same run in Python):
+//  dollars_per_ton_co2 <- carbon slider; square_footage, chosen_set_point, current_heating_system <- size, thermostat, heating today;
+//  insulation slider -> the unified_r target of find_closest_row; price_per_kWh_electric, price_per_therm_secondary <- prices;
+//  rebate_type <- income range. The home is picked with the notebook's find_closest_row over its 173 Minneapolis homes.
 // Not in the notebook, added so the page can draw it: monthly series, 15-year totals (annual x 15, no discounting),
 // no-winner case (keep the furnace), and non-gas backup fuels (price and CO2 per unit of heat from the page inputs).
-// The notebook does not use setpoint, square footage or location parameters; here square footage picks the nearest
-// ResStock home among the ones exported (the notebook's find_closest_row idea), the thermostat setting is not used.
 (function () {
   const D = window.NB_DATA, Prev = window.HeatPumpModel;
   if (!D) return;
@@ -41,12 +43,20 @@
   }
 
   // run_thermal_hp_sim for one profile (null = no heat pump) over the year
-  function sim(home, prof, inp, aux, scale) {
+  // Hourly loads ship as base64 uint16 in tens of BTU; decode once per home.
+  const loads = new Map();
+  function loadOf(h) {
+    if (!loads.has(h.id)) { const b = atob(h.load), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); loads.set(h.id, new Uint16Array(u.buffer)); }
+    return loads.get(h.id);
+  }
+
+  function sim(home, prof, inp, aux) {
+    const L = loadOf(home);
     const monthly = DAYS.map(() => ({ costUsd: 0, co2Kg: 0 }));
     let kwh = 0, aux_btu = 0, hp_btu = 0, usd = 0, kg = 0;
     const el = inp.prices.electricityUsdPerKWh;
     for (let t = 0; t < D.hours; t++) {
-      const need = home.demandBtu[t] * 10 * scale, T = D.tempF[t];
+      const need = L[t] * 10, T = D.tempF[t];
       if (!(need > 0)) continue;
       let hp = 0, e = 0;
       if (prof) {
@@ -62,21 +72,36 @@
   }
 
   const cache = new Map();   // profile sims are the slow part; they depend on home, prices and fuel only
-  function allSims(home, inp, aux, k) {
-    const key = [home.buildingId, k, inp.prices.electricityUsdPerKWh, aux.usd, aux.kg].join("|");
-    if (!cache.has(key)) cache.set(key, { base: sim(home, null, inp, aux, k), hp: D.profiles.map(p => sim(home, p, inp, aux, k)) });
+  function allSims(home, inp, aux) {
+    const key = [home.id, inp.prices.electricityUsdPerKWh, aux.usd, aux.kg].join("|");
+    if (!cache.has(key)) cache.set(key, { base: sim(home, null, inp, aux), hp: D.profiles.map(p => sim(home, p, inp, aux)) });
     return cache.get(key);
   }
 
-  // Notebook's find_closest_row idea: the exported ResStock home (typical insulation) nearest to the home size.
-  // Synced to the notebook: it hardcodes ResStock building 274938, so the page uses that home for Minneapolis (size does not change it).
-  function pickHome() { return D.homes[D.notebookHome]; }
+  // The notebook's find_closest_row(df, heating_fuel, heating_setpoint, unified_r, area): among homes with that fuel, the smallest
+  // sum of squared differences in standard-deviation units (std over all 173 homes); first one wins a tie, as pandas idxmin does.
+  const FUEL = { gas: "Natural Gas", electric: "Electricity", propane: "Propane", oil: "Fuel Oil", wood: "Other Fuel", kerosene: "Other Fuel" };
+  function findClosestRow(fuel, setpoint, unifiedR, area) {
+    const sc = D.scales, c = D.homes.filter(h => h.fuel === fuel);
+    if (!c.length) return null;
+    let best = null, bd = Infinity;
+    for (const h of c) {
+      const d = ((h.setpointF - setpoint) / sc.heating_setpoint) ** 2 + ((h.unifiedR - unifiedR) / sc.unified_r_value) ** 2 + ((h.areaSqft - area) / sc.area) ** 2;
+      if (d < bd) { bd = d; best = h; }
+    }
+    return best;
+  }
+  function pickHome(inp) {
+    const H = inp.home, sp = H.thermostatF ?? 68, r = H.insulationR ?? 2.5, a = H.floorAreaSqft ?? 1500;
+    const own = findClosestRow(FUEL[H.currentHeat] || "Natural Gas", sp, r, a);
+    return own ? { home: own, fuelFallback: false } : { home: findClosestRow("Natural Gas", sp, r, a), fuelFallback: true };
+  }
 
   function run(inp) {
     if (inp.region.id !== "minneapolis") return Prev.run(inp);
-    const home = pickHome(inp.home.floorAreaSqft), k = 5 / (inp.home.insulationR || 5), aux = auxPerBtu(inp);
+    const { home, fuelFallback } = pickHome(inp), aux = auxPerBtu(inp), L = loadOf(home);
     const sc = inp.scenario || {}, price = Number.isFinite(sc.carbonUsd) ? sc.carbonUsd : LAMBDAS[Number.isInteger(sc.lamIdx) ? sc.lamIdx : 8];
-    const { base, hp } = allSims(home, inp, aux, k), type = inp.costs.rebateType || "none";
+    const { base, hp } = allSims(home, inp, aux), type = inp.costs.rebateType || "none";
     const rowsAt = pr => {
       const g = s => s.usd + s.kg * pr / 1000, bg = g(base);
       return D.profiles.map((p, i) => {
@@ -105,7 +130,8 @@
     const shown = chosen || alt;
     const mkMonthly = c => base.monthly.map((m, i) => ({ today: { costUsd: m.costUsd, co2Kg: m.co2Kg },
       heatPump: c ? { costUsd: c.s.monthly[i].costUsd, co2Kg: c.s.monthly[i].co2Kg } : { costUsd: m.costUsd, co2Kg: m.co2Kg } }));
-    const heatKWh = k * home.demandBtu.reduce((a, b) => a + b, 0) * 10 / BTU_PER_KWH, peakKw = k * Math.max(...home.demandBtu) * 10 / BTU_PER_KWH;
+    let tot = 0, pk = 0; for (let t = 0; t < D.hours; t++) { tot += L[t]; if (L[t] > pk) pk = L[t]; }
+    const heatKWh = tot * 10 / BTU_PER_KWH, peakKw = pk * 10 / BTU_PER_KWH;
     const sRow = c => c ? c.s : base;
     const s = sRow(shown), life = LIFE;
     const upfront = shown ? { installedUsd: shown.cap, rebatesUsd: shown.reb, netUsd: shown.net } : { installedUsd: 0, rebatesUsd: 0, netUsd: 0 };
@@ -131,7 +157,8 @@
               total_operating_cost: shown.s.usd, total_co2_kg: shown.s.kg, capital_cost_usd: shown.cap, rebate_usd: shown.reb,
               grand_operating_cost: shown.grand, grand_operating_savings: shown.grandSave, net_capital_cost_usd: shown.net,
               grand_payback: shown.grandSave > 0 ? shown.net / shown.grandSave : null, ng_baseline_grand_cost: baseGrand } : null,
-            isWinner: !!chosen && chosen === winner, carbonUsdPerTonne: price, rebateType: type, buildingId: home.buildingId, homeAreaSqft: home.areaSqft, loadScale: k, profile: shown ? shown.p.id : null, keepFurnace: !chosen, altTons: alt ? r1(alt.p.nominalTons) : null,
+            isWinner: !!chosen && chosen === winner, carbonUsdPerTonne: price, rebateType: type, home: { building_id: home.id, area: home.areaSqft, heating_fuel: home.fuel, heating_setpoint: home.setpointF, unified_r_value: home.unifiedR, fuel_fallback: fuelFallback },
+            buildingId: home.id, homeAreaSqft: home.areaSqft, profile: shown ? shown.p.id : null, keepFurnace: !chosen, altTons: alt ? r1(alt.p.nominalTons) : null,
             brand: shown ? shown.p.brand : null, grandCostUsd: chosen ? chosen.grand : baseGrand, baselineGrandCostUsd: baseGrand },
       notes: [
         "Runs the team's model.ipynb: a real ResStock home's hourly heating load and real Minneapolis weather, matched to AHRI-listed cold-climate heat pumps.",
