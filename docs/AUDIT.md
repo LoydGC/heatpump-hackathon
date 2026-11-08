@@ -56,3 +56,5 @@ To filter by workstream: search the page for `| UI |`, `| Model |`, `| Data |` o
 | 2026-11-08 | repo | UI | Removed Montréal, footer paragraph, location-step disclaimer and two copy phrases; front page now has no location subheader and the lede ends "Just tell us where your home is." | Claude, for Gavin | this push | D-022 |
 | 2026-11-08 | repo | UI | Reworded Boston cold-night card; removed repo / "data pack" wording from visible text | Claude, for Gavin | this push | D-023 |
 | 2026-11-08 | repo | UI | Rewrote climate cards (all three regions) under the kicker+heading+body flow rule | Claude, for Gavin | this push | D-024 |
+| 2026-11-07 | repo | Data | Added docs/COMPARABLES.md and docs/comparables.html: comparable heat pump products research (no PR, no deploy; docs/ excluded from deploys) | Claude, for Gavin | this push | |
+| 2026-11-08 | merge | Infra | Merged dashboard branch (wizard, ResStock dropdowns, climate page) and comparables research into `main`; no deploy | Claude, for Gavin | this push | |
