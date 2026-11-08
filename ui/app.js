@@ -35,9 +35,11 @@
   const DEFAULT_LAM_IDX = 8;                        // $300/t: the notebook's default carbon price (dollars_per_ton_co2)
   const DIAL_STEPS = 12;                            // 13 slider positions = the model's lambda grid
   const dialIdx = () => state.prioSet ? Math.round(state.priority * DIAL_STEPS) : (isV1(region()) ? DEFAULT_LAM_IDX : DIAL_STEPS / 2);  // stand-in default = balanced
-  const isV1 = r => !!r && r.id === V1.regionId && V1.loaded();
+  const USE_V1 = false;   // Gavin 2026-11-08: Sharvi's v1 is early-stage and non-authoritative; where models conflict, Patrick's notebook model wins
+  const NB = window.HeatPumpModelNB;   // Patrick's notebook model, used for Minneapolis
+  const isV1 = r => !!r && !!NB && r.id === NB.regionId;   // name kept: 'the city has a carbon-dollar dial and a keep-furnace answer'
   async function runModel(inp) {
-    if (inp.region.id === V1.regionId && V1.loaded()) {
+    if (USE_V1 && inp.region.id === V1.regionId && V1.loaded()) {
       const sc = inp.scenario;
       return V1.run(inp, { tariff: inp.prices.timeOfUse ? "tou" : "flat", weather: sc.coldWinter ? "tmy3_cold" : "tmyx_main",
                            credit: sc.acCredit ? 4000 : 0, controller: "smart", lamIdx: sc.lamIdx, rebatesOn: sc.rebatesOn, incomeUsd: sc.incomeUsd });
@@ -283,16 +285,14 @@
 
     $("h3").textContent = custom ? `Your heat pump report for your ${r.name} home` : `Heat pump report for a typical ${r.name} home`;
     const rsel = selection(r, state.overrides);
-    const v1 = out.v1, v1Failed = r.id === V1.regionId && !v1;
+    const v1 = out.v1, v1Failed = USE_V1 && r.id === V1.regionId && !v1;
 
 
     const a = out.annual, cut = a.today.co2Kg - a.heatPump.co2Kg, saveYr = a.today.costUsd - a.heatPump.costUsd;
     // One explicit suggestion for every city (no size picker); the dial on page 3 is the control.
     $("rSizeBox").hidden = true; document.querySelector(".reco").classList.add("single");
-    if (v1 && !out.sizeTons) {
+    if (isV1(r) && !out.sizeTons) {
       $("rReco").textContent = "Keep your gas furnace for now";
-    } else if (v1) {
-      $("rReco").textContent = `A ${out.sizeTons}-ton (${v1.sizeKbtuh},000 BTU/h) cold-climate heat pump`;
     } else {
       $("rReco").textContent = `A ${out.sizeTons}-ton (${Math.round(out.sizeTons * 12)},000 BTU/h) cold-climate heat pump`;
     }
@@ -385,7 +385,7 @@
   const sizeLabel = k => k ? `${k / 12}-ton hybrid heat pump` : "Keep the gas furnace";
   const dollars = v => "$" + Math.round(v).toLocaleString();
   function dialSetText(idx) {
-    if (isV1(region())) return `${dollars(V1.lambdas()[idx])} per tonne of CO₂`;
+    if (isV1(region())) return `${dollars(NB.lambdas[idx])} per tonne of CO₂`;
     return idx === 0 ? "Lowest total cost" : idx === DIAL_STEPS ? "Lowest carbon" : idx < DIAL_STEPS / 2 ? "Leaning toward lower cost" : idx > DIAL_STEPS / 2 ? "Leaning toward lower carbon" : "A balance of cost and carbon";
   }
   $("dial").addEventListener("input", e => {
