@@ -129,7 +129,7 @@
         tip.innerHTML = `<b>${p.tip.title}</b>` + p.tip.lines.map(([k, v]) => `<div>${k}<span>${v}</span></div>`).join("");
         tip.hidden = false;
         const hb = host.getBoundingClientRect(), cb = c.getBoundingClientRect();
-        let x = cb.left - hb.left + cb.width / 2 + 12, y = cb.bottom - hb.top + 6;   // below the circle, clear of its label
+        let x = cb.right - hb.left + 12, y = cb.top - hb.top + cb.height / 2 - tip.offsetHeight / 2;   // right of the circle, vertically centred
         if (x + tip.offsetWidth > hb.width) x = cb.left - hb.left - tip.offsetWidth - 12;
         tip.style.left = Math.max(0, x) + "px"; tip.style.top = Math.max(0, y) + "px";
       };
