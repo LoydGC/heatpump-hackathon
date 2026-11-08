@@ -289,15 +289,9 @@
 
     $("h3").textContent = custom ? `Your heat pump report for your ${r.name} home` : `Heat pump report for a typical ${r.name} home`;
     const rsel = selection(r, state.overrides);
-    $("rRef").innerHTML = refHtml(r, rsel) + (hasRS(r) ? " Shown for comparison only: it is not an output of the model above." : "");
-    $("rSub").textContent = `${selText(rsel).replace(/^./, c => c.toUpperCase())}, ${ENVELOPES[h.envelope].label.toLowerCase()}, heated by ${f.short} today. ` +
-      (custom ? `${custom} detail${custom > 1 ? "s" : ""} from you, the rest typical for the area.` : "All details are typical for the area; go back to add yours.") +
-      (out.v1 ? " The v1 model uses a fixed typical house, so these details aren't used in its numbers yet." : "");
+    $("rRef").innerHTML = refHtml(r, rsel);
     const v1 = out.v1, v1Failed = r.id === V1.regionId && !v1;
-    $("rBanner").innerHTML = v1
-      ? "<b>Model v1.</b> These numbers come from the team's first Python model: not exactly what our end model will be, but closer to what we're thinking. It uses one fixed typical house, so your home details and price edits don't change these figures yet, and several inputs (installed cost, rebates, time-of-use rates, AC credit, grid carbon) are placeholders."
-      : "<b>Placeholder numbers.</b> The team's model isn't plugged in for this region yet. These come from a simple stand-in so the layout can be reviewed." + (v1Failed ? " (The Minneapolis model data couldn't be loaded, so this is the stand-in too. Open the site through the local server or the deployed URL.)" : "");
-    $("rBanner").hidden = false;
+
 
     const a = out.annual, cut = a.today.co2Kg - a.heatPump.co2Kg, saveYr = a.today.costUsd - a.heatPump.costUsd;
     $("rSizeBox").hidden = !!v1; document.querySelector(".reco").classList.toggle("single", !!v1);
@@ -399,10 +393,7 @@
     $("acSeg").querySelectorAll("button").forEach(b => { b.setAttribute("aria-pressed", (b.dataset.ac === "1") === state.acCredit);
       b.onclick = () => { state.acCredit = b.dataset.ac === "1"; save(); renderResults(); }; });
 
-    $("rNotes").innerHTML = ((out.isPlaceholder || out.v1) ? out.notes : []).concat(
-      r.dataStatus === "placeholder" ? [`Climate, prices and grid carbon for ${r.name} are placeholders until the team's data for this region is in.`]
-        : [`Climate, prices and grid carbon for ${r.name} come from the team's data (TMYx 2011–2025 weather, EIA prices, MISO 2025 grid).`]
-    ).map(n => `<li>${n}</li>`).join("");
+
     await renderMeter(out);
     await renderRebates(out);
   }

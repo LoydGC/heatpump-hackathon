@@ -62,3 +62,4 @@ To filter by workstream: search the page for `| UI |`, `| Model |`, `| Data |` o
 | 2026-11-08 | repo | Data | Added `docs/REFERENCE_FACTS.md`: guaranteed facts from the ResStock extracts (Boston typical home, bins, medians) | Claude, for Gavin | this push | D-025 |
 | 2026-11-08 | repo | UI | Removed theme switcher and sand/sage/paper themes; green lichen theme only | Claude, for Gavin | this push | D-005 |
 | 2026-11-08 | repo | UI | Climate citations now link directly to sources; Sources list removed | Claude, for Gavin | this push | D-020 |
+| 2026-11-08 | repo | UI | Results page: removed subtitle, placeholder/model banner and notes list | Claude, for Gavin | this push | D-018 |
