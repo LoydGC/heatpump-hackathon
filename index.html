@@ -457,6 +457,24 @@ details.fold .fs{font-size:13px}
 
     <div class="tiles sum-tiles" id="sumTiles"></div>
 
+    <div class="results-charts" style="margin-top:6px">
+      <div class="charts2">
+        <div class="chart-card">
+          <h3>Total spent over time</h3>
+          <p class="sub" id="cumSub">Upfront costs plus bills, by year</p>
+          <div class="legend"><span><i style="border-color:var(--c-now)"></i><span id="lgNow2">Keep today's heat</span></span><span><i style="border-color:var(--c-hp)"></i>Heat pump</span></div>
+          <div id="chCum"></div>
+        </div>
+        <div class="chart-card">
+          <h3>Heating bill by month</h3>
+          <p class="sub">Dollars per month</p>
+          <div class="legend"><span><i style="border-color:var(--c-now)"></i><span id="lgNow3">Today</span></span><span><i style="border-color:var(--c-hp)"></i>With heat pump</span></div>
+          <div id="chBill"></div>
+        </div>
+      </div>
+      <details class="tbl"><summary>Show monthly numbers as a table</summary><div class="table-scroll"><table><thead><tr><th>Month</th><th>Bill today</th><th>Bill with heat pump</th><th>CO₂ today</th><th>CO₂ with heat pump</th></tr></thead><tbody id="mTable"></tbody></table></div></details>
+    </div>
+
     <div class="card whatif">
       <h3>What if&hellip;</h3>
       <div class="whatif-row">
@@ -507,21 +525,6 @@ details.fold .fs{font-size:13px}
       <summary><span class="fh">Money</span><span class="muted fs">bills, break-even and total spent over time</span></summary>
       <div class="fold-body">
       <div class="tiles" id="moneyTiles"></div>
-      <div class="charts2">
-        <div class="chart-card">
-          <h3>Total spent over time</h3>
-          <p class="sub" id="cumSub">Upfront costs plus heating bills, year by year</p>
-          <div class="legend"><span><i style="border-color:var(--c-now)"></i><span id="lgNow2">Keep today's heat</span></span><span><i style="border-color:var(--c-hp)"></i>Heat pump</span></div>
-          <div id="chCum"></div>
-        </div>
-        <div class="chart-card">
-          <h3>Heating bill by month</h3>
-          <p class="sub">Dollars per month</p>
-          <div class="legend"><span><i style="border-color:var(--c-now)"></i><span id="lgNow3">Today</span></span><span><i style="border-color:var(--c-hp)"></i>With heat pump</span></div>
-          <div id="chBill"></div>
-        </div>
-      </div>
-      <details class="tbl"><summary>Show monthly numbers as a table</summary><div class="table-scroll"><table><thead><tr><th>Month</th><th>Bill today</th><th>Bill with heat pump</th><th>CO₂ today</th><th>CO₂ with heat pump</th></tr></thead><tbody id="mTable"></tbody></table></div></details>
       </div>
     </details>
     <details class="fold">
