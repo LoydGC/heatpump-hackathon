@@ -77,7 +77,7 @@ Inputs (built by `modelInputs()` in `ui/app.js`; units in names):
 ```
 { schemaVersion: 1,
   region:   { id, name, designTempF, monthlyMeanF[12], monthlySdF[12], dataStatus: "placeholder" | "data.zip" },
-  home:     { source: "typical" | "custom", floorAreaSqft, envelope: "drafty"|"average"|"tight",
+  home:     { source: "typical" | "custom", floorAreaSqft /* derived: ResStock cell mean size */, homeType: "sfd"|"sfa", sizeBin, binLevel: "fine"|"coarse", resstockRef: {n, medianKWh, medianTherms, medianOtherFuelKWh}|null, envelope: "drafty"|"average"|"tight",
               heatLossWPerF, thermostatF, currentHeat: "gas"|"oil"|"propane"|"electric"|"wood"|"kerosene" },
   prices:   { electricityUsdPerKWh, fuelUsdPerUnit, fuelUnit, timeOfUse: bool, fuelUsdPerKWhHeat },
   emissions:{ gridKgCo2PerKWh, fuelKgCo2PerUnit, fuelKgCo2PerKWhHeat },
@@ -154,6 +154,12 @@ v1 placeholders (from `model/README.md`): installed cost curve, rebates (verify)
 - **Data → UI:** region packs for Boston, Montréal and Fairbanks like the Minneapolis pack (monthly or hourly temperatures, design temp, electricity and fuel prices, grid CO2, rebates). Today only Minneapolis values in `ui/regions.js` come from `data.zip`; the other three are placeholders and are labeled as such on the results page.
 - **Model → UI:** an implementation of `HeatPumpModel.run` in the shape above, and agreement on whether the model runs in-browser (JS), is precomputed to JSON per region and size, or sits behind an endpoint.
 - **Open question:** free-text locations outside the four regions are not supported (no geocoding without a key). Adding more regions means adding an entry to `ui/regions.js`.
+
+### Home type and size (ResStock dropdowns)
+- Options: home type `sfd`/`sfa` (others disabled); size bins fine = 500-749, 750-999, 1000-1499, 1500-1999, 2000-2499, 2500-2999, 3000-3999; coarse = 0-1499 (excl. <500), 1500-2499, 2500-3999. 0-499 and 4000+ dropped by Gavin 2026-11-08.
+- `ui/resstock.js` (`window.RESSTOCK`) is generated: `python3 tools/build_resstock_ui.py <datasets/resstock dir> ui/resstock.js`. Per city (Minneapolis, Boston, Fairbanks) x type x bin: ResStock model count, weighted mean sq ft, weighted median kWh, therms, propane/oil kWh. Regenerate if the extracts change.
+- Model needs: v1 ignores these (fixed house). When the end model takes home type and size, read `inputs.home.homeType/sizeBin/floorAreaSqft`; `resstockRef` is a reference figure, never model output.
+- Thin (<5) or empty cells: UI flags or falls back to the nearest non-empty bin. Montréal has no ResStock data.
 
 ## Infra
 

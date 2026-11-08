@@ -424,7 +424,12 @@ details.fold .fs{font-size:13px}
         <h3 style="margin-top:10px">Describe your home</h3>
         <p class="muted" style="font-size:14px;margin-top:4px">Change anything that's different for you. Fields you don't touch keep the typical value.</p>
         <div class="form-grid">
-          <div class="f"><label for="sqft">Home size (sq ft) <span class="src" data-src="floorAreaSqft"></span></label><input id="sqft" type="number" min="300" max="10000" step="50"></div>
+          <div class="f"><label for="htype">Home type <span class="src" data-src="homeType"></span></label><select id="htype"></select></div>
+          <div class="f"><label for="sbin">Home size (sq ft) <span class="src" data-src="sizeBin"></span></label><select id="sbin"></select></div>
+          <div class="f full"><span class="lbl" id="blL">Size groups <span class="src" data-src="binLevel"></span></span>
+            <div class="seg" role="group" aria-labelledby="blL" id="blSeg"><button type="button" data-lvl="fine">9 sizes</button><button type="button" data-lvl="coarse">4 sizes</button></div>
+            <p class="hint muted" id="binNote"></p></div>
+          <div class="f full" id="resRef" aria-live="polite"></div>
           <div class="f"><label for="heat">Heating today <span class="src" data-src="currentHeat"></span></label><select id="heat"></select></div>
           <div class="f full"><span class="lbl" id="envL">How well does it hold heat? <span class="src" data-src="envelope"></span></span>
             <div class="seg" role="group" aria-labelledby="envL" id="envSeg"></div></div>
@@ -462,6 +467,7 @@ details.fold .fs{font-size:13px}
     <h2 id="h3" tabindex="-1"></h2>
     <p class="muted" id="rSub" style="margin-top:6px"></p>
     <p class="banner" id="rBanner"></p>
+    <p class="banner" id="rRef"></p>
 
     <div class="reco card">
       <div>
@@ -615,6 +621,7 @@ details.fold .fs{font-size:13px}
 </main>
 
 <script src="ui/regions.js"></script>
+<script src="ui/resstock.js"></script>
 <script src="ui/rebates.js"></script>
 <script src="ui/model-stub.js"></script>
 <script src="ui/model-v1.js"></script>

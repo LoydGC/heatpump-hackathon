@@ -50,13 +50,60 @@
     return Model().run(inp);
   }
 
+  // ---------- ResStock home type x size selection ----------
+  // Dropdown options come from ResStock (ui/resstock.js, built from datasets/resstock). A (city, type, bin) cell can be
+  // thin (<5 models) or empty; an empty choice falls back to the nearest non-empty bin and says so.
+  const RS = window.RESSTOCK || { fine: [], coarse: [], cells: {} };
+  const HOME_TYPES = [
+    { id: "sfd", label: "Single-family detached", rs: "Single-Family Detached", on: true },
+    { id: "sfa", label: "Single-family attached (townhouse, rowhouse)", rs: "Single-Family Attached", on: true },
+    { id: "mh", label: "Mobile home (not covered yet)", on: false },
+    { id: "mf24", label: "Multi-family, 2 to 4 units (not covered yet)", on: false },
+    { id: "mf5", label: "Multi-family, 5+ units (not covered yet)", on: false }
+  ];
+  const BIN_MID = { fine: [625, 875, 1250, 1750, 2250, 2750, 3500], coarse: [1000, 2000, 3000] };
+  const BIN_EDGES = { fine: [750, 1000, 1500, 2000, 2500, 3000], coarse: [1500, 2500] };
+  const binList = lvl => RS[lvl];
+  const binFor = (lvl, sqft) => binList(lvl)[BIN_EDGES[lvl].filter(e => sqft >= e).length];
+  const binLabel = b => b.endsWith("+") ? b.slice(0, -1) + "+" : b.replace("-", "–");
+  const cellOf = (r, type, lvl, bin) => (RS.cells[r.id] || {})[`${type}|${lvl}|${bin}`] || null;
+  const hasRS = r => !!RS.cells[r.id];
+  function selection(r, ov) {
+    const type = ov.homeType || "sfd", lvl = ov.binLevel || "fine";
+    const list = binList(lvl), dflt = binFor(lvl, r.typicalHome.floorAreaSqft);
+    const want = list.includes(ov.sizeBin) ? ov.sizeBin : dflt;
+    let bin = want;
+    if (hasRS(r) && !(cellOf(r, type, lvl, want) || {}).n) {
+      const wi = list.indexOf(want);
+      const ok = list.map((b, i) => [b, i]).filter(([b]) => (cellOf(r, type, lvl, b) || {}).n).sort((a, b) => Math.abs(a[1] - wi) - Math.abs(b[1] - wi));
+      if (ok.length) bin = ok[0][0];
+    }
+    const cell = cellOf(r, type, lvl, bin), i = list.indexOf(bin);
+    return { type, lvl, want, bin, fellBack: bin !== want, cell, sqft: cell && cell.sqft ? cell.sqft : BIN_MID[lvl][i] };
+  }
+  const typeLabel = id => (HOME_TYPES.find(t => t.id === id) || HOME_TYPES[0]).label;
+  const selText = sel => `${typeLabel(sel.type).split(" (")[0].toLowerCase()}, ${binLabel(sel.bin)} sq ft`;
+  // ResStock reference figures for the chosen cell (population medians, not model output).
+  function refHtml(r, sel) {
+    if (!hasRS(r)) return `<b>No ResStock reference for ${r.name}.</b> ResStock covers US homes only; ${r.name} uses placeholder values.`;
+    const c = sel.cell, label = `${typeLabel(sel.type).split(" (")[0].toLowerCase()}, ${binLabel(sel.bin)} sq ft`;
+    if (!c || !c.n) return `<b>No ResStock homes</b> match that choice in ${r.name}.`;
+    const fuel = [`${c.kwh.toLocaleString()} kWh electricity`];
+    if (c.therms) fuel.push(`${c.therms.toLocaleString()} therms gas`);
+    if (c.otherKwh) fuel.push(`${c.otherKwh.toLocaleString()} kWh of propane or fuel oil`);
+    return `<b>ResStock reference, not our model:</b> the median ${label} home in ${r.name} (${c.n} ResStock home${c.n > 1 ? "s" : ""}) uses about ${fuel.join(", ")} a year, all uses included.` +
+      (c.n < 5 ? " <b>Only a few homes in this group, so treat it as rough.</b>" : "");
+  }
+
   // Typical (synthetic) home + regional prices, then the user's overrides on top.
   function typical(r, ov) {
     const heat = ov.currentHeat || r.typicalHome.currentHeat;
-    const sqft = ov.floorAreaSqft || r.typicalHome.floorAreaSqft;
+    const sel = selection(r, ov), dsel = selection(r, {});
+    const sqft = sel.sqft;
     const env = ov.envelope || r.typicalHome.envelope;
     return {
-      floorAreaSqft: r.typicalHome.floorAreaSqft,
+      floorAreaSqft: sqft,
+      homeType: dsel.type, binLevel: dsel.lvl, sizeBin: dsel.bin,
       envelope: r.typicalHome.envelope,
       currentHeat: r.typicalHome.currentHeat,
       thermostatF: r.typicalHome.thermostatF,
@@ -70,7 +117,10 @@
   }
   function effective() {
     const r = region(), d = typical(r, state.overrides);
-    return Object.assign({}, d, state.overrides);
+    const h = Object.assign({}, d, state.overrides);
+    const sel = selection(r, state.overrides);   // home type and size come from the dropdowns; sq ft is derived
+    h.floorAreaSqft = d.floorAreaSqft; h.homeType = sel.type; h.binLevel = sel.lvl; h.sizeBin = sel.bin;
+    return h;
   }
   function modelInputs(sizeTons, rebatesOn = state.rebatesOn, tou = null, lamIdx = null) {
     const r = region(), h = effective(), f = FUELS[h.currentHeat];
@@ -80,6 +130,8 @@
       schemaVersion: 1,
       region: { id: r.id, name: r.full, designTempF: r.designTempF, monthlyMeanF: r.monthlyMeanF, monthlySdF: r.monthlySdF, dataStatus: r.dataStatus },
       home: { source: Object.keys(state.overrides).length ? "custom" : "typical", floorAreaSqft: h.floorAreaSqft, envelope: h.envelope,
+              homeType: h.homeType, sizeBin: h.sizeBin, binLevel: h.binLevel,
+              resstockRef: (c => c && c.n ? { n: c.n, medianKWh: c.kwh, medianTherms: c.therms, medianOtherFuelKWh: c.otherKwh } : null)(selection(r, state.overrides).cell),
               heatLossWPerF: h.heatLossWPerF, thermostatF: h.thermostatF, currentHeat: h.currentHeat },
       prices: { electricityUsdPerKWh: h.electricityUsdPerKWh, fuelUsdPerUnit: fuelPrice, fuelUnit: f.unit, timeOfUse: tou == null ? !!h.timeOfUse : tou,
                 fuelUsdPerKWhHeat: fuelPrice / (f.kwh * f.eff) },
@@ -181,14 +233,14 @@
     b.addEventListener("click", () => setOverride("envelope", k)); $("envSeg").appendChild(b);
   });
   const FIELDS = [ // [inputId, key, parse]
-    ["sqft", "floorAreaSqft", Number], ["heat", "currentHeat", String], ["tstat", "thermostatF", Number],
+    ["heat", "currentHeat", String], ["tstat", "thermostatF", Number],
     ["elec", "electricityUsdPerKWh", Number], ["fuelPrice", "fuelUsdPerUnit", Number], ["rebates", "rebatesUsd", Number],
     ["costTon", "installedUsdPerTon", Number], ["ua", "heatLossWPerF", Number]
   ];
   function setOverride(key, val) {
     const r = region(), d = typical(r, state.overrides);
     if (key === "currentHeat") { delete state.overrides.fuelUsdPerUnit; delete state.overrides.rebatesUsd; }
-    if (key === "floorAreaSqft" || key === "envelope") delete state.overrides.heatLossWPerF;
+    if (key === "floorAreaSqft" || key === "envelope" || key === "homeType" || key === "sizeBin" || key === "binLevel") delete state.overrides.heatLossWPerF;
     if (val === "" || val == null || (typeof val === "number" && !isFinite(val)) || val === d[key]) delete state.overrides[key];
     else state.overrides[key] = val;
     state.sizeTons = null;
@@ -197,6 +249,17 @@
   FIELDS.forEach(([id, key, parse]) => {
     $(id).addEventListener("change", e => setOverride(key, e.target.value === "" ? "" : parse(e.target.value)));
   });
+  // Home type + size dropdowns (ResStock options)
+  HOME_TYPES.forEach(t => { const o = document.createElement("option"); o.value = t.id; o.textContent = t.label; o.disabled = !t.on; $("htype").appendChild(o); });
+  $("htype").addEventListener("change", e => setOverride("homeType", e.target.value));
+  $("sbin").addEventListener("change", e => setOverride("sizeBin", e.target.value));
+  document.querySelectorAll("#blSeg button").forEach(b => b.addEventListener("click", () => {
+    const r = region(), sel = selection(r, state.overrides), lvl = b.dataset.lvl; if (lvl === sel.lvl) return;
+    const nb = binFor(lvl, sel.sqft);                       // keep roughly the same size when switching groupings
+    if (lvl === "fine") delete state.overrides.binLevel; else state.overrides.binLevel = lvl;
+    state.overrides.sizeBin = nb; if (nb === binFor(lvl, r.typicalHome.floorAreaSqft)) delete state.overrides.sizeBin;
+    delete state.overrides.heatLossWPerF; state.sizeTons = null; renderHome(); save();
+  }));
   $("tou").addEventListener("change", e => setOverride("timeOfUse", e.target.checked));
   const prioText = v => v < 20 ? "We'll favor the lowest total cost." : v > 80 ? "We'll favor the lowest carbon." : v < 45 ? "Leaning toward lower cost." : v > 55 ? "Leaning toward lower carbon." : "A balance of cost and carbon.";
   $("prio").addEventListener("input", e => { state.priority = +e.target.value / 100; state.prioSet = true; state.sizeTons = null; $("prioText").textContent = prioText(+e.target.value); save(); });
@@ -208,7 +271,7 @@
     $("qpWhy").textContent = `We'll model ${r.typicalHome.why}.`;
     const td = typical(r, {});
     $("qpList").innerHTML = [
-      `${td.floorAreaSqft.toLocaleString()} sq ft, ${ENVELOPES[td.envelope].label.toLowerCase()}`,
+      `${selText(selection(r, {})).replace(/^./, c => c.toUpperCase())}, ${ENVELOPES[td.envelope].label.toLowerCase()}`,
       `Heated today by ${FUELS[td.currentHeat].short}`,
       `Thermostat at ${td.thermostatF} °F`,
       `Local prices: electricity $${td.electricityUsdPerKWh.toFixed(2)}/kWh${td.currentHeat !== "electric" ? `, ${FUELS[td.currentHeat].short} $${td.fuelUsdPerUnit.toFixed(2)}/${FUELS[td.currentHeat].unit}` : ""}`,
@@ -216,6 +279,17 @@
     ].map(x => `<li>${x}</li>`).join("");
 
     FIELDS.forEach(([id, key]) => { if (key !== skipKey || id === "heat") $(id).value = h[key]; });
+    const sel = selection(r, state.overrides), lvlBins = binList(sel.lvl);
+    $("htype").value = sel.type;
+    $("sbin").innerHTML = lvlBins.map(b => {
+      const c = cellOf(r, sel.type, sel.lvl, b), n = c ? c.n : null;
+      const tag = !hasRS(r) ? "" : n === 0 ? " – no ResStock homes here" : n < 5 ? ` – only ${n} ResStock home${n > 1 ? "s" : ""}` : ` – ${n} ResStock homes`;
+      return `<option value="${b}"${n === 0 ? " disabled" : ""}${b === sel.bin ? " selected" : ""}>${binLabel(b)} sq ft${tag}</option>`;
+    }).join("");
+    document.querySelectorAll("#blSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.lvl === sel.lvl));
+    $("binNote").textContent = (sel.fellBack ? `ResStock has no ${typeLabel(sel.type).split(" (")[0].toLowerCase()} homes of ${binLabel(sel.want)} sq ft in ${r.name}, so we're showing the nearest group, ${binLabel(sel.bin)} sq ft. ` : "") +
+      (r.id === V1.regionId ? "Model v1 uses one fixed house, so home type and size don't change its numbers yet." : "Home type and size (500–3,999 sq ft) set the heat-loss estimate in the placeholder stand-in; the team's model isn't plugged in for this region.");
+    $("resRef").innerHTML = `<div class="banner" style="margin-top:0">${refHtml(r, sel)}</div>`;
     $("fuelPriceL").textContent = h.currentHeat === "electric" ? "Fuel price (same as electricity)" : `${f.short[0].toUpperCase() + f.short.slice(1)} ($ per ${f.unit})`;
     $("fuelPrice").disabled = h.currentHeat === "electric";
     $("tou").checked = !!h.timeOfUse;
@@ -248,7 +322,9 @@
     const nowName = "Today (" + f.short + ")";
 
     $("h3").textContent = custom ? `Your heat pump report for your ${r.name} home` : `Heat pump report for a typical ${r.name} home`;
-    $("rSub").textContent = `${h.floorAreaSqft.toLocaleString()} sq ft, ${ENVELOPES[h.envelope].label.toLowerCase()}, heated by ${f.short} today. ` +
+    const rsel = selection(r, state.overrides);
+    $("rRef").innerHTML = refHtml(r, rsel) + (hasRS(r) ? " Shown for comparison only: it is not an output of the model above." : "");
+    $("rSub").textContent = `${selText(rsel).replace(/^./, c => c.toUpperCase())}, ${ENVELOPES[h.envelope].label.toLowerCase()}, heated by ${f.short} today. ` +
       (custom ? `${custom} detail${custom > 1 ? "s" : ""} from you, the rest typical for the area.` : "All details are typical for the area; go back to add yours.") +
       (out.v1 ? " The v1 model uses a fixed typical house, so these details aren't used in its numbers yet." : "");
     const v1 = out.v1, v1Failed = r.id === V1.regionId && !v1;
@@ -495,8 +571,9 @@
     const pay = o => o.paybackYears != null && o.paybackYears <= 40 ? o.paybackYears.toFixed(1) + " years" : "not on bills alone";
     const cut = a.today.co2Kg - a.heatPump.co2Kg;
     const stat = id => (RB.STATUS[id] || id);
+    const ov0 = state.overrides;
     const rows = [
-      ["Home size", `${h.floorAreaSqft.toLocaleString()} sq ft`, "floorAreaSqft"],
+      ["Home type and size", selText(selection(r, ov0)).replace(/^./, c => c.toUpperCase()), "sizeBin"],
       ["How well it holds heat", ENVELOPES[h.envelope].label, "envelope"],
       ["Current heating", f.label, "currentHeat"],
       ["Winter thermostat", `${h.thermostatF} °F`, "thermostatF"],
