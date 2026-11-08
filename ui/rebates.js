@@ -42,7 +42,7 @@
           note: "Equipment must be on the NEEP cold-climate list (COP 1.75 or better at 5 °F). Central systems need an Xcel participating contractor. Apply by Sept 30 of the year after install.",
           url: "https://www.xcelenergy.com/digital_application", checked: false },
         { name: "CenterPoint Energy ducted heat pump + gas furnace rebate", level: "Utility", status: "open",
-          amount: "Team data pack says $1,100. CenterPoint's page on 2026-11-07 showed $400 for an existing home; confirm the amount with CenterPoint.",
+          amount: "The team's earlier data said $1,100. CenterPoint's page on 2026-11-07 showed $400 for an existing home; confirm the amount with CenterPoint.",
           note: "For a hybrid with a 92%+ efficient gas furnace. The heat pump must be set to switch to gas at 40 °F or below. Your contractor usually submits it; allow up to 10 weeks.",
           url: "https://www.centerpointenergy.com/en-us/residential/save-energy-money/efficiency-programs-and-rebates/ducted-air-source-heat-pump-rebate?sa=mn", checked: true },
         { name: "Minneapolis Green Cost Share", level: "City", status: "limited", amount: "Up to $14,000, Green Zone homes only",
@@ -51,7 +51,7 @@
           note: "Not launched as of the team's sources.", url: "https://homeenergybasics.com/heat-pumps/states/mn", checked: true }
       ].concat(FED_US),
       paperwork: ["Xcel and CenterPoint account numbers (from a bill)", "Model and serial numbers of the heat pump (from the installer)", "AHRI or NEEP listing for the model", "Final itemized invoice", "Proof the heat pump switchover is set to 40 °F or lower (hybrid with gas)", "Insulation / air-sealing invoice if claiming the $600 bonus", "Income documents for income-qualified programs"],
-      amountsNote: "The calculator uses $2,000 for the heat pump and adds $1,100 only if you heat with gas today (from the team's data pack)."
+      amountsNote: "The calculator uses $2,000 for the heat pump and adds $1,100 only if you heat with gas today (from the team's earlier data)."
     },
     fairbanks: {
       intro: "In Fairbanks, rebate money has been scarce. The state's federal home energy rebate program had not launched as of the most recent page we read, so check before counting on any rebate.",

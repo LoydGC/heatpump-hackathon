@@ -79,7 +79,7 @@
     4: { t: "Synapse Energy Economics, Switch on the Savings: A Heat Pump Cost-Effectiveness Study (Massachusetts, 2018)", u: "https://www.synapse-energy.com/switch-savings-heat-pump-cost-effectiveness-study" },
     5: { t: "Harvard Kennedy School, Opportunities for Cost-Effective Residential Heat Pump Adoption in Massachusetts", u: "https://www.hks.harvard.edu/opportunities-cost-effective-residential-heat-pump-adoption-massachusetts" },
     6: { t: "Air Source Heat Pumps in Very Cold Climates (Alaska field monitoring and cold-chamber tests, OSTI)", u: "https://www.osti.gov/biblio/1975545" },
-    7: { t: "Team data pack (data.zip): MSP TMYx 2011–2025 and TMY3 hourly weather, ASHRAE design conditions (.ddy), EIA prices, EPA/MISO emissions. Percentages on this page were computed from these files.", u: null },
+    7: { t: "Team data: MSP TMYx 2011–2025 and TMY3 hourly weather, ASHRAE design conditions (.ddy), EIA prices, EPA/MISO emissions. Percentages on this page were computed from these files.", u: null },
     8: { t: "ASHRAE heating design temperatures for major US cities (Boston 99.6%: 7.7 °F), as tabulated by FGIA", u: "https://fgiaonline.org/wp-content/uploads/2025/02/ASHRAE-Temperatures-for-Major-US-Cities.pdf" }
   };
 
@@ -117,12 +117,13 @@
       cards: [
         { k: "Heat pumps excel at", h: "Replacing electric resistance heat", tag: "research", src: [4, 5],
           p: "A Massachusetts cost study found heat pumps about three times as efficient as electric resistance heat, with a payback near four years even without incentives. A Harvard study put the yearly savings for a typical electric-heated home at up to $2,900." },
-        { k: "Your climate is ideal for", h: "Carrying the whole winter", tag: "reasoning", src: [8, 3],
-          p: "Boston's very cold night is about 8 °F, compared with about −9 °F in Minneapolis. That keeps most hours inside the range (5 °F and up) where NEEP-listed units publish their ratings, so a properly sized unit should carry nearly all of the heating. We have not checked this against a Boston hourly weather file, which isn't in the repo yet." },
+        { k: "Your climate is ideal for", h: "Winters milder than Minnesota's", tag: "reasoning", src: [8, 3, 2],
+          p: "Boston's design cold night (the 99.6% ASHRAE heating condition) is about 8 °F, versus about −9 °F in Minneapolis. That is close to the 5 °F point where NEEP-listed cold-climate units publish their ratings, and the Minnesota field study saw heat pumps keep working down to about −20 °F. So the coldest Boston nights are well within what these units are built for." },
         { k: "Where we expect less benefit", h: "Homes heated with natural gas or oil", tag: "research", src: [5, 4],
           p: "The Harvard study found switching from natural gas typically raises yearly bills by about $300 to $500. For oil, bills fall only modestly, and the Synapse study put payback past 25 years without incentives. Rebates, cooling savings and a lower-priced electricity plan can change that." }
       ],
       notes: [
+        { tag: "gap", text: "Boston hourly weather has not been added yet, so the number of hours below 5 °F is not computed.", src: [] },
         { tag: "gap", text: "The Synapse study used 2017 fuel prices and we did not check the Harvard study's price assumptions. Current Massachusetts fuel and electricity prices still need checking.", src: [] }
       ]
     },

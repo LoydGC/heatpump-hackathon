@@ -435,7 +435,7 @@
 
     $("rNotes").innerHTML = ((out.isPlaceholder || out.v1) ? out.notes : []).concat(
       r.dataStatus === "placeholder" ? [`Climate, prices and grid carbon for ${r.name} are placeholders until the team's data for this region is in.`]
-        : [`Climate, prices and grid carbon for ${r.name} come from the team's data pack (TMYx 2011–2025 weather, EIA prices, MISO 2025 grid).`]
+        : [`Climate, prices and grid carbon for ${r.name} come from the team's data (TMYx 2011–2025 weather, EIA prices, MISO 2025 grid).`]
     ).map(n => `<li>${n}</li>`).join("");
     await renderMeter(out);
     await renderRebates(out);
