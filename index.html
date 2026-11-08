@@ -319,7 +319,8 @@ details.fold .fs{font-size:13px}
           <!-- warm waves inside -->
           <path d="M256 92c6-6 12 6 18 0s12 6 18 0" fill="none" stroke="var(--c-now)" stroke-width="2.5" stroke-linecap="round"/>
           <path d="M260 104c6-6 12 6 18 0s12 6 18 0" fill="none" stroke="var(--c-now)" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
-          <!-- outdoor unit -->
+          <!-- outdoor unit (half size, anchored to the ground beside the house) -->
+          <g transform="translate(148 201) scale(.5) translate(-148 -201)">
           <rect x="44" y="130" width="104" height="66" rx="8" fill="url(#unitG)" stroke="var(--ink)" stroke-width="2.5"/>
           <circle cx="86" cy="163" r="24" fill="#FFFFFF" stroke="var(--ink)" stroke-width="2"/>
           <circle cx="86" cy="163" r="16" fill="none" stroke="var(--line)" stroke-width="1.5"/>
@@ -327,9 +328,10 @@ details.fold .fs{font-size:13px}
           <circle cx="86" cy="163" r="3" fill="var(--ink)"/>
           <path d="M120 144h18M120 152h18M120 160h18M120 168h18M120 176h18" stroke="var(--line)" stroke-width="2"/>
           <rect x="52" y="196" width="8" height="5" fill="var(--ink)"/><rect x="132" y="196" width="8" height="5" fill="var(--ink)"/>
+          </g>
           <!-- refrigerant line -->
-          <path d="M148 146 H176" stroke="var(--c-hp)" stroke-width="4" stroke-linecap="round"/>
-          <path d="M148 156 H176" stroke="var(--c-now)" stroke-width="4" stroke-linecap="round"/>
+          <path d="M148 181 H176" stroke="var(--c-hp)" stroke-width="3" stroke-linecap="round"/>
+          <path d="M148 187 H176" stroke="var(--c-now)" stroke-width="3" stroke-linecap="round"/>
           <!-- cold outside air arrows -->
           <g stroke="var(--c-hp)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <path d="M6 112c10-8 20 8 30 0s20 8 30 0"/><path d="M60 106l7 6-8 4"/>
@@ -341,7 +343,7 @@ details.fold .fs{font-size:13px}
             <path d="M120 24v10M115 29h10M116.5 25.5l7 7M123.5 25.5l-7 7"/>
             <path d="M150 70v10M145 75h10M146.5 71.5l7 7M153.5 71.5l-7 7"/>
           </g>
-          <text x="96" y="222" text-anchor="middle" font-size="12" fill="var(--muted)" font-family="Work Sans, sans-serif">outdoor unit</text>
+          <text x="112" y="222" text-anchor="middle" font-size="12" fill="var(--muted)" font-family="Work Sans, sans-serif">outdoor unit</text>
           <text x="246" y="222" text-anchor="middle" font-size="12" fill="var(--muted)" font-family="Work Sans, sans-serif">warm home</text>
         </svg>
       </div>
