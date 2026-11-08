@@ -87,10 +87,10 @@
 
   // Four climate types, in plain language (qualitative; sources in brackets)
   const CLIMATE_TYPES = [
-    { id: "mild", name: "Mild winters", text: "A heat pump can do the whole job alone, and is two to three times as efficient as ordinary electric heating.", src: [1] },
-    { id: "cold", name: "Cold winters", text: "Modern cold-climate models are built for this. Savings depend mostly on what you're replacing: big against electric heat and propane, small against cheap natural gas.", src: [3, 4, 5] },
-    { id: "verycold", name: "Very cold winters", text: "Good units keep running down to around 0 to −13 °F and in tests as low as −20 °F, but they deliver less heat as it gets colder. Plan on backup for the coldest nights.", src: [1, 2] },
-    { id: "extreme", name: "Extreme cold", text: "Published field evidence is thin. Whether a heat pump makes sense depends on the exact home and unit, so talk to a specialist.", src: [6] }
+    { id: "mild", name: "Mild winters", text: "A heat pump can handle all your heating and uses far less energy than electric heat.", src: [1] },
+    { id: "cold", name: "Cold winters", text: "Modern cold-climate heat pumps are built for this, and save the most over electric heat and propane.", src: [3, 4, 5] },
+    { id: "verycold", name: "Very cold winters", text: "Good units keep heating at 0 °F and below. A backup helps on the coldest nights.", src: [1, 2] },
+    { id: "extreme", name: "Extreme cold", text: "Less research exists here, so a specialist can help find the right setup.", src: [6] }
   ];
 
   const CLIMATE = {

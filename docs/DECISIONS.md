@@ -288,3 +288,5 @@ _D-018 update (2026-11-08):_ Gavin asked for a trade-off curve on the results pa
 _D-019 update (2026-11-08):_ Gavin: the dial ("What matters more to you?") moves to the home step, directly under the title, and is removed from the results page. The home step title is now "Tell us about your home and what you value" and its subtitle is removed. The dial still sets cost vs carbon for both engines; results show the trade-off chart. For stand-in regions the untouched default is now the balanced middle (it was drawn at "lower carbon" while the model used 50/50).
 
 _D-024 update (2026-11-08):_ Gavin: remove the "It may not be a good fit if you heat with" card; heat pump messaging is positive going forward. Removed for Minneapolis and Boston (two cards each for now); a replacement card is pending his pick from the options offered.
+
+_D-024 update (2026-11-08):_ Gavin: the "How heat pumps do in different climates" blurbs are cut to one short, plain, positive sentence each (mild, cold, very cold, extreme). Sources unchanged; the "small against gas" line is dropped from the cold blurb.
