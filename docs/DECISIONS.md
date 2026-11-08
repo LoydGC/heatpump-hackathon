@@ -45,6 +45,7 @@ Add a row here with each new entry.
 | D-022 | 2026-11-08 | UI | Remove Montréal and the on-page disclaimers/footer | active |
 | D-023 | 2026-11-08 | UI | No references to the repo or "data pack" in user-facing text | active |
 | D-024 | 2026-11-08 | UI | Climate card rule: kicker and heading read as one sentence; body supports the heading | active |
+| D-025 | 2026-11-08 | UI/Data | Boston typical home comes from the Boston ResStock extract, the definitive reference | active |
 
 ## How to add an entry
 
@@ -261,3 +262,13 @@ _D-021 update (2026-11-08):_ Gavin: the Home type list shows only single-family 
 _D-021 update (2026-11-08):_ Gavin: size groups with no ResStock homes are removed from the size dropdown instead of greyed out. If a previous choice becomes unavailable, the nearest available group is selected with a short note.
 
 _D-019 update (2026-11-08):_ Gavin: the "What matters more to you?" slider is removed from the home step. The carbon-price dial on the results page remains the one place to set cost vs carbon.
+
+### D-025 · 2026-11-08 · Boston typical home comes from the Boston ResStock extract (definitive reference)
+- **Workstream:** UI (with Data)
+- **Decision:** The "typical Boston home" on the home step is built from Gavin's Boston ResStock extract (`datasets/resstock/boston_metadata_upgrade0_all_types.csv`, amy2018 release 1, baseline upgrade 0), not hand-set guesses. Population: single-family detached, 500-3999 sq ft (0-499 and 4000+ dropped, 122 models). Fields: size = weighted median (1,698 sq ft); heating fuel = weighted mode (natural gas, 80%); draftiness = weighted median infiltration (15 ACH50 or more = drafty). Median yearly use for reference: 8,012 kWh, 1,013 therms. Thermostat (68 F), prices, rebates and installed cost are not in ResStock and stay hand-set placeholders. **This extract is the definitive reference for the Boston typical home going forward; change it only by updating the extract and rebuilding `ui/resstock.js`.**
+- **Why:** Gavin asked for the typical home to be constructed from the data and noted as the reference. (He wrote "ComStock"; this reads that as the ResStock extracts he produced.)
+- **Decided by:** Gavin.
+- **Refs:** `tools/build_resstock_ui.py` (`typical`), `ui/resstock.js`, `ui/app.js` (`TB`). The same medians and modes are also computed for Minneapolis and Fairbanks but not yet applied.
+- **Status:** active
+
+_D-021 update (2026-11-08):_ Gavin: the "Size groups" toggle (9 or 4 sizes) is removed from the home step; only the 7 fine size bins are offered.

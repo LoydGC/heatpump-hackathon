@@ -160,6 +160,7 @@ v1 placeholders (from `model/README.md`): installed cost curve, rebates (verify)
 - `ui/resstock.js` (`window.RESSTOCK`) is generated: `python3 tools/build_resstock_ui.py <datasets/resstock dir> ui/resstock.js`. Per city (Minneapolis, Boston, Fairbanks) x type x bin: ResStock model count, weighted mean sq ft, weighted median kWh, therms, propane/oil kWh. Regenerate if the extracts change.
 - Model needs: v1 ignores these (fixed house). When the end model takes home type and size, read `inputs.home.homeType/sizeBin/floorAreaSqft`; `resstockRef` is a reference figure, never model output.
 - Vintage is deliberately not an input, a lookup key or displayed anywhere in the UI (Gavin 2026-11-08); heat loss = size x envelope factor only.
+- `RESSTOCK.typical[city]`: typical single-family detached home (weighted medians / modes: sqft, fuel, ach50 -> envelope, median kWh and therms). Boston's is applied to the typical home and is the definitive reference (D-025); Minneapolis and Fairbanks are computed but not applied.
 - Thin (<5) cells are used silently; empty cells are disabled and the UI falls back to the nearest non-empty bin. Montréal has no ResStock data.
 
 ## Infra

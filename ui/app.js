@@ -54,6 +54,13 @@
   // Dropdown options come from ResStock (ui/resstock.js, built from datasets/resstock). A (city, type, bin) cell can be
   // thin (<5 models) or empty; an empty choice falls back to the nearest non-empty bin and says so.
   const RS = window.RESSTOCK || { fine: [], coarse: [], cells: {} };
+  // Boston's typical home is built from the Boston ResStock extract (single-family detached, weighted medians/modes).
+  // That extract is the definitive reference for the Boston typical home (Gavin, 2026-11-08); see docs/DECISIONS.md D-025.
+  const TB = RS.typical && RS.typical.boston;
+  if (TB) Object.assign(REGIONS.boston.typicalHome, {
+    floorAreaSqft: TB.sqft, currentHeat: TB.fuel, envelope: TB.envelope,
+    why: `a typical Boston single-family home from ResStock: about ${(Math.round(TB.sqft / 50) * 50).toLocaleString()} sq ft, drafty, heated by ${FUELS[TB.fuel].short}`
+  });
   const HOME_TYPES = [
     { id: "sfd", label: "Single-family detached", rs: "Single-Family Detached", on: true },
     { id: "sfa", label: "Single-family attached (townhouse, rowhouse)", rs: "Single-Family Attached", on: true }
@@ -66,7 +73,7 @@
   const cellOf = (r, type, lvl, bin) => (RS.cells[r.id] || {})[`${type}|${lvl}|${bin}`] || null;
   const hasRS = r => !!RS.cells[r.id];
   function selection(r, ov) {
-    const type = ov.homeType || "sfd", lvl = ov.binLevel || "fine";
+    const type = ov.homeType || "sfd", lvl = "fine";  // 7 ResStock size bins only (the 4-group toggle was removed)
     const list = binList(lvl), dflt = binFor(lvl, r.typicalHome.floorAreaSqft);
     const want = list.includes(ov.sizeBin) ? ov.sizeBin : dflt;
     let bin = want;
@@ -248,13 +255,6 @@
   HOME_TYPES.forEach(t => { const o = document.createElement("option"); o.value = t.id; o.textContent = t.label; $("htype").appendChild(o); });
   $("htype").addEventListener("change", e => setOverride("homeType", e.target.value));
   $("sbin").addEventListener("change", e => setOverride("sizeBin", e.target.value));
-  document.querySelectorAll("#blSeg button").forEach(b => b.addEventListener("click", () => {
-    const r = region(), sel = selection(r, state.overrides), lvl = b.dataset.lvl; if (lvl === sel.lvl) return;
-    const nb = binFor(lvl, sel.sqft);                       // keep roughly the same size when switching groupings
-    if (lvl === "fine") delete state.overrides.binLevel; else state.overrides.binLevel = lvl;
-    state.overrides.sizeBin = nb; if (nb === binFor(lvl, r.typicalHome.floorAreaSqft)) delete state.overrides.sizeBin;
-    delete state.overrides.heatLossWPerF; state.sizeTons = null; renderHome(); save();
-  }));
   $("tou").addEventListener("change", e => setOverride("timeOfUse", e.target.checked));
 
   function renderHome(skipKey) {
@@ -276,7 +276,6 @@
     $("htype").value = sel.type;
     $("sbin").innerHTML = lvlBins.filter(b => !hasRS(r) || (cellOf(r, sel.type, sel.lvl, b) || {}).n)
       .map(b => `<option value="${b}"${b === sel.bin ? " selected" : ""}>${binLabel(b)} sq ft</option>`).join("");
-    document.querySelectorAll("#blSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.lvl === sel.lvl));
     $("binNote").textContent = (sel.fellBack ? `ResStock has no ${typeLabel(sel.type).split(" (")[0].toLowerCase()} homes of ${binLabel(sel.want)} sq ft in ${r.name}, so we're showing the nearest group, ${binLabel(sel.bin)} sq ft. ` : "") +
       (r.id === V1.regionId ? "Model v1 uses one fixed house, so home type and size don't change its numbers yet." : "Home type and size (500–3,999 sq ft) set the heat-loss estimate in the placeholder stand-in; the team's model isn't plugged in for this region.");
     $("resRef").innerHTML = `<div class="banner" style="margin-top:0">${refHtml(r, sel)}</div>`;

@@ -58,3 +58,4 @@ To filter by workstream: search the page for `| UI |`, `| Model |`, `| Data |` o
 | 2026-11-08 | repo | UI | Rewrote climate cards (all three regions) under the kicker+heading+body flow rule | Claude, for Gavin | this push | D-024 |
 | 2026-11-07 | repo | Data | Added docs/COMPARABLES.md and docs/comparables.html: comparable heat pump products research (no PR, no deploy; docs/ excluded from deploys) | Claude, for Gavin | this push | |
 | 2026-11-08 | merge | Infra | Merged dashboard branch (wizard, ResStock dropdowns, climate page) and comparables research into `main`; no deploy | Claude, for Gavin | this push | |
+| 2026-11-08 | repo | UI | Fast-forwarded branch onto main (cf872ba); removed Size groups toggle; Boston typical home now built from the Boston ResStock extract | Claude, for Gavin | this push | D-025 |
