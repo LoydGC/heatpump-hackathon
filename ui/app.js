@@ -402,7 +402,7 @@
     if (isV1(region())) return `${dollars(carbonUsd())} per tonne of CO₂`;
     return idx === 0 ? "Lowest total cost" : idx === DIAL_STEPS ? "Lowest carbon" : idx < DIAL_STEPS / 2 ? "Leaning toward lower cost" : idx > DIAL_STEPS / 2 ? "Leaning toward lower carbon" : "A balance of cost and carbon";
   }
-  ["dial", "dial2"].forEach(id => $(id).addEventListener("input", e => {
+  ["dial"].forEach(id => $(id).addEventListener("input", e => {
     if (isV1(region())) state.carbonUsd = +e.target.value;
     else { state.priority = +e.target.value / DIAL_STEPS; state.prioSet = true; }
     state.sizeTons = null; save(); renderDial();
@@ -432,9 +432,8 @@
   }
   function renderDial() {
     const nb = isV1(region());
-    ["dial", "dial2"].forEach(id => { const el = $(id); el.max = nb ? 300 : DIAL_STEPS; el.step = nb ? 10 : 1; el.value = nb ? carbonUsd() : dialIdx(); });
-    ["dialVal", "dialVal2"].forEach(id => { $(id).textContent = dialSetText(nb ? 0 : dialIdx()); });
-    $("dial2Card").hidden = false;
+    ["dial"].forEach(id => { const el = $(id); el.max = nb ? 300 : DIAL_STEPS; el.step = nb ? 10 : 1; el.value = nb ? carbonUsd() : dialIdx(); });
+    ["dialVal"].forEach(id => { $(id).textContent = dialSetText(nb ? 0 : dialIdx()); });
   }
   function renderLamTable(out) {
     const rows = out.sweep;
