@@ -318,3 +318,5 @@ _D-029 update (2026-11-08):_ Gavin: restructure the income rebate for clarity. B
 _D-031 update (2026-11-08):_ Gavin: the "ResStock reference, not our model" banner was still on the results page and must go. Removed from the results page too; it no longer appears anywhere in the tool.
 
 _D-029 update (2026-11-08):_ Gavin: the two rebate buttons looked alike. Now "Standard rebates (utility, open to everyone)" with Include them / Leave them out, and, below a dashed divider, "Income-based rebate (extra, if your income qualifies)". The two are independent: leaving standard rebates out no longer switches off the income rebate. The comparison table columns read "Without / With standard rebates".
+
+_D-029 update (2026-11-08):_ Gavin: hide the standard rebates control; only income-based remains. The standard utility rebate is still counted in every number (always on, no toggle); the "What if" card shows only the income rebate (Minneapolis) and is hidden for Boston and Fairbanks, which have no other control in it. The with/without comparison table inside the rebates fold still works.

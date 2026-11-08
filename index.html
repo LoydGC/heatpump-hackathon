@@ -466,13 +466,13 @@ details.fold .fs{font-size:13px}
       <details class="tbl"><summary>Show monthly numbers as a table</summary><div class="table-scroll"><table><thead><tr><th>Month</th><th>Bill today</th><th>Bill with heat pump</th><th>CO₂ today</th><th>CO₂ with heat pump</th></tr></thead><tbody id="mTable"></tbody></table></div></details>
     </div>
 
-    <div class="card whatif">
+    <div class="card whatif" id="whatIf">
       <h3>What if&hellip;</h3>
       <div class="whatif-row">
-        <div><p class="wl">Standard rebates <span class="muted" style="font-weight:500">(utility, open to everyone)</span></p>
+        <div><div id="stdBox" hidden><p class="wl">Standard rebates <span class="muted" style="font-weight:500">(utility, open to everyone)</span></p>
           <div class="seg" role="group" aria-label="Standard rebates included or left out" id="rebSeg"><button data-reb="1">Include them</button><button data-reb="0">Leave them out</button></div>
-          <p class="muted wn" id="rebLede"></p>
-          <div id="incBox" style="margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)"><p class="wl" id="incL">Income-based rebate <span class="muted" style="font-weight:500">(extra, if your income qualifies)</span></p>
+          <p class="muted wn" id="rebLede"></p></div>
+          <div id="incBox"><p class="wl" id="incL">Income-based rebate <span class="muted" style="font-weight:500">(extra, if your income qualifies)</span></p>
           <div class="seg seg3" role="group" aria-labelledby="incL" id="incSeg"><button data-inc="full">80% or less<br><small>$8,000</small></button><button data-inc="partial">80–150%<br><small>$4,000</small></button><button data-inc="none">Over 150%<br><small>None</small></button></div>
           <p class="muted wn" id="incLede"></p></div></div>
       </div>

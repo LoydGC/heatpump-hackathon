@@ -83,3 +83,4 @@ To filter by workstream: search the page for `| UI |`, `| Model |`, `| Data |` o
 | 2026-11-08 | repo | UI | Income rebate restructured: labelled amounts, Minneapolis only | Claude, for Gavin | this push | D-029 |
 | 2026-11-08 | repo | UI | Removed ResStock reference banner from the results page | Claude, for Gavin | this push | D-031 |
 | 2026-11-08 | repo | UI | Split standard and income rebate controls visually and logically | Claude, for Gavin | this push | D-029 |
+| 2026-11-08 | repo | UI | Hid standard rebates toggle (always counted); What if card Minneapolis-only | Claude, for Gavin | this push | D-029 |

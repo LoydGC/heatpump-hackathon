@@ -22,6 +22,7 @@
   if (!state.regionId) state.maxStep = 0;
   delete state.overrides.homeType; delete state.overrides.envelope; delete state.overrides.timeOfUse;  // home type and heat-holding inputs were removed from the page
   if (!INCOME_USD.hasOwnProperty(state.income)) state.income = "none";
+  state.rebatesOn = true;               // standard utility rebates are always counted; only the income-based one is a control
   state.sizeTons = null;                // no size picker any more; the suggestion follows the dial
   const save = () => { try { sessionStorage.setItem("hp-wizard", JSON.stringify(state)); } catch (e) {} };
   let current = 0;
@@ -458,7 +459,7 @@
       b.setAttribute("aria-pressed", b.dataset.inc === state.income);
       b.onclick = () => { state.income = b.dataset.inc; save(); renderResults(); };
     });
-    $("incBox").hidden = r.id !== "minneapolis";
+    $("incBox").hidden = r.id !== "minneapolis"; $("whatIf").hidden = r.id !== "minneapolis";   // the What if card only holds the income rebate and the model scenarios
     const incAmt = incomeUsd();
     $("incLede").textContent = incAmt === 8000 ? "Income at or under 80% of area median: the full $8,000 rebate, counted above."
       : incAmt === 4000 ? "Income between 80% and 150% of area median: half the rebate, $4,000, counted above."
