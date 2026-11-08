@@ -256,7 +256,6 @@
       .map(b => `<option value="${b}"${b === sel.bin ? " selected" : ""}>${binLabel(b)} sq ft</option>`).join("");
     $("binNote").textContent = (sel.fellBack ? `ResStock has no ${typeLabel(sel.type).split(" (")[0].toLowerCase()} homes of ${binLabel(sel.want)} sq ft in ${r.name}, so we're showing the nearest group, ${binLabel(sel.bin)} sq ft. ` : "") +
       (r.id === V1.regionId ? "Model v1 uses one fixed house, so home type and size don't change its numbers yet." : "Home type and size (500–3,999 sq ft) set the heat-loss estimate in the placeholder stand-in; the team's model isn't plugged in for this region.");
-    $("resRef").innerHTML = `<div class="banner" style="margin-top:0">${refHtml(r, sel)}</div>`;
     $("fuelPriceL").textContent = h.currentHeat === "electric" ? "Fuel price (same as electricity)" : `${f.short[0].toUpperCase() + f.short.slice(1)} ($ per ${f.unit})`;
     $("fuelPrice").disabled = h.currentHeat === "electric";
     $("tou").checked = !!h.timeOfUse;
