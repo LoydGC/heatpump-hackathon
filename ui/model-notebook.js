@@ -18,7 +18,7 @@
 (function () {
   const D = window.NB_DATA, Prev = window.HeatPumpModel;
   if (!D) return;
-  const LAMBDAS = [0, 10, 25, 50, 75, 100, 150, 200, 300, 400, 500, 750, 1000];   // $ per tonne CO2, the dial (default 300 = notebook default)
+  const LAMBDAS = [0, 10, 25, 50, 75, 100, 150, 200, 300];   // $ per tonne CO2, the dial (default 300 = notebook default)
   const BTU_PER_KWH = 3412.14, FURNACE_EFF = 0.80, GRID_KG_KWH = 0.45, GAS_KG_THERM = 5.30, LIFE = 15;
   const DAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
   const monthOf = new Uint8Array(D.hours);

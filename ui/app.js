@@ -34,7 +34,7 @@
   const V1 = window.HeatPumpModelV1;
   const DEFAULT_LAM_IDX = 8;                        // $300/t: the notebook's default carbon price (dollars_per_ton_co2)
   const DIAL_STEPS = 12;                            // 13 slider positions = the model's lambda grid
-  const carbonUsd = () => Number.isFinite(state.carbonUsd) ? state.carbonUsd : 300;   // $ per tonne CO2, Patrick's notebook default 300
+  const carbonUsd = () => Number.isFinite(state.carbonUsd) ? Math.min(300, Math.max(0, state.carbonUsd)) : 300;   // $ per tonne CO2, Patrick's notebook default 300
   const dialIdx = () => state.prioSet ? Math.round(state.priority * DIAL_STEPS) : (isV1(region()) ? DEFAULT_LAM_IDX : DIAL_STEPS / 2);  // stand-in default = balanced
   const USE_V1 = false;   // Gavin 2026-11-08: Sharvi's v1 is early-stage and non-authoritative; where models conflict, Patrick's notebook model wins
   const NB = window.HeatPumpModelNB;   // Patrick's notebook model, used for Minneapolis
@@ -427,7 +427,7 @@
   }
   function renderDial() {
     const nb = isV1(region());
-    ["dial", "dial2"].forEach(id => { const el = $(id); el.max = nb ? 1000 : DIAL_STEPS; el.step = nb ? 10 : 1; el.value = nb ? carbonUsd() : dialIdx(); });
+    ["dial", "dial2"].forEach(id => { const el = $(id); el.max = nb ? 300 : DIAL_STEPS; el.step = nb ? 10 : 1; el.value = nb ? carbonUsd() : dialIdx(); });
     ["dialVal", "dialVal2"].forEach(id => { $(id).textContent = dialSetText(nb ? 0 : dialIdx()); });
     $("dial2Card").hidden = false;
   }
