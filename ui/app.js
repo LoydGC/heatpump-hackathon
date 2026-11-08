@@ -190,7 +190,7 @@
   });
 
   // ---------- Step 2: climate ----------
-  // Content lives in ui/regions.js (CLIMATE, CLIMATE_TYPES, SOURCES); each claim is tagged and cited.
+  // Content lives in ui/regions.js (CLIMATE, CLIMATE_TYPES, SOURCES); each claim is tagged; source numbers stay in the data and in docs/REFERENCES.md, not on the page.
   const { SOURCES, CLIMATE_TYPES } = window.HP_DATA;
   const ico = {
     sun: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
@@ -200,7 +200,6 @@
   const pct = v => Math.round(v * 100) + "%";
   const TAGS = { research: "Research", data: "Team data", reasoning: "Our reasoning", gap: "Not researched" };
   const tagHtml = t => `<span class="tag tag-${t}">${TAGS[t]}</span>`;
-  const cite = ids => ids && ids.length ? ids.filter(n => SOURCES[n] && SOURCES[n].u).map(n => `<sup><a href="${SOURCES[n].u}" target="_blank" rel="noopener" class="cite" title="${SOURCES[n].t.replace(/"/g, "&quot;")}">${n}</a></sup>`).join("") : "";
   function renderClimate() {
     const r = region(); if (!r) return;
     const c = r.climate;
@@ -209,8 +208,8 @@
     $("cIntro").textContent = c.status === "researched" ? "Here is what the research and the team's data say about heat pumps where you live." : c.status === "limited" ? "We have less research for this region, so some of this page is our own reasoning, marked as such." : "This is a hard case for heat pumps, and we say so plainly below.";
     $("cSpecialist").hidden = !c.specialist; $("cSpecialist").innerHTML = c.specialist ? `<b>Needs a specialist.</b> ${c.specialist}` : "";
     const icons = ["sun", "leaf", "snow"];
-    $("cFacts").innerHTML = c.cards.map((f, i) => `<div class="fact ${f.less ? "less" : ""}"><div class="ico">${ico[f.ico || icons[i]]}</div><p class="muted" style="font-size:13px;font-weight:600">${f.k}</p><h3>${f.h}</h3><p style="margin-top:6px">${f.p}${cite(f.src)}</p><p style="margin-top:8px">${tagHtml(f.tag)}</p></div>`).join("");
-    $("cTypes").innerHTML = CLIMATE_TYPES.map(t => `<div class="ctype ${t.id === c.type ? "here" : ""}"><h3>${t.name}${t.id === c.type ? ' <span class="tag yours">Like yours</span>' : ""}</h3><p style="margin-top:6px;font-size:14px">${t.text}${cite(t.src)}</p></div>`).join("");
+    $("cFacts").innerHTML = c.cards.map((f, i) => `<div class="fact ${f.less ? "less" : ""}"><div class="ico">${ico[f.ico || icons[i]]}</div><p class="muted" style="font-size:13px;font-weight:600">${f.k}</p><h3>${f.h}</h3><p style="margin-top:6px">${f.p}</p><p style="margin-top:8px">${tagHtml(f.tag)}</p></div>`).join("");
+    $("cTypes").innerHTML = CLIMATE_TYPES.map(t => `<div class="ctype ${t.id === c.type ? "here" : ""}"><h3>${t.name}${t.id === c.type ? ' <span class="tag yours">Like yours</span>' : ""}</h3><p style="margin-top:6px;font-size:14px">${t.text}</p></div>`).join("");
   }
   $("toHome").addEventListener("click", () => { unlock(2); go(2); });
 
