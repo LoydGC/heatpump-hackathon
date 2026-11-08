@@ -61,13 +61,106 @@ Entry format:
 
 **Provides**
 
-- **Test sizing page** · UI → all · delivered
-  - What / where: `index.html`, live at https://heatpump-hackathon.vercel.app
-  - Format: static page; inputs and outputs currently placeholder values from the team sketch
+- **Guided 4-step page** · UI → all · delivered (prototype, placeholder numbers)
+  - What / where: `index.html` (root, static), `ui/app.js` (wizard), `ui/charts.js`, `ui/regions.js` (region data), `ui/model-stub.js` (placeholder model). No build step.
+  - Flow: Location → Climate summary → Home details → Results. Steps are gated: you can go back to any step already reached, never forward past it (direct `#results` URLs fall back to step 1). Changing an earlier answer re-renders later steps.
+  - Owner: Gavin (via Claude) · Updated: 2026-11-07
+
+**UI/Model handoff (proposed)**
+
+The results page calls `window.HeatPumpModel.run` and nothing else. `ui/model-stub.js` is a placeholder implementation (`isPlaceholder: true`). To plug in the real model, load a script after it that replaces `window.HeatPumpModel` (or `run`) with the same shape, and return `isPlaceholder: false` so the "placeholder numbers" banner hides. `run` may return a value or a Promise (e.g. a `fetch` to a Model-owned JSON file or service).
+
+`HeatPumpModel.run(inputs) -> outputs`
+
+Inputs (built by `modelInputs()` in `ui/app.js`; units in names):
+
+```
+{ schemaVersion: 1,
+  region:   { id, name, designTempF, monthlyMeanF[12], monthlySdF[12], dataStatus: "placeholder" | "data.zip" },
+  home:     { source: "typical" | "custom", floorAreaSqft /* derived: ResStock cell mean size */, homeType: "sfd"|"sfa", sizeBin, binLevel: "fine"|"coarse", resstockRef: {n, medianKWh, medianTherms, medianOtherFuelKWh}|null, envelope: "drafty"|"average"|"tight",
+              heatLossWPerF, thermostatF, currentHeat: "gas"|"oil"|"propane"|"electric"|"wood"|"kerosene" },
+  prices:   { electricityUsdPerKWh, fuelUsdPerUnit, fuelUnit, timeOfUse: bool, fuelUsdPerKWhHeat },
+  emissions:{ gridKgCo2PerKWh, fuelKgCo2PerUnit, fuelKgCo2PerKWhHeat },
+  costs:    { installedUsdPerTon, rebatesUsd, lifetimeYears },
+  priority: 0..1,          // 0 = lowest cost, 1 = lowest CO2
+  sizeTons: number | null  // null = model picks; otherwise evaluate this size
+}
+```
+
+Outputs (everything the results page draws):
+
+```
+{ schemaVersion: 1, isPlaceholder: bool, modelVersion: string,
+  recommendedSizeTons, sizeTons, capacityKwAt5F, designLoadKw, lifetimeYears,
+  annual:   { today:    { costUsd, co2Kg, heatKWh },
+              heatPump: { costUsd, co2Kg, electricityKWh, heatPumpShare /*0..1 of heat load*/ } },
+  monthly:  [ 12 x { today: { costUsd, co2Kg }, heatPump: { costUsd, co2Kg } } ],   // Jan..Dec
+  upfront:  { installedUsd, rebatesUsd, netUsd },
+  paybackYears: number | null,
+  lifetime: { costUsd, co2Kg, todayCostUsd, todayCo2Kg },        // heat pump life totals
+  sizes:    [ { sizeTons, lifetimeCostUsd, lifetimeCo2Kg, heatPumpShare, paybackYears } ],  // sweep for the trade-off charts
+  notes:    [ string ] }                                             // shown under results
+```
+
+Step 2 (climate page) does not call the model: its text is hand-written per region in `ui/regions.js` (`CLIMATE`, `CLIMATE_TYPES`, `SOURCES`), with each claim tagged Research / Team data / Our reasoning / Not researched and cited in a Sources footer.
+
+
+**Model v1 mapping (Minneapolis only; added 2026-11-07)**
+
+Status: **v1 is not exactly what the end model will be, but closer to what the team is thinking.** The UI loads `model/results/frontend_data.json` (relative `fetch`; the local server serves the repo root; `.vercelignore` re-includes it; no embedded copy, so opening `index.html` from `file://` falls back to the placeholder stub with a notice). Code: `ui/model-v1.js` (adapter) and `runModel()` in `ui/app.js`. Boston, Montréal and Fairbanks still use the placeholder stub.
+
+Lookup: `recommendations["<tariff>|<weather>|credit<0|4000>|<smart|standard>"]["<lambda>"]`.
+
+| UI input | Model key | Notes |
+|---|---|---|
+| Carbon dial (results page; same value as the home-step slider), 13 snapped positions | lambda, `meta.lambda_grid_usd_per_t` = LAMS in `model/sweep.py`: 0, 10, 25, 50, 75, 100, 150, 200, 300, 400, 500, 750, 1000 ($ per tonne CO2) | `state.priority = index/12`; default (untouched) = index 10 ($500/t), roughly where the heat pump starts to win |
+| Smart meter toggle (`timeOfUse`) | tariff `tou` (on) or `flat` (off) | TOU rates are assumed in the model |
+| Winter: typical / very cold (More scenarios) | weather `tmyx_main` / `tmy3_cold` | |
+| AC: keeping / replacing too (More scenarios) | credit `0` / `4000` | $4,000 is a scenario value, not sourced |
+| Rebates on/off | not a model axis: model nets $2,000 Xcel (+ $1,100 CenterPoint if `centerpoint_rule`) inside `up_front`; UI adds them back when off | the model's *recommendation* is always computed with rebates on |
+| (none yet) | controller `smart` fixed; `standard` (installer-set fixed switchover) has no UI | |
+| Home size, envelope, thermostat, current fuel, prices, installed $/ton, heat loss | **not used** by v1 (fixed 15 kW house, gas furnace baseline, fixed prices) | UI says so on the results page |
+
+| Model output | UI element |
+|---|---|
+| `size_kbtuh` (0 = keep gas), `/12` = tons | Suggestion card; 0 shows "Keep your gas furnace" |
+| `controller`, `switchover_C`, `centerpoint_rule` | Suggestion subtext (CenterPoint: heat pump runs above 40 F) |
+| `annual_cost`; `sum(monthly.base_cost)` | Yearly bill tile (heat pump vs today) |
+| `annual_co2_t`; `sum(monthly.base_co2_kg)` | CO2 per year tile |
+| `up_front` | Upfront tile; installed = $5,286 + $178.6 x kBtu/h, rebates and AC credit backed out from it |
+| `payback_years` | UI recomputes `up_front / (base annual cost - annual_cost)`; null shows "Not on bills alone" |
+| `lifetime_cost`, `lifetime_co2_t`, `tonnes_saved_15y`, `usd_per_tonne` | Money/Carbon folds, dial sentence ("$X per tonne avoided") |
+| `monthly.*` | Monthly CO2 and bill charts, cumulative chart derived from `up_front` + years x `annual_cost` |
+| `hp_share` | "covers about N% of your heating" |
+| `recommendations[...]` across all lambda | "How the recommendation changes with the dial" table; best heat pump option = highest lambda with `size_kbtuh > 0` |
+| `meta.assumptions`, `meta.sizes_kbtuh` | Notes under results, PDF report size range |
+| `peak_kW`, `load_duration` | **no UI yet** (load-duration chart is a natural next addition) |
+
+`HeatPumpModel.run` inputs gained `scenario: { coldWinter, acCredit, rebatesOn, lamIdx }`; the adapter returns the stub's output shape plus `v1: { rec, lam, lamIdx, scenario, sizeKbtuh, usdPerTonne, ... }`, `sizes: []`, `isPlaceholder: false`, `capacityKwAt5F: null`.
+
+v1 placeholders (from `model/README.md`): installed cost curve, rebates (verify), TOU rates, AC credit, fixed house, grid carbon is a 2025 MISO average (not marginal), discount rate 0, heating only.
+
+**New UI-side fields (rebates + report, 2026-11-07)**
+
+- **Smart meter (TODO, flesh out):** `prices.timeOfUse` boolean; placeholder 10% discount in the stub. Model/Data should supply real TOU price schedules per region; usage-data calibration is not designed yet (see D-014).
+- `window.HP_REBATES` (`ui/rebates.js`): `REGION[id] = { intro, programs[{name, level, status, amount, note, url, checked}], paperwork[], amountsNote }` plus `SOURCES[]`. Hand-written snapshots dated 2026-11-07, not data-driven.
+- UI calls `HeatPumpModel.run` twice per render (rebates on/off, same `sizeTons`) via `costs.rebatesUsd`. Model needs no change but must keep `rebatesUsd = 0` valid and `upfront`, `paybackYears`, `lifetime` consistent with it.
+- Report reads from `run` outputs: `designLoadKw`, `capacityKwAt5F`, `sizeTons`, `recommendedSizeTons`, `annual.*.heatPumpShare`, `isPlaceholder`, `modelVersion`. It shows a size range of ±1 entry in `HeatPumpModel.sizes`. Optional Model outputs that would improve it: `designLoadBtuh`, `backupSwitchoverF`, `backupKwNeeded`.
+- **Data → UI (new):** a verified rebates pack per region (program, amount formula, deadline, URL, fuel condition). Open discrepancy: CenterPoint hybrid rebate is $1,100 in data.zip but $400 on CenterPoint's page on 2026-11-07. Boston `rebatesUsd` ($8,000) and Montréal ($3,000) are placeholders; Mass Save is $/ton and LogisVert is $/BTU-h.
 
 **Needs**
 
-- `model/results/frontend_data.json` from Model (not wired into `index.html` yet)
+- ~~`model/results/frontend_data.json` from Model (not wired into `index.html` yet)~~ wired for Minneapolis on 2026-11-07 (see Model v1 mapping).
+- **Data → UI:** region packs for Boston, Montréal and Fairbanks like the Minneapolis pack (monthly or hourly temperatures, design temp, electricity and fuel prices, grid CO2, rebates). Today only Minneapolis values in `ui/regions.js` come from `data.zip`; the other three are placeholders and are labeled as such on the results page.
+- **Model → UI:** an implementation of `HeatPumpModel.run` in the shape above, and agreement on whether the model runs in-browser (JS), is precomputed to JSON per region and size, or sits behind an endpoint.
+- **Open question:** free-text locations outside the four regions are not supported (no geocoding without a key). Adding more regions means adding an entry to `ui/regions.js`.
+
+### Home type and size (ResStock dropdowns)
+- Options: home type `sfd`/`sfa` (others disabled); size bins fine = 500-749, 750-999, 1000-1499, 1500-1999, 2000-2499, 2500-2999, 3000-3999; coarse = 0-1499 (excl. <500), 1500-2499, 2500-3999. 0-499 and 4000+ dropped by Gavin 2026-11-08.
+- `ui/resstock.js` (`window.RESSTOCK`) is generated: `python3 tools/build_resstock_ui.py <datasets/resstock dir> ui/resstock.js`. Per city (Minneapolis, Boston, Fairbanks) x type x bin: ResStock model count, weighted mean sq ft, weighted median kWh, therms, propane/oil kWh. Regenerate if the extracts change.
+- Model needs: v1 ignores these (fixed house). When the end model takes home type and size, read `inputs.home.homeType/sizeBin/floorAreaSqft`; `resstockRef` is a reference figure, never model output.
+- Vintage is deliberately not an input, a lookup key or displayed anywhere in the UI (Gavin 2026-11-08); heat loss = size x envelope factor only.
+- Thin (<5) cells are used silently; empty cells are disabled and the UI falls back to the nearest non-empty bin. Montréal has no ResStock data.
 
 ## Infra
 
