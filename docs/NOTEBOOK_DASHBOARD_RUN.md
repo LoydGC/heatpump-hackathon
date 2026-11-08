@@ -8,7 +8,7 @@ Page 3 collects the inputs; going to page 4 runs the notebook's search in the br
 | dollars_per_ton_co2 | carbon price slider ($0-300/t) | 300 |
 | location | city | Minneapolis (only city with notebook data) |
 | square_footage | home size (sq ft) | 1500 |
-| current_heating_system | heating today (gas, electric, propane; others fall back) | Natural Gas |
+| current_heating_system | fixed: every home heats with natural gas today (no input) | Natural Gas |
 | chosen_set_point | winter thermostat (°F) | 68 |
 | price_per_kWh_electric | electricity $/kWh | 0.12 |
 | price_per_therm_secondary | fuel price ($/therm for gas) | 1.20 |
@@ -31,9 +31,8 @@ winner.json: same winner, values within 1e-6 relative.
    from 600 to 3000 sq ft to the same 1698 sq ft home. This is the notebook's metric, kept as is.
 2. **Few homes at higher insulation.** 173 homes, median unified R 2.83, only a handful above 3.5, so Fair/Decent/Good each land on
    1-3 homes.
-3. **Fuels.** Notebook homes: 165 gas, 6 electric, 1 propane, 1 other. Oil (none) falls back to gas homes. The notebook prices
-   the backup as an 80% gas furnace whatever the fuel; the page prices non-gas backup from its own fuel price and CO2 (optimize.py
-   follows the notebook).
+3. **Fuels.** Gas only (Gavin 2026-11-08): the heating input is gone and every city assumes natural gas today, matching the notebook's
+   gas-furnace backup. find_closest_row searches the 165 gas homes.
 4. **Thermostat** only changes which home is picked (the sim's setpoint does not change the load), and ResStock set points are
    discrete (55-75 °F).
 5. **Other cities**: Boston and Fairbanks have no notebook data; they still use the older stand-in model.

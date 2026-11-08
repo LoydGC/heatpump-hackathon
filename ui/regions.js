@@ -62,8 +62,8 @@
       gridNote: "a grid that leans heavily on coal and oil",
       fuelPrices: { gas: 2.60, oil: 4.20, propane: 4.80, electric: 0.26, wood: 300, kerosene: 4.60 },
       rebatesUsd: 0,
-      typicalHome: { floorAreaSqft: 1800, envelope: "tight", currentHeat: "oil", thermostatF: 68,
-                     why: "a well-insulated house heated by fuel oil, the most common setup in interior Alaska" }
+      typicalHome: { floorAreaSqft: 1800, envelope: "tight", currentHeat: "gas", thermostatF: 68,
+                     why: "a well-insulated house heated by natural gas" }
     }
   };
 
