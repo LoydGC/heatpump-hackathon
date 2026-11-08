@@ -1,6 +1,6 @@
 // Region and fuel data used by the UI.
 // Minneapolis values come from data.zip (data/processed/model_inputs_minneapolis.json and
-// msp_weather_TMYx.2011-2025.csv). Boston, Montréal and Fairbanks are PLACEHOLDERS until the
+// msp_weather_TMYx.2011-2025.csv). Boston and Fairbanks are PLACEHOLDERS until the
 // Data workstream supplies packs for them. See docs/INTERFACES.md (UI section).
 (function () {
   // Fuels: energy per unit (kWh of heat content), appliance efficiency, kg CO2 per unit.
@@ -50,20 +50,6 @@
       rebateIfGasBackupUsd: 1100,
       typicalHome: { floorAreaSqft: 2000, envelope: "average", currentHeat: "gas", thermostatF: 68,
                      why: "a mid-century house with a natural gas furnace, the most common setup in the area" }
-    },
-    montreal: {
-      id: "montreal", name: "Montréal", full: "Montréal, Québec", short: "Montréal, QC",
-      dataStatus: "placeholder",
-      designTempF: -10,
-      monthlyMeanF: [14.5, 17.6, 28.4, 43.5, 56.5, 65.8, 70.5, 68.5, 60.4, 48.0, 36.5, 22.8],
-      monthlySdF:   [12, 12, 11, 9, 9, 8, 7, 7, 8, 9, 10, 12],
-      electricityUsdPerKWh: 0.07,
-      gridKgCo2PerKWh: 0.002,
-      gridNote: "an almost entirely hydroelectric grid",
-      fuelPrices: { gas: 1.20, oil: 3.90, propane: 3.20, electric: 0.07, wood: 280, kerosene: 4.00 },
-      rebatesUsd: 3000,
-      typicalHome: { floorAreaSqft: 1300, envelope: "average", currentHeat: "electric", thermostatF: 68,
-                     why: "a duplex-style home with electric baseboard heaters, the most common setup in Québec" }
     },
     fairbanks: {
       id: "fairbanks", name: "Fairbanks", full: "Fairbanks, Alaska", short: "Fairbanks, AK",
@@ -140,20 +126,6 @@
         { tag: "gap", text: "The Synapse study used 2017 fuel prices and we did not check the Harvard study's price assumptions. Current Massachusetts fuel and electricity prices still need checking.", src: [] }
       ]
     },
-    montreal: {
-      type: "verycold", status: "limited",
-      headline: "Montréal is a cold-climate case we haven't researched yet.",
-      design: null,
-      cards: [
-        { k: "Heat pumps excel at", h: "Replacing electric baseboards", tag: "reasoning", src: [1],
-          p: "The Minnesota field work found heat pumps two to three times as efficient as standard electric heating. Many Québec homes use electric baseboards, so that is the likely best case. We haven't found Québec-specific studies." },
-        { k: "Your climate is ideal for", h: "Not established yet", tag: "gap", src: [],
-          p: "We haven't sourced Québec's grid emissions or prices, so we won't claim a carbon benefit here yet." },
-        { k: "Where we expect less benefit", h: "The coldest weeks", tag: "reasoning", src: [1, 2],
-          p: "Montréal winters are colder than Boston's, closer to Minneapolis. The research above says good units run down to about 0 to −13 °F and deliver less heat as it gets colder, so plan for backup." }
-      ],
-      notes: [{ tag: "gap", text: "Prices, rebates and climate numbers for Montréal in the results are rough placeholders.", src: [] }]
-    },
     fairbanks: {
       type: "extreme", status: "specialist",
       headline: "Fairbanks needs a specialist's eye before you decide.",
@@ -176,7 +148,6 @@
   const ALIASES = [
     ["boston", /\b(boston|cambridge|somerville|brookline|newton|quincy|massachusetts|mass|ma)\b/],
     ["minneapolis", /\b(minneapolis|st\.? ?paul|saint paul|twin cities|minnesota|mn|msp|bloomington|edina)\b/],
-    ["montreal", /\b(montr[eé]al|laval|longueuil|qu[eé]bec|qc|quebec)\b/],
     ["fairbanks", /\b(fairbanks|north pole|alaska|ak)\b/]
   ];
   function matchPlace(text) {
@@ -190,7 +161,6 @@
       if (/^99[5-9]/.test(z)) return "fairbanks";
       return null;
     }
-    if (/^h\d[a-z]/.test(t.replace(/\s/g, ""))) return "montreal"; // Montréal postal codes start with H
     for (const [id, re] of ALIASES) if (re.test(t)) return id;
     return null;
   }

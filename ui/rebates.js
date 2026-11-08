@@ -53,22 +53,6 @@
       paperwork: ["Xcel and CenterPoint account numbers (from a bill)", "Model and serial numbers of the heat pump (from the installer)", "AHRI or NEEP listing for the model", "Final itemized invoice", "Proof the heat pump switchover is set to 40 °F or lower (hybrid with gas)", "Insulation / air-sealing invoice if claiming the $600 bonus", "Income documents for income-qualified programs"],
       amountsNote: "The calculator uses $2,000 for the heat pump and adds $1,100 only if you heat with gas today (from the team's data pack)."
     },
-    montreal: {
-      intro: "In Québec the main program is Hydro-Québec's LogisVert. The federal grant has closed, and federal heat pump funding is announced for 2027 with details still to come.",
-      programs: [
-        { name: "Hydro-Québec LogisVert", level: "Utility / provincial", status: "open",
-          amount: "About $120 per 1,000 BTU/h of heating capacity (rated at −8 °C) for ENERGY STAR cold-climate units, about $50 per 1,000 BTU/h for standard units. A typical 3-ton cold-climate system is a few thousand dollars.",
-          note: "Installed by a licensed (RBQ) contractor; apply online within 9 months of installation. The low-income 100% stream was suspended for high demand.",
-          url: "https://www.hydroquebec.com/residential/energy-wise/financial-assistance/logisvert/residential.html", checked: true },
-        { name: "Rénoclimat / Chauffez vert", level: "Province", status: "ended", amount: "Heat pump funding moved to LogisVert; Chauffez vert ended March 31, 2026 (per third-party sources)",
-          note: "Ask whether any oil-to-electric replacement program has returned.", url: "https://transitionenergetique.gouv.qc.ca/", checked: false },
-        { name: "Canada Greener Homes Grant", level: "Federal", status: "ended", amount: "Closed to new applicants",
-          note: "Hydro-Québec's page says the federal government announced heat pump funding starting in 2027; details not yet known.",
-          url: "https://natural-resources.canada.ca/energy-efficiency/homes/canada-greener-homes-initiative", checked: false }
-      ],
-      paperwork: ["Hydro-Québec account number", "Contractor's RBQ licence number", "Itemized invoice with model, serial number and heating capacity at −8 °C", "Proof of eligible product (ENERGY STAR cold-climate listing)", "Proof of the old heating system (photos), especially if replacing oil", "Proof of ownership of the home"],
-      amountsNote: "The $3,000 in the calculator is a placeholder. Québec dollars and Canadian prices are shown as dollars without currency conversion."
-    },
     fairbanks: {
       intro: "In Fairbanks, rebate money has been scarce. The state's federal home energy rebate program had not launched as of the most recent page we read, so check before counting on any rebate.",
       programs: [

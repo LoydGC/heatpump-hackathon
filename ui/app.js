@@ -194,7 +194,7 @@
     const raw = $("place").value, id = matchPlace(raw);
     if (id) return chooseRegion(id);
     const msg = $("locMsg"); msg.className = "loc-msg warn";
-    msg.textContent = raw.trim() ? `We don't have data for "${raw.trim()}" yet. Pick the closest of the four regions above.` : "Type a city or ZIP code, or pick a region.";
+    msg.textContent = raw.trim() ? `We don't have data for "${raw.trim()}" yet. Pick the closest of the three regions above.` : "Type a city or ZIP code, or pick a region.";
   });
 
   // ---------- Step 2: climate ----------
