@@ -116,6 +116,7 @@ button,select,input{font:inherit;color:inherit}
 .f .hint{font-size:13px;margin-top:4px}
 .f.full{grid-column:1/-1}
 .seg{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--panel)}
+.seg[hidden]{display:none}
 .seg button{flex:1;border:0;background:none;padding:8px 4px;cursor:pointer;font-weight:600;font-size:14px}
 .seg button small{font-weight:500;font-size:12px}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--panel);border-radius:999px}
@@ -465,9 +466,8 @@ details.fold .fs{font-size:13px}
 
     <div class="card whatif" id="whatIf">
       <h3>Rebates</h3>
-      <p class="muted" style="margin:-2px 0 14px" id="rebIntro">Based on the household income you chose on the home step.</p>
       <div id="stdBox" hidden><div class="seg" id="rebSeg"><button data-reb="1"></button><button data-reb="0"></button></div><p id="rebLede"></p></div>
-      <div id="incBox"><p class="wl" id="incL">Income-based rebate <span class="muted" style="font-weight:500">(your household income vs. area median)</span></p>
+      <div id="incBox"><p class="wl" id="incL" hidden>Income-based rebate</p>
         <div class="seg seg3" role="group" aria-labelledby="incL" id="incSeg" hidden><button data-inc="full">80% or less<br><small>up to $8,000</small></button><button data-inc="partial">80–150%<br><small>up to $4,000</small></button><button data-inc="none">Over 150%<br><small>None</small></button></div>
         <p class="muted wn" id="incLede"></p></div>
       <div class="reb-total" id="rebTotal"></div>

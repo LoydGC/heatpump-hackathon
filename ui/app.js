@@ -484,10 +484,10 @@
     });
     $("rebTotal").innerHTML = state.income !== "none"
       ? `Income-based rebate: ${money(w.upfront.rebatesUsd)}<small>${w.sizeTons ? `Your upfront cost comes down to ${money(w.upfront.netUsd)}.` : "It comes off the cost of a heat pump. At this setting of the dial we suggest keeping your gas furnace; the figures show the best heat pump for comparison."}</small>`
-      : `Income-based rebate: none<small>Choose a range above if your household qualifies.</small>`;
+      : `Income-based rebate: none`;
     $("incBox").hidden = $("whatIf").hidden = false;
-    $("incLede").textContent = state.income === "full" ? "Income at or under 80% of area median: the full rebate, up to $8,000, counted above."
-      : state.income === "partial" ? "Income between 80% and 150% of area median: half the cost, up to $4,000, counted above."
+    $("incLede").textContent = state.income === "full" ? "Income at or under 80% of area median: the full rebate, up to $8,000."
+      : state.income === "partial" ? "Income between 80% and 150% of area median: half the cost, up to $4,000."
       : "Income over 150% of area median: no income-based rebate.";
     const row = (k, a, b, d, on) => `<tr class="${on ? "on" : ""}"><td>${k}</td><td>${a}</td><td>${b}</td><td class="diff">${d}</td></tr>`;
     const dlt = (x, y, fmt) => { const v = x - y; return v === 0 ? "—" : fmt(v); };
