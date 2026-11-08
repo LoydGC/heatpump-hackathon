@@ -117,8 +117,8 @@
       cards: [
         { k: "Heat pumps excel at", h: "Replacing electric resistance heat", tag: "research", src: [4, 5],
           p: "A Massachusetts cost study found heat pumps about three times as efficient as electric resistance heat, with a payback near four years even without incentives. A Harvard study put the yearly savings for a typical electric-heated home at up to $2,900." },
-        { k: "Your climate is ideal for", h: "Winters milder than Minnesota's", tag: "reasoning", src: [8, 3, 2],
-          p: "Boston's design cold night (the 99.6% ASHRAE heating condition) is about 8 °F, versus about −9 °F in Minneapolis. That is close to the 5 °F point where NEEP-listed cold-climate units publish their ratings, and the Minnesota field study saw heat pumps keep working down to about −20 °F. So the coldest Boston nights are well within what these units are built for." },
+        { k: "Your climate is ideal for", h: "Handling the cold", tag: "reasoning", src: [8, 3, 2],
+          p: "Boston's coldest nights are around 8 °F. Cold-climate heat pumps are rated down to 5 °F and keep working well below that, so they can handle a typical Boston winter." },
         { k: "Where we expect less benefit", h: "Homes heated with natural gas or oil", tag: "research", src: [5, 4],
           p: "The Harvard study found switching from natural gas typically raises yearly bills by about $300 to $500. For oil, bills fall only modestly, and the Synapse study put payback past 25 years without incentives. Rebates, cooling savings and a lower-priced electricity plan can change that." }
       ],
