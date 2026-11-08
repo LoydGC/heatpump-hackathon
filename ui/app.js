@@ -134,7 +134,7 @@
       prices: { electricityUsdPerKWh: h.electricityUsdPerKWh, fuelUsdPerUnit: fuelPrice, fuelUnit: f.unit, timeOfUse: tou == null ? !!h.timeOfUse : tou,
                 fuelUsdPerKWhHeat: fuelPrice / (f.kwh * f.eff) },
       emissions: { gridKgCo2PerKWh: r.gridKgCo2PerKWh, fuelKgCo2PerUnit: fuelCo2, fuelKgCo2PerKWhHeat: fuelCo2 / (f.kwh * f.eff) },
-      costs: { installedUsdPerTon: h.installedUsdPerTon, rebatesUsd: rebatesOn ? h.rebatesUsd + incomeUsd() : 0, lifetimeYears: LIFETIME_YEARS },
+      costs: { installedUsdPerTon: h.installedUsdPerTon, rebatesUsd: (rebatesOn ? h.rebatesUsd : 0) + incomeUsd(), lifetimeYears: LIFETIME_YEARS },
       priority: state.prioSet ? state.priority : (isV1(r) ? DEFAULT_LAM_IDX / DIAL_STEPS : state.priority),
       sizeTons: sizeTons ?? null,
       scenario: { coldWinter: state.cold, acCredit: state.acCredit, rebatesOn, incomeUsd: incomeUsd(), lamIdx: lamIdx ?? dialIdx() }  // used by model v1
@@ -448,7 +448,7 @@
     const { w, wo } = await bothRebateCases(out);
     const reb = w.upfront.rebatesUsd, life = out.lifetimeYears;
     $("rebLede").textContent = reb > 0
-      ? `Counting about ${money(reb)} off the upfront cost.`
+      ? `Counting about ${money(Math.min(h.rebatesUsd, w.upfront.installedUsd))} off the upfront cost.`
       : `No rebates counted for this home. Add one under "Prices, rebates and other details" on the home step.`;
     $("rebSeg").querySelectorAll("button").forEach(b => {
       b.setAttribute("aria-pressed", (b.dataset.reb === "1") === state.rebatesOn);
@@ -460,8 +460,7 @@
     });
     $("incBox").hidden = r.id !== "minneapolis";
     const incAmt = incomeUsd();
-    $("incLede").textContent = !state.rebatesOn ? "Turn rebates on to count an income-based rebate."
-      : incAmt === 8000 ? "Income at or under 80% of area median: the full $8,000 rebate, counted above."
+    $("incLede").textContent = incAmt === 8000 ? "Income at or under 80% of area median: the full $8,000 rebate, counted above."
       : incAmt === 4000 ? "Income between 80% and 150% of area median: half the rebate, $4,000, counted above."
       : "Income over 150% of area median: no income-based rebate.";
     const row = (k, a, b, d, on) => `<tr class="${on ? "on" : ""}"><td>${k}</td><td>${a}</td><td>${b}</td><td class="diff">${d}</td></tr>`;
@@ -577,7 +576,7 @@
         <ul>${rb.paperwork.map(p => `<li>${esc(p)}</li>`).join("")}</ul></section>
 
       <section><h2>5. Cost and CO₂ summary</h2>
-        <table><thead><tr><th></th><th>Without rebates</th><th>With rebates</th></tr></thead><tbody>
+        <table><thead><tr><th></th><th>Without standard rebates</th><th>With standard rebates</th></tr></thead><tbody>
           <tr><td>Installed price (${out.sizeTons} tons)</td><td>${money(wo.upfront.installedUsd)}</td><td>${money(w.upfront.installedUsd)}</td></tr>
           <tr><td>Rebates</td><td>$0</td><td>−${money(w.upfront.rebatesUsd)}</td></tr>
           <tr><td>Upfront costs after rebates</td><td>${money(wo.upfront.netUsd)}</td><td>${money(w.upfront.netUsd)}</td></tr>

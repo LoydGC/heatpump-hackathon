@@ -469,10 +469,10 @@ details.fold .fs{font-size:13px}
     <div class="card whatif">
       <h3>What if&hellip;</h3>
       <div class="whatif-row">
-        <div><p class="wl">Rebates</p>
-          <div class="seg" role="group" aria-label="Rebates on or off" id="rebSeg"><button data-reb="1">With rebates</button><button data-reb="0">Without rebates</button></div>
+        <div><p class="wl">Standard rebates <span class="muted" style="font-weight:500">(utility, open to everyone)</span></p>
+          <div class="seg" role="group" aria-label="Standard rebates included or left out" id="rebSeg"><button data-reb="1">Include them</button><button data-reb="0">Leave them out</button></div>
           <p class="muted wn" id="rebLede"></p>
-          <div id="incBox"><p class="wl" style="margin-top:14px" id="incL">Income-based rebate: your household income vs. area median</p>
+          <div id="incBox" style="margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)"><p class="wl" id="incL">Income-based rebate <span class="muted" style="font-weight:500">(extra, if your income qualifies)</span></p>
           <div class="seg seg3" role="group" aria-labelledby="incL" id="incSeg"><button data-inc="full">80% or less<br><small>$8,000</small></button><button data-inc="partial">80–150%<br><small>$4,000</small></button><button data-inc="none">Over 150%<br><small>None</small></button></div>
           <p class="muted wn" id="incLede"></p></div></div>
       </div>
@@ -521,7 +521,7 @@ details.fold .fs{font-size:13px}
     <details class="fold">
       <summary><span class="fh">How rebates change the numbers</span><span class="muted fs">side-by-side tables</span></summary>
       <div class="fold-body">
-      <div class="card" style="padding:12px 16px"><div class="table-scroll"><table class="cmp"><thead><tr><th></th><th>Without rebates</th><th>With rebates</th><th>Rebates change</th></tr></thead><tbody id="rebCmp"></tbody></table></div></div>
+      <div class="card" style="padding:12px 16px"><div class="table-scroll"><table class="cmp"><thead><tr><th></th><th>Without standard rebates</th><th>With standard rebates</th><th>Rebates change</th></tr></thead><tbody id="rebCmp"></tbody></table></div></div>
       <p class="muted" id="rebCmpNote" style="font-size:14px;margin-top:10px;max-width:70ch"></p>
       </div>
     </details>

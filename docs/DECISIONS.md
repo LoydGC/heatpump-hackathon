@@ -316,3 +316,5 @@ _D-033 (2026-11-08):_ Gavin: do not waffle or qualify; the tool must sound confi
 _D-029 update (2026-11-08):_ Gavin: restructure the income rebate for clarity. Buttons now read "80% or less / $8,000", "80-150% / $4,000", "Over 150% / None", with one plain sentence under them. Applies to Minneapolis only; the control is hidden for Boston and Fairbanks.
 
 _D-031 update (2026-11-08):_ Gavin: the "ResStock reference, not our model" banner was still on the results page and must go. Removed from the results page too; it no longer appears anywhere in the tool.
+
+_D-029 update (2026-11-08):_ Gavin: the two rebate buttons looked alike. Now "Standard rebates (utility, open to everyone)" with Include them / Leave them out, and, below a dashed divider, "Income-based rebate (extra, if your income qualifies)". The two are independent: leaving standard rebates out no longer switches off the income rebate. The comparison table columns read "Without / With standard rebates".
