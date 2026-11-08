@@ -44,3 +44,30 @@ To filter by workstream: search the page for `| UI |`, `| Model |`, `| Data |` o
 | 2026-11-07 | upload | Data | Unpacked `data.zip` into `data/raw/` and removed the zip; `data/processed/`, `data/scripts/`, `data/README.md` were left out | sharvis3 | `49460e6` | D-013 |
 | 2026-11-07 | repo | Data | Restored `data/processed/`, `data/scripts/`, `data/README.md` from the original zip (`b7e8b32`); `model/` tests pass and `sweep.py` reproduces `model/results/sweep.csv` exactly | Claude, for Gavin | this push | D-013 |
 | 2026-11-07 | repo | Infra | `.vercelignore`: re-include `model/results/frontend_data.json`; updated INTERFACES, WORKSTREAMS, README (untested on Vercel) | Claude, for Gavin | this push | D-013 |
+| 2026-11-07 | repo | UI | Rebuilt dashboard as gated 4-step wizard (location, climate, home, results); added `ui/` scripts and placeholder model stub; documented UI/Model handoff | Claude, for Gavin | this push (branch `claude/project-thread-ez6q50`) | D-014 |
+| 2026-11-07 | repo | UI | Added Rebates section (with/without toggle, per-region program explainer with links) and printable "Download your report (PDF)" to results; new `ui/rebates.js` | Claude, for Gavin | this push (branch `claude/project-thread-6h36e8`) | D-015, D-016 |
+| 2026-11-07 | repo | UI | Moved smart meter (time-of-use) toggle to main Your home form and into the report; flagged as placeholder to flesh out | Claude, for Gavin | this push | D-017 |
+| 2026-11-07 | repo | UI | Results: "Add a smart meter?" section compares heat pump vs heat pump + smart meter (toggle applies it page-wide) | Claude, for Gavin | this push | D-017 |
+| 2026-11-07 | repo | UI | Front page: headline "Let's get you a heat pump!" with the location question as subheader | Claude, for Gavin | this push | |
+| 2026-11-07 | repo | UI | Results page split: headline numbers, what-if toggles (rebates, smart meter), PDF button first; CO2, money, tables and size trade-off folded; rebate explainer moved to its own `#rebates` page reached by a button | Claude, for Gavin | this push | D-018 |
+| 2026-11-07 | repo | UI | Merged main (model v1); wired Minneapolis to `model/results/frontend_data.json` via `ui/model-v1.js`; added carbon-price dial (13 snapped $/t steps), winter and AC scenarios, dial sweep table; labeled model v1 vs placeholder regions; PDF report uses v1 numbers | Claude, for Gavin | this push | D-019 |
+| 2026-11-07 | repo | UI | Step 2 climate page rewritten with per-region cited content (Minneapolis, Boston researched; Montréal limited; Fairbanks flagged for a specialist), climate-type overview, tagged claims and Sources footer; `climateStats` removed from model stub | Claude, for Gavin | this push (branch `claude/project-thread-ez6q50`) | D-012 |
+| 2026-11-08 | repo | UI | Merged branches 6h36e8 and ez6q50 onto main; replaced sq ft box with ResStock home type and size dropdowns (7 fine / 3 coarse bins), ResStock reference figures, new `ui/resstock.js` and `tools/build_resstock_ui.py` | Claude, for Gavin | this push | D-021 |
+| 2026-11-08 | repo | UI | Removed Montréal, footer paragraph, location-step disclaimer and two copy phrases; front page now has no location subheader and the lede ends "Just tell us where your home is." | Claude, for Gavin | this push | D-022 |
+| 2026-11-08 | repo | UI | Reworded Boston cold-night card; removed repo / "data pack" wording from visible text | Claude, for Gavin | this push | D-023 |
+| 2026-11-08 | repo | UI | Rewrote climate cards (all three regions) under the kicker+heading+body flow rule | Claude, for Gavin | this push | D-024 |
+| 2026-11-07 | repo | Data | Added docs/COMPARABLES.md and docs/comparables.html: comparable heat pump products research (no PR, no deploy; docs/ excluded from deploys) | Claude, for Gavin | this push | |
+| 2026-11-08 | merge | Infra | Merged dashboard branch (wizard, ResStock dropdowns, climate page) and comparables research into `main`; no deploy | Claude, for Gavin | this push | |
+| 2026-11-08 | repo | UI | Fast-forwarded branch onto main (cf872ba); removed Size groups toggle; Boston typical home now built from the Boston ResStock extract | Claude, for Gavin | this push | D-025 |
+| 2026-11-08 | repo | Data | Added `docs/REFERENCE_FACTS.md`: guaranteed facts from the ResStock extracts (Boston typical home, bins, medians) | Claude, for Gavin | this push | D-025 |
+| 2026-11-08 | repo | UI | Removed theme switcher and sand/sage/paper themes; green lichen theme only | Claude, for Gavin | this push | D-005 |
+| 2026-11-08 | repo | UI | Climate citations now link directly to sources; Sources list removed | Claude, for Gavin | this push | D-020 |
+| 2026-11-08 | repo | UI | Results page: removed subtitle, placeholder/model banner and notes list | Claude, for Gavin | this push | D-018 |
+| 2026-11-08 | repo | UI | Added cost-versus-carbon trade-off chart to results page (`ui/charts.js` tradeoffChart) | Claude, for Gavin | this push | D-018 |
+| 2026-11-08 | repo | UI | Moved the cost-vs-carbon dial to the home step under a new title; removed from results | Claude, for Gavin | this push | D-019 |
+| 2026-11-08 | repo | UI | Climate illustration: outdoor heat pump unit at half size, refrigerant lines re-attached | Claude, for Gavin | this push | |
+| 2026-11-08 | repo | UI | Removed the "may not be a good fit" climate card (Minneapolis, Boston); card grid now fits 2 or 3 cards | Claude, for Gavin | this push | D-024 |
+| 2026-11-08 | repo | UI | Shortened the four climate-type blurbs | Claude, for Gavin | this push | D-024 |
+| 2026-11-08 | repo | UI | Added "Cleaner heat / Even where gas is cheap" card (Minneapolis, Boston); R-07 in REFERENCE_FACTS | Claude, for Gavin | this push | D-024 |
+| 2026-11-08 | repo | UI | Removed the "modern cold-climate models" paragraph from the heat pump definition | Claude, for Gavin | this push | |
+| 2026-11-08 | repo | UI | Moved cumulative-cost and monthly-bill charts and the monthly table out of the Money fold onto the results page | Claude, for Gavin | this push | D-018 |

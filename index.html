@@ -3,515 +3,590 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Heat Pump Sizer</title>
+<title>Heat Pump Guide</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Lora:wght@500;600;700&family=Young+Serif&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   color-scheme:light;
   --bg:#ECEEE3; --panel:#F7F7F0; --ink:#2E2B22; --muted:#6A6656; --line:#D6D6C6;
-  --hp:#4E7040; --hp-soft:#DCE5CF; --base:#A08C74; --warn:#A8642B; --focus:#3F6E8C; --accent:#3E5A33;
+  --hp:#4E7040; --hp-soft:#DCE5CF; --base:#A08C74; --focus:#3F6E8C; --accent:#3E5A33;
   --display:"Fraunces",Georgia,serif;
-  --r:16px; --r-sm:12px;
+  /* chart data colors: validated pair (dataviz validator) */
+  --c-now:#C27E26; --c-hp:#00806A; --grid:#E2E2D6; --axis:#B9B7A6;
+  --r:18px; --r-sm:12px;
 }
-/* Sand & clay: warm dune base, terracotta-clay action color, olive heat pump line */
-:root[data-theme="sand"]{
-  --bg:#F2EADC; --panel:#FBF6EE; --ink:#3A2E24; --muted:#76665A; --line:#E0D3C0;
-  --hp:#6F8442; --hp-soft:#E8E2C9; --base:#B39E86; --focus:#3F6E8C; --accent:#9A5636;
-  --display:"Young Serif",Georgia,serif;
-}
-/* Sage & mist: cool grey-green, deep sage, calm and airy */
-:root[data-theme="sage"]{
-  --bg:#E8EEEA; --panel:#F8FBF9; --ink:#22302B; --muted:#5E6E67; --line:#CFDAD4;
-  --hp:#4F8A72; --hp-soft:#D6E7DE; --base:#9EA69C; --focus:#3F6E8C; --accent:#2F5E50;
-  --display:"Lora",Georgia,serif;
-}
-/* Warm paper: unbleached paper, ink brown, ochre and fern */
-:root[data-theme="paper"]{
-  --bg:#F4F0E6; --panel:#FFFDF7; --ink:#2F2A1F; --muted:#6F6857; --line:#E2DCCB;
-  --hp:#5D7A34; --hp-soft:#ECE8D2; --base:#C1A777; --focus:#3F6E8C; --accent:#8A6417;
-  --display:"Fraunces",Georgia,serif;
-}
-[data-theme="sage"] h1{word-spacing:-.12em;font-weight:700}
-.themebar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:22px;font-size:14px}
-.themebar span{font-weight:600;margin-right:4px}
-.themebar button{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 12px 5px 6px;cursor:pointer;font-size:14px}
-.themebar button[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
-.themebar i{width:18px;height:18px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.12)}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--bg);background-image:radial-gradient(60rem 30rem at 95% -10%,var(--hp-soft),transparent 70%),radial-gradient(40rem 26rem at -10% 110%,color-mix(in srgb,var(--base) 22%,transparent),transparent 70%);background-attachment:fixed;min-height:100vh;color:var(--ink);font:400 16px/1.55 "Work Sans",system-ui,sans-serif;font-variant-numeric:tabular-nums}
-main{max-width:1180px;margin:0 auto;padding:28px 16px 48px}
-h1{font-family:var(--display);font-size:clamp(32px,5vw,54px);line-height:1.02;font-weight:600;letter-spacing:-.01em;margin:0;font-variation-settings:"SOFT" 100,"WONK" 1}
-h2{font-family:var(--display);font-size:19px;font-weight:600;margin:0 0 10px;font-variation-settings:"SOFT" 100}
+main{max-width:1040px;margin:0 auto;padding:20px 16px 56px}
+h1,h2,h3{font-family:var(--display);font-variation-settings:"SOFT" 100,"WONK" 1;margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(34px,5.4vw,60px);line-height:1.04;font-weight:600}
+h2{font-size:clamp(24px,3vw,32px);line-height:1.15;font-weight:600}
+h3{font-size:19px;font-weight:600}
 p{margin:0}
 .muted{color:var(--muted)}
 button,select,input{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 
-/* Priority bar */
-.priority{background:var(--panel);border-radius:var(--r);padding:20px 22px;border:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:16px 24px;align-items:end;margin:22px 0 26px}
-.prio-track{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center}
-.prio-end{font-family:var(--display);font-weight:700;font-size:26px}
-.prio-help{grid-column:1/-1;font-size:14px}
-input[type=range]{width:100%;accent-color:var(--accent)}
-.go{background:var(--accent);color:var(--panel);border:0;border-radius:999px;padding:12px 34px;font-family:var(--display);font-weight:700;font-size:20px;cursor:pointer}
-.go:hover{opacity:.9}
+/* Top bar: brand, steps */
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:26px}
+.brand{font-family:var(--display);font-weight:700;font-size:18px;display:flex;align-items:center;gap:8px}
+.brand svg{width:26px;height:26px}
+.steps{display:flex;gap:6px;list-style:none;margin:0;padding:0;flex-wrap:wrap}
+.steps button{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 14px 6px 6px;cursor:pointer;font-size:14px;font-weight:600}
+.steps .n{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--bg);font-size:13px}
+.steps button[aria-current="step"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.steps button[aria-current="step"] .n,.steps button.done .n{background:var(--accent);color:var(--panel)}
+.steps button:disabled{cursor:not-allowed;opacity:.45}
+@media (max-width:640px){.steps .t{display:none}.steps button{padding:6px}}
 
-/* Layout */
-.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:28px}
-.layout>*,.field>div,.chart-wrap>*{min-width:0}
-@media (max-width:860px){.layout{grid-template-columns:minmax(0,1fr)}.priority{grid-template-columns:1fr}}
-.inputs{display:flex;flex-direction:column;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:6px 16px;align-self:start}
-.field{display:grid;grid-template-columns:30px 1fr;gap:8px;align-items:start;padding:12px 0;border-bottom:1px dashed var(--line)}
-.field:last-child{border-bottom:0}
-.field label,.field .lbl{font-weight:600;font-size:14px;display:block;margin-bottom:6px}
-.field select,.field input[type=number]{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-sm);padding:7px 9px}
-.lock{width:28px;height:28px;border:1px solid var(--line);background:var(--bg);border-radius:50%;cursor:pointer;display:grid;place-items:center;padding:0;margin-top:22px}
-.lock svg{width:14px;height:14px}
-.lock[aria-pressed="true"]{background:var(--accent);color:var(--panel);border-color:var(--accent)}
+.step{display:none;animation:rise .35s ease both}
+.step.active{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.step{animation:none}}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:24px}
+.pill-btn{border:0;border-radius:999px;padding:14px 30px;font-family:var(--display);font-weight:700;font-size:19px;cursor:pointer;background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 82%,white),var(--accent));color:var(--panel);box-shadow:0 6px 18px -8px color-mix(in srgb,var(--accent) 70%,transparent),inset 0 1px 0 rgba(255,255,255,.25);transition:transform .12s}
+.pill-btn:hover{transform:translateY(-1px)}
+.pill-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.ghost-btn{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:11px 22px;font-weight:600;cursor:pointer}
+.nav-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:30px;flex-wrap:wrap}
+.tag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:color-mix(in srgb,var(--base) 22%,transparent);color:var(--ink)}
+.tag.yours{background:var(--hp-soft)}
+
+/* Step 1: landing */
+.hero{position:relative;text-align:center;padding:clamp(28px,7vw,80px) 8px clamp(28px,5vw,56px);overflow:hidden}
+.hero .glow{position:absolute;inset:-20% -10% auto;height:120%;background:radial-gradient(closest-side,color-mix(in srgb,var(--hp-soft) 90%,white),transparent);z-index:-1}
+.hero h1{max-width:16ch;margin:0 auto}
+.hero .hero-sub{font-family:var(--display);font-size:clamp(22px,3vw,32px);font-weight:600;line-height:1.2;margin:14px auto 0;max-width:34ch;color:var(--accent)}
+.hero .lede{font-size:clamp(17px,2vw,20px);margin:16px auto 0;max-width:46ch}
+.where{display:flex;gap:8px;max-width:620px;margin:34px auto 0;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px;box-shadow:0 18px 40px -24px color-mix(in srgb,var(--ink) 45%,transparent)}
+.where input{flex:1;min-width:0;border:0;background:none;font-size:clamp(17px,2.2vw,21px);padding:10px 18px}
+.where input:focus{outline:none}
+.where:focus-within{border-color:var(--focus);box-shadow:0 0 0 3px color-mix(in srgb,var(--focus) 25%,transparent)}
+@media (max-width:520px){.where{flex-direction:column;border-radius:var(--r)}.where .pill-btn{width:100%}}
+.quick{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:22px}
+.quick button{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:9px 18px;font-weight:600;cursor:pointer}
+.quick button[aria-pressed="true"]{border-color:var(--accent);background:var(--hp-soft)}
+.loc-msg{min-height:1.6em;margin-top:16px;font-weight:600}
+.loc-msg.warn{color:#8A4B1E}
+.scope{font-size:14px;margin-top:8px}
+
+/* Step 2: climate */
+.climate-head{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:28px;align-items:center}
+@media (max-width:820px){.climate-head{grid-template-columns:1fr}}
+.climate-head .kicker{font-weight:700;color:var(--accent);margin-bottom:6px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:26px}
+@media (max-width:820px){.facts{grid-template-columns:1fr}}
+.fact{padding:20px 22px;border-radius:var(--r);border:1px solid var(--line);background:var(--panel)}
+.fact .ico{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;margin-bottom:10px;background:var(--hp-soft)}
+.fact.less .ico{background:color-mix(in srgb,var(--base) 25%,transparent)}
+.fact h3{margin-bottom:6px}
+.ctypes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.ctypes{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.ctypes{grid-template-columns:1fr}}
+.ctype{padding:16px;border:1px dashed var(--line);border-radius:var(--r);background:transparent}
+.ctype.here{border:1px solid var(--accent);background:var(--panel);box-shadow:inset 0 0 0 1px var(--accent)}
+.ctype h3{font-size:16px}
+.specialist{margin-top:22px;background:color-mix(in srgb,var(--c-now) 14%,var(--panel));border-color:var(--c-now)}
+.tag-research{background:var(--hp-soft)}.tag-data{background:color-mix(in srgb,var(--focus) 18%,transparent)}
+.tag-reasoning{background:color-mix(in srgb,var(--c-now) 22%,transparent)}.tag-gap{background:transparent;border:1px dashed var(--muted)}
+.cite{color:var(--accent);font-weight:700;text-decoration:none;padding:0 1px}
+.cnotes{list-style:none;padding:0}
+.sources{margin-top:34px;padding:18px 22px;border:1px solid var(--line);border-radius:var(--r);background:var(--panel)}
+.sources ol{margin:0;padding-left:22px;font-size:13px}.sources li{margin-top:5px;scroll-margin-top:12px}
+.sources a{color:var(--accent)}
+.what{margin-top:26px}.what>div{max-width:70ch}
+@media (max-width:820px){.what{grid-template-columns:1fr}}
+.what svg{width:100%;height:auto;display:block}
+.what p+p{margin-top:10px}
+.mini{display:flex;gap:18px;flex-wrap:wrap;margin-top:18px;font-size:14px}
+.mini b{display:block;font-family:var(--display);font-size:24px}
+
+/* Step 3: home */
+.choose{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:20px;margin-top:24px;align-items:start}
+@media (max-width:820px){.choose{grid-template-columns:1fr}}
+.quickpath{background:var(--hp-soft);border-color:transparent}
+.quickpath p+button{margin-top:18px}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 20px;margin-top:16px}
+@media (max-width:560px){.form-grid{grid-template-columns:1fr}}
+.f label,.f .lbl{display:flex;justify-content:space-between;gap:8px;align-items:baseline;font-weight:600;font-size:14px;margin-bottom:6px}
+.f input[type=number],.f select{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-sm);padding:9px 11px}
+.f .hint{font-size:13px;margin-top:4px}
+.f.full{grid-column:1/-1}
 .seg{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--panel)}
-.seg button{flex:1;border:0;background:none;padding:7px 0;cursor:pointer;font-weight:600}
+.seg button{flex:1;border:0;background:none;padding:8px 4px;cursor:pointer;font-weight:600;font-size:14px}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--panel);border-radius:999px}
-.size-readout{font-size:13px;margin-top:6px}
+.src{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.src.yours{color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.prio{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;font-weight:600}
+details.more{margin-top:20px;border-top:1px dashed var(--line);padding-top:14px}
+details.more summary{cursor:pointer;font-weight:700}
 .check{display:flex;gap:8px;align-items:center;font-weight:600;font-size:14px}
 .check input{width:18px;height:18px;accent-color:var(--accent)}
-.hint{font-size:12.5px;margin-top:4px}
+.status-line{margin-top:16px;font-size:14px}
 
-/* Chart area */
-.chart-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px}
-.tabs{display:flex;gap:4px}
-.tabs button{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 12px;cursor:pointer;font-size:14px;font-weight:600}
-.tabs button[aria-pressed="true"]{background:var(--accent);color:var(--panel);border-color:var(--accent)}
-.chart-wrap{display:grid;grid-template-columns:1fr 170px;gap:18px;align-items:start}
-@media (max-width:560px){.chart-wrap{grid-template-columns:1fr}}
-svg.chart{width:100%;height:auto;display:block}
-.legend{display:flex;flex-direction:column;gap:16px;font-size:14px;padding-top:6px}
-.legend .k{display:flex;gap:8px;align-items:center}
-.sw{width:22px;height:0;border-top:3px solid}
-.sw.base{border-color:var(--base);border-top-style:dotted}
-.sw.hp{border-color:var(--hp)}
-.sw.gap{height:12px;border:0;background:repeating-linear-gradient(135deg,var(--hp) 0 1.5px,transparent 1.5px 6px)}
-.co2 .num{font-family:var(--display);font-size:32px;font-weight:700;line-height:1.1}
-.toggle{display:flex;gap:8px;align-items:center;font-weight:600;cursor:pointer}
-.toggle input{width:36px;height:20px;appearance:none;background:var(--line);border-radius:999px;position:relative;cursor:pointer;margin:0}
-.toggle input::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--panel);transition:left .15s}
-.toggle input:checked{background:var(--accent)}
-.toggle input:checked::after{left:18px}
-@media (prefers-reduced-motion:reduce){.toggle input::after{transition:none}}
-
-.roi{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:22px;padding:20px 22px;background:var(--hp-soft);border-radius:var(--r)}
-.roi .big{font-family:var(--display);font-size:clamp(28px,3.8vw,40px);font-weight:600;line-height:1.1;color:var(--accent)}
-.roi .sub{font-size:14px;margin-top:4px}
-@media (max-width:480px){.roi{grid-template-columns:1fr}}
-
-.compare{margin-top:26px}
+/* Step 4: results */
+.banner{background:color-mix(in srgb,var(--base) 18%,transparent);border-radius:var(--r-sm);padding:10px 14px;font-size:14px;margin-top:14px}
+.reco{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:24px;align-items:center;margin-top:22px}
+@media (max-width:820px){.reco{grid-template-columns:1fr}}
+.reco .big{font-family:var(--display);font-size:clamp(26px,3.4vw,38px);font-weight:600;line-height:1.15}
+.sizes{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.sizes button{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 12px;cursor:pointer;font-weight:600;font-size:14px}
+.sizes button[aria-pressed="true"]{background:var(--accent);color:var(--panel);border-color:var(--accent)}
+.sizes button .star{font-size:11px;margin-left:4px}
+.section{margin-top:34px}
+.section-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:16px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px}
+.tile .k{font-size:13px;font-weight:600;color:var(--muted)}
+.tile .v{font-family:var(--display);font-size:30px;font-weight:600;line-height:1.15;margin-top:2px}
+.tile .s{font-size:13px;color:var(--muted);margin-top:2px}
+.tile.hero-t{background:var(--hp-soft);border-color:transparent}
+.charts2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:820px){.charts2{grid-template-columns:1fr}}
+.chart-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px 16px 10px;min-width:0}
+.chart-card h3{font-size:16px;margin-bottom:2px}
+.chart-card .sub{font-size:13px;color:var(--muted);margin-bottom:8px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;margin-bottom:6px}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:18px;height:0;border-top:2px solid;display:inline-block}
+.chart-host{position:relative}
+svg.chart{width:100%;height:auto;display:block;overflow:visible}
+svg.chart .tick{font-size:12px;fill:var(--muted)}
+svg.chart .end-label{font-size:12px;fill:var(--ink);font-weight:600}
+svg.chart .marker-label{fill:var(--ink);font-weight:600}
+.tip{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;box-shadow:0 8px 20px -10px rgba(0,0,0,.35);min-width:170px;z-index:2}
+.tip b{display:block;margin-bottom:2px}
+.tip div{display:flex;align-items:center;gap:6px}
+.tip i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.tip span{margin-left:auto;font-weight:600;padding-left:10px}
 table{width:100%;border-collapse:collapse;font-size:14px}
-th,td{text-align:right;padding:7px 8px;border-bottom:1px solid var(--line)}
+th,td{text-align:right;padding:6px 8px;border-bottom:1px solid var(--line)}
 th:first-child,td:first-child{text-align:left}
-thead th{font-weight:700;color:var(--muted)}
-tr.cur td{font-weight:700}
+thead th{color:var(--muted);font-weight:700}
 .table-scroll{overflow-x:auto}
+details.tbl{margin-top:8px;font-size:14px}
+details.tbl summary{cursor:pointer;font-weight:600;color:var(--muted)}
+.notes{font-size:13px;margin-top:26px;max-width:80ch}
+.notes li+li{margin-top:4px}
+footer{margin-top:40px;font-size:13px}
 
-.rebates{margin-top:30px;padding:20px 22px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r)}
-.rebate-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
-.rebate-row label{font-weight:600;font-size:14px;display:block;margin-bottom:6px}
-.rebate-row input{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-sm);padding:7px 9px}
-details{margin-top:26px;font-size:14px}
-summary{cursor:pointer;font-weight:700}
-.assume{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:12px}
-.assume label{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
-.assume input{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-sm);padding:6px 8px}
-.note{margin-top:14px;font-size:13px;max-width:72ch}
-.banner{background:color-mix(in srgb,var(--base) 18%,transparent);border-radius:var(--r-sm);padding:8px 12px;font-size:14px;margin-top:14px}
-.status{min-height:1.5em;font-size:14px;font-weight:600;color:var(--accent)}
+
+
+.reco.single{grid-template-columns:1fr}
+.dial{margin-top:14px}
+.dial h3{font-size:19px}
+.dial-row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;margin-top:14px;font-weight:600;font-size:14px}
+.dial-val{font-family:var(--display);font-size:22px;font-weight:600;margin-top:6px}
+details.more#v1Opts{margin-top:14px}
+.lamtbl tr.cur td{background:var(--hp-soft);font-weight:700}
+
+/* Results: summary first, details folded */
+.sum-tiles{margin-top:22px}
+.whatif{margin-top:6px}
+.whatif h3{font-size:18px;margin-bottom:10px}
+.whatif-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+@media (max-width:720px){.whatif-row{grid-template-columns:1fr}}
+.whatif .wl{font-weight:600;font-size:14px;margin-bottom:6px}
+.whatif .wn{font-size:13px;margin-top:6px}
+.rebate-hop{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-top:14px;padding:18px 24px}
+.rebate-hop h3{font-size:19px}
+.more-h{margin:34px 0 12px;font-size:24px}
+details.fold{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);margin-top:12px}
+details.fold>summary{cursor:pointer;list-style:none;padding:16px 22px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::before{content:"+";font-weight:700;font-size:20px;width:18px;color:var(--accent)}
+details.fold[open]>summary::before{content:"\2212"}
+details.fold .fh{font-family:var(--display);font-size:20px;font-weight:600}
+details.fold .fs{font-size:13px}
+.fold-body{padding:0 22px 22px}
+
+/* Rebates + report */
+.report-cta{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;background:var(--hp-soft);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:var(--r);padding:22px 26px;margin-top:22px}
+.report-cta h3{font-size:22px}
+.report-cta p{max-width:52ch;margin-top:4px}
+.report-btn{font-size:clamp(20px,2.6vw,26px);padding:18px 38px;display:inline-flex;align-items:center;gap:12px}
+.report-btn svg{width:26px;height:26px}
+.reb-toggle{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:4px 0 16px}
+.reb-toggle .seg{max-width:340px;flex:1 1 280px}
+.cmp th,.cmp td{text-align:right;padding:9px 10px}
+.cmp th:first-child,.cmp td:first-child{text-align:left}
+.cmp td.diff{font-weight:700;color:var(--accent)}
+.cmp tr.on td:nth-child(3),.cmp th.on{background:color-mix(in srgb,var(--hp-soft) 70%,transparent)}
+.src-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:14px}
+.src-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px}
+.src-card h3{font-size:17px;margin-bottom:4px}
+.src-card p{font-size:14px}
+.prog{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px 20px;margin-top:12px}
+.prog h3{font-size:17px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.prog .lvl{font-size:13px;color:var(--muted);font-weight:600}
+.prog .amt{margin-top:6px;font-weight:600}
+.prog .nt{margin-top:4px;font-size:14px;color:var(--muted)}
+.prog a{font-size:14px;font-weight:600;color:var(--accent)}
+.st{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:var(--hp-soft)}
+.st.ended,.st.not\ open{background:color-mix(in srgb,var(--base) 30%,transparent)}
+.st.unclear,.st.limited{background:color-mix(in srgb,var(--c-now) 22%,transparent)}
+.paper{margin:10px 0 0;padding-left:20px;font-size:14px}
+
+/* Printable report: hidden on screen, the only thing shown when printing / saving as PDF */
+.report{display:none}
+@media print{
+  @page{size:Letter;margin:.55in}
+  html,body{background:#fff !important}
+  body{background-image:none !important;font:400 11pt/1.4 "Work Sans",system-ui,sans-serif;color:#1f1d17;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  main>*:not(#report){display:none !important}
+  main{max-width:none;padding:0}
+  .report{display:block}
+  .report h1{font-size:22pt;line-height:1.1}
+  .report h2{font-size:13pt;margin:14pt 0 5pt;padding-bottom:3pt;border-bottom:1.5px solid #3E5A33;color:#3E5A33;break-after:avoid}
+  .report section{break-inside:avoid}
+  .report table{font-size:10pt}
+  .report th,.report td{text-align:left;padding:3pt 6pt;border-bottom:1px solid #ddd}
+  .report .grid2{display:grid;grid-template-columns:1fr 1fr;gap:6pt 18pt}
+  .report .box{border:1px solid #bbb;border-radius:6pt;padding:6pt 10pt}
+  .report .big{font-size:15pt;font-weight:700}
+  .report .warn{border:1.5px solid #8A4B1E;background:#faf2e6;border-radius:6pt;padding:7pt 10pt;margin-top:12pt;font-size:10pt}
+  .report ul{margin:3pt 0;padding-left:16pt}
+  .report .cb li{list-style:none;margin-left:-14pt}
+  .report .cb li:before{content:"\2610  "}
+  .report .tg{font-size:8.5pt;font-weight:700;text-transform:uppercase;border:1px solid #999;border-radius:8pt;padding:0 5pt}
+  .report .tg.you{background:#DCE5CF;border-color:#3E5A33}
+  .report .foot{margin-top:10pt;font-size:8.5pt;color:#555}
+}
 </style>
 </head>
 <body>
 <main>
-  <div class="themebar" role="group" aria-label="Color theme">
-    <span>Theme</span>
-    <button data-theme-btn="lichen"><i style="background:linear-gradient(135deg,#ECEEE3 50%,#3E5A33 50%)"></i>Lichen &amp; moss</button>
-    <button data-theme-btn="sand"><i style="background:linear-gradient(135deg,#F2EADC 50%,#9A5636 50%)"></i>Sand &amp; clay</button>
-    <button data-theme-btn="sage"><i style="background:linear-gradient(135deg,#E8EEEA 50%,#2F5E50 50%)"></i>Sage &amp; mist</button>
-    <button data-theme-btn="paper"><i style="background:linear-gradient(135deg,#F4F0E6 50%,#8A6417 50%)"></i>Warm paper</button>
-  </div>
-  <h1>What size heat pump?</h1>
-  <p class="muted" style="margin-top:8px;max-width:64ch">Compare a heat pump with your current heating, month by month. Switch the location to see how Boston and Fairbanks change the answer.</p>
-  <p class="banner">Placeholder model and prices. Every number here is a rough stand-in until the team's data and model are plugged in.</p>
-
-  <section class="priority" aria-label="Optimization priority">
-    <div class="prio-track">
-      <span class="prio-end" aria-hidden="true">$</span>
-      <input id="prio" type="range" min="0" max="100" value="50" aria-label="Priority between lowest cost and lowest CO2" aria-valuetext="Balanced">
-      <span class="prio-end" aria-hidden="true">CO<sub>2</sub></span>
-      <p class="prio-help muted" id="prioText">Balanced between cost and CO₂. Press Go to pick the heat pump size for this priority.</p>
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4c6 6 9 10 9 15a9 9 0 0 1-18 0c0-5 3-9 9-15z" fill="var(--hp)"/><path d="M16 27V14m0 6 4-4m-4 1-3-3" stroke="var(--panel)" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+      Heat Pump Guide
     </div>
-    <div>
-      <button class="go" id="go">Go!</button>
-      <p class="status" id="status" role="status"></p>
-    </div>
-  </section>
+    <nav aria-label="Progress">
+      <ol class="steps" id="steps">
+        <li><button data-go="0"><span class="n">1</span><span class="t">Location</span></button></li>
+        <li><button data-go="1"><span class="n">2</span><span class="t">Your climate</span></button></li>
+        <li><button data-go="2"><span class="n">3</span><span class="t">Your home</span></button></li>
+        <li><button data-go="3"><span class="n">4</span><span class="t">Results</span></button></li>
+      </ol>
+    </nav>
+  </header>
 
-  <div class="layout">
-    <aside class="inputs" aria-label="Your home">
-      <div class="field">
-        <button class="lock" data-lock="fuel" aria-pressed="true" aria-label="Lock current heat"></button>
-        <div>
-          <label for="fuel">Current heat</label>
-          <select id="fuel">
-            <option value="elec">Electric resistance</option>
-            <option value="wood">Wood</option>
-            <option value="kero" selected>Kerosene</option>
-            <option value="oil">Heating oil</option>
-            <option value="gas">Natural gas</option>
-          </select>
-        </div>
-      </div>
-      <div class="field">
-        <button class="lock" data-lock="loc" aria-pressed="true" aria-label="Lock location"></button>
-        <div>
-          <label for="loc">Location</label>
-          <select id="loc">
-            <option value="bos">Boston, MA</option>
-            <option value="fai">Fairbanks, AK</option>
-          </select>
-        </div>
-      </div>
-      <div class="field">
-        <button class="lock" data-lock="size" aria-pressed="false" aria-label="Lock heat pump size"></button>
-        <div>
-          <span class="lbl" id="sizeLbl">Heat pump</span>
-          <div class="seg" role="group" aria-labelledby="sizeLbl">
-            <button data-size="1.5" aria-pressed="false">S</button>
-            <button data-size="2.5" aria-pressed="true">M</button>
-            <button data-size="3.5" aria-pressed="false">L</button>
-          </div>
-          <input id="size" type="range" min="0.5" max="6" step="0.25" value="2.5" aria-label="Heat pump size in tons" style="margin-top:8px">
-          <p class="size-readout muted" id="sizeOut"></p>
-        </div>
-      </div>
-      <div class="field">
-        <button class="lock" data-lock="meter" aria-pressed="false" aria-label="Lock smart meter"></button>
-        <div>
-          <label class="check"><input type="checkbox" id="meter"> Smart meter</label>
-          <p class="hint muted">Time-of-use rate, modeled as 10% off heat pump electricity.</p>
-        </div>
-      </div>
-      <div class="field">
-        <button class="lock" data-lock="kwh" aria-pressed="true" aria-label="Lock electricity price"></button>
-        <div>
-          <label for="kwh">$/kWh</label>
-          <input id="kwh" type="number" step="0.01" min="0">
-        </div>
-      </div>
-      <div class="field">
-        <button class="lock" data-lock="therm" aria-pressed="true" aria-label="Lock current heat price"></button>
-        <div>
-          <label for="therm">$/kWh thermal</label>
-          <input id="therm" type="number" step="0.001" min="0">
-          <p class="hint muted" id="thermHint"></p>
-        </div>
-      </div>
-    </aside>
-
-    <section aria-label="Results">
-      <div class="chart-head">
-        <h2 id="chartTitle">Heating cost by month</h2>
-        <div class="tabs" role="group" aria-label="Chart options">
-          <button data-metric="cost" aria-pressed="true">Cost</button>
-          <button data-metric="co2" aria-pressed="false">CO₂</button>
-          <span style="width:10px"></span>
-          <button data-view="month" aria-pressed="true">Month</button>
-          <button data-view="day" aria-pressed="false">Coldest day</button>
-        </div>
-      </div>
-      <div class="chart-wrap">
-        <svg class="chart" id="chart" viewBox="0 0 640 320" role="img" aria-labelledby="chartTitle"></svg>
-        <div class="legend">
-          <div class="k"><span class="sw base"></span><span>Last year (current heat only)</span></div>
-          <div class="k"><span class="sw hp"></span><span>With heat pump</span></div>
-          <div class="k"><span class="sw gap"></span><span>Difference</span></div>
-          <div class="co2">
-            <div class="muted" style="font-size:13px">CO₂ per year</div>
-            <div class="num" id="co2Num">–</div>
-            <div class="muted" style="font-size:13px" id="co2Sub"></div>
-          </div>
-          <label class="toggle"><input type="checkbox" id="incReb" checked> Incl. rebates</label>
-        </div>
-      </div>
-
-      <div class="roi">
-        <div>
-          <h2>ROI ($)</h2>
-          <div class="big" id="roiCost">–</div>
-          <p class="sub muted" id="roiCostSub"></p>
-        </div>
-        <div>
-          <h2>ROI (CO₂)</h2>
-          <div class="big" id="roiCo2">–</div>
-          <p class="sub muted" id="roiCo2Sub"></p>
-        </div>
-      </div>
-
-      <div class="compare">
-        <h2>Boston vs Fairbanks at this size</h2>
-        <div class="table-scroll">
-          <table>
-            <thead><tr><th>Location</th><th>Design temp</th><th>Heat from heat pump</th><th>Yearly savings</th><th>Payback</th><th>CO₂ cut per year</th></tr></thead>
-            <tbody id="cmp"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <section class="rebates" aria-labelledby="rebH">
-    <h2 id="rebH">Rebates</h2>
-    <div class="rebate-row">
-      <div><label for="rebFlat">Flat rebate ($)</label><input id="rebFlat" type="number" step="100" min="0" value="2000"></div>
-      <div><label for="rebTon">Per-ton rebate ($/ton)</label><input id="rebTon" type="number" step="100" min="0" value="1000"></div>
-      <div><label for="rebCap">Rebate cap ($)</label><input id="rebCap" type="number" step="500" min="0" value="10000"></div>
+  <!-- STEP 1: where -->
+  <section class="step" id="step-0" aria-labelledby="h0">
+    <div class="hero">
+      <div class="glow"></div>
+      <h1 id="h0" tabindex="-1">Let's get you a heat pump!</h1>
+      <p class="lede muted">We'll show what a heat pump could do for your bills and your carbon footprint. Just tell us where your home is.</p>
+      <form class="where" id="whereForm" autocomplete="off">
+        <label for="place" class="sr" style="position:absolute;left:-9999px">City or ZIP code</label>
+        <input id="place" list="placeList" placeholder="City or ZIP code, e.g. Boston or 55401">
+        <datalist id="placeList">
+          <option value="Boston, MA"><option value="Minneapolis–St. Paul, MN"><option value="Fairbanks, AK">
+        </datalist>
+        <button class="pill-btn" type="submit">Let's go</button>
+      </form>
+      <div class="quick" id="quick" role="group" aria-label="Or pick a region"></div>
+      <p class="loc-msg" id="locMsg" role="status"></p>
     </div>
   </section>
 
-  <details>
-    <summary>Placeholder assumptions</summary>
-    <div class="assume">
-      <div><label for="ua">Home heat loss (W per °F)</label><input id="ua" type="number" step="10" value="150"></div>
-      <div><label for="tbal">Balance point (°F)</label><input id="tbal" type="number" step="1" value="60"></div>
-      <div><label for="costTon">Installed cost ($/ton)</label><input id="costTon" type="number" step="250" value="5500"></div>
-      <div><label for="life">Heat pump life (years)</label><input id="life" type="number" step="1" value="15"></div>
-      <div><label for="grid">Grid CO₂ (kg/kWh)</label><input id="grid" type="number" step="0.01"></div>
-      <div><label for="fuelCo2">Current heat CO₂ (kg per kWh thermal)</label><input id="fuelCo2" type="number" step="0.01"></div>
-      <div><label for="cutoff">Heat pump cutoff (°F)</label><input id="cutoff" type="number" step="1" value="-22"></div>
+  <!-- STEP 2: climate -->
+  <section class="step" id="step-1" aria-labelledby="h1">
+    <div class="climate-head">
+      <div>
+        <p class="kicker" id="cKicker"></p>
+        <h2 id="h1" tabindex="-1"></h2>
+        <p class="muted" style="margin-top:10px;font-size:17px" id="cIntro"></p>
+      </div>
+      <div class="card" style="padding:18px">
+        <svg viewBox="0 0 360 230" role="img" aria-labelledby="hpPicT">
+          <title id="hpPicT">Illustration: an outdoor heat pump unit beside a house, pulling heat from cold outside air and moving it indoors</title>
+          <defs>
+            <linearGradient id="unitG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#E4E4DA"/></linearGradient>
+            <linearGradient id="warmG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F6D9A8"/><stop offset="1" stop-color="#EFC27E"/></linearGradient>
+          </defs>
+          <path d="M0 196 H360" stroke="var(--line)" stroke-width="2"/>
+          <!-- house -->
+          <path d="M176 196 V112 L246 62 L316 112 V196 Z" fill="var(--panel)" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>
+          <rect x="196" y="126" width="44" height="40" rx="4" fill="url(#warmG)" stroke="var(--ink)" stroke-width="2"/>
+          <path d="M218 126v40M196 146h44" stroke="var(--ink)" stroke-width="1.5"/>
+          <rect x="262" y="140" width="32" height="56" rx="3" fill="var(--hp-soft)" stroke="var(--ink)" stroke-width="2"/>
+          <!-- warm waves inside -->
+          <path d="M256 92c6-6 12 6 18 0s12 6 18 0" fill="none" stroke="var(--c-now)" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M260 104c6-6 12 6 18 0s12 6 18 0" fill="none" stroke="var(--c-now)" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
+          <!-- outdoor unit (half size, anchored to the ground beside the house) -->
+          <g transform="translate(148 201) scale(.5) translate(-148 -201)">
+          <rect x="44" y="130" width="104" height="66" rx="8" fill="url(#unitG)" stroke="var(--ink)" stroke-width="2.5"/>
+          <circle cx="86" cy="163" r="24" fill="#FFFFFF" stroke="var(--ink)" stroke-width="2"/>
+          <circle cx="86" cy="163" r="16" fill="none" stroke="var(--line)" stroke-width="1.5"/>
+          <g fill="var(--hp)"><path d="M86 163c0-10 6-14 9-12s-3 10-9 12z"/><path d="M86 163c9 5 10 12 7 14s-9-6-7-14z"/><path d="M86 163c-9 5-16 2-16-2s10-5 16 2z"/></g>
+          <circle cx="86" cy="163" r="3" fill="var(--ink)"/>
+          <path d="M120 144h18M120 152h18M120 160h18M120 168h18M120 176h18" stroke="var(--line)" stroke-width="2"/>
+          <rect x="52" y="196" width="8" height="5" fill="var(--ink)"/><rect x="132" y="196" width="8" height="5" fill="var(--ink)"/>
+          </g>
+          <!-- refrigerant line -->
+          <path d="M148 181 H176" stroke="var(--c-hp)" stroke-width="3" stroke-linecap="round"/>
+          <path d="M148 187 H176" stroke="var(--c-now)" stroke-width="3" stroke-linecap="round"/>
+          <!-- cold outside air arrows -->
+          <g stroke="var(--c-hp)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 112c10-8 20 8 30 0s20 8 30 0"/><path d="M60 106l7 6-8 4"/>
+            <path d="M14 92c10-8 20 8 30 0s20 8 30 0" opacity=".6"/>
+          </g>
+          <!-- snowflakes -->
+          <g stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round">
+            <path d="M30 40v14M23 47h14M25 42l10 10M35 42 25 52"/>
+            <path d="M120 24v10M115 29h10M116.5 25.5l7 7M123.5 25.5l-7 7"/>
+            <path d="M150 70v10M145 75h10M146.5 71.5l7 7M153.5 71.5l-7 7"/>
+          </g>
+          <text x="112" y="222" text-anchor="middle" font-size="12" fill="var(--muted)" font-family="Work Sans, sans-serif">outdoor unit</text>
+          <text x="246" y="222" text-anchor="middle" font-size="12" fill="var(--muted)" font-family="Work Sans, sans-serif">warm home</text>
+        </svg>
+      </div>
     </div>
-    <p class="note muted">Temperatures are synthesized from 1991–2020 monthly normals with an assumed spread, not real hourly data. Heat load is heat loss × (balance point − outdoor temp). Heat pump size is its capacity at 5°F; capacity falls in the cold and stops below the cutoff, and the current heat covers the rest. Efficiency (COP) runs from about 4 at 47°F to 1.4 at −15°F. Wood is counted as zero CO₂ by default. Replace all of it with the team's data.</p>
-  </details>
+
+    <p class="specialist card" id="cSpecialist" hidden></p>
+    <div class="facts" id="cFacts"></div>
+
+    <div class="section">
+      <h3 style="font-size:22px;margin-bottom:12px">How heat pumps do in different climates</h3>
+      <div class="ctypes" id="cTypes"></div>
+    </div>
+
+    <div class="what card">
+      <div>
+        <h3 style="font-size:24px;margin-bottom:12px">What's a heat pump?</h3>
+        <p>A heat pump <b>moves heat instead of making it</b>. Even freezing air holds heat. The outdoor unit gathers it and pumps it inside, the way a fridge moves heat out of its box, just in reverse.</p>
+        <p>Because it moves heat rather than burning fuel, a heat pump can be <b>two to three times as efficient as ordinary electric heat</b>.<sup><a href="https://www.mncee.org/cold-climate-air-source-heat-pump-field-assessment" target="_blank" rel="noopener" class="cite">1</a></sup> In summer it runs backwards and cools your home too.</p>
+      </div>
+    </div>
+
+
+    <div class="nav-row">
+      <button class="ghost-btn" data-back>← Change location</button>
+      <button class="pill-btn" id="toHome">Next: your home →</button>
+    </div>
+  </section>
+
+  <!-- STEP 3: home -->
+  <section class="step" id="step-2" aria-labelledby="h2">
+    <h2 id="h2" tabindex="-1">Tell us about your home and what you value</h2>
+    <div class="card dial" id="dialCard">
+      <h3 id="dialH">What matters more to you?</h3>
+      <div class="dial-row">
+        <span class="dl">Lowest cost</span>
+        <input id="dial" type="range" min="0" max="12" step="1" value="10" aria-labelledby="dialH" aria-describedby="dialVal">
+        <span class="dl">Most CO₂ cut</span>
+      </div>
+      <p class="dial-val" id="dialVal" aria-live="polite"></p>
+    </div>
+
+    <div class="choose">
+      <div class="card quickpath">
+        <span class="tag">Fastest</span>
+        <h3 style="margin-top:10px">Use a typical <span id="qpRegion"></span> home</h3>
+        <p class="muted" style="margin-top:6px;font-size:14px" id="qpWhy"></p>
+        <button class="pill-btn" id="useTypical" style="width:100%">See results for a typical home →</button>
+      </div>
+
+      <div class="card">
+        <span class="tag yours">More accurate</span>
+        <h3 style="margin-top:10px">Describe your home</h3>
+        <p class="muted" style="font-size:14px;margin-top:4px">Change anything that's different for you. Fields you don't touch keep the typical value.</p>
+        <div class="form-grid">
+          <div class="f"><label for="htype">Home type <span class="src" data-src="homeType"></span></label><select id="htype"></select></div>
+          <div class="f"><label for="sbin">Home size (sq ft) <span class="src" data-src="sizeBin"></span></label><select id="sbin"></select></div>
+          <div class="f full"><p class="hint muted" id="binNote"></p></div>
+          <div class="f full" id="resRef" aria-live="polite"></div>
+          <div class="f"><label for="heat">Heating today <span class="src" data-src="currentHeat"></span></label><select id="heat"></select></div>
+          <div class="f full"><span class="lbl" id="envL">How well does it hold heat? <span class="src" data-src="envelope"></span></span>
+            <div class="seg" role="group" aria-labelledby="envL" id="envSeg"></div></div>
+          <div class="f"><label for="tstat">Thermostat in winter (°F) <span class="src" data-src="thermostatF"></span></label><input id="tstat" type="number" min="55" max="78" step="1"></div>
+          <div class="f full"><span class="lbl">Smart meter <span class="src" data-src="timeOfUse"></span></span>
+            <label class="check"><input type="checkbox" id="tou"> I already have a smart meter (time-of-use rate)</label>
+            <p class="hint muted">Leave it off to see what adding one would do; the results page compares heat pump with and without a smart meter. Placeholder: 10% cheaper electricity.</p></div>
+        </div>
+
+        <details class="more">
+          <summary>Prices, rebates and other details (we filled these in for your region)</summary>
+          <div class="form-grid">
+            <div class="f"><label for="elec">Electricity ($/kWh) <span class="src" data-src="electricityUsdPerKWh"></span></label><input id="elec" type="number" min="0" step="0.01"></div>
+            <div class="f"><label for="fuelPrice"><span id="fuelPriceL">Fuel price</span> <span class="src" data-src="fuelUsdPerUnit"></span></label><input id="fuelPrice" type="number" min="0" step="0.01"></div>
+            <div class="f"><label for="rebates">Rebates you expect ($) <span class="src" data-src="rebatesUsd"></span></label><input id="rebates" type="number" min="0" step="100"></div>
+            <div class="f"><label for="costTon">Installed cost ($ per ton) <span class="src" data-src="installedUsdPerTon"></span></label><input id="costTon" type="number" min="0" step="250"></div>
+            <div class="f"><label for="ua">Heat loss (W per °F) <span class="src" data-src="heatLossWPerF"></span></label><input id="ua" type="number" min="20" step="5"><p class="hint muted">Leave as is unless you have an energy audit. We estimate it from size and draftiness.</p></div>
+          </div>
+        </details>
+        <p class="status-line muted" id="homeStatus"></p>
+        <button class="pill-btn" id="useCustom" style="margin-top:16px">See my report →</button>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="ghost-btn" data-back>← Back to climate</button>
+    </div>
+  </section>
+
+  <!-- STEP 4: results -->
+  <section class="step" id="step-3" aria-labelledby="h3">
+    <h2 id="h3" tabindex="-1"></h2>
+    <p class="banner" id="rRef"></p>
+
+    <div class="reco card">
+      <div>
+        <p class="muted" style="font-weight:600">Our suggestion</p>
+        <p class="big" id="rReco"></p>
+      </div>
+      <div id="rSizeBox">
+        <p class="muted" style="font-weight:600;font-size:14px">Try another size</p>
+        <div class="sizes" id="rSizes" role="group" aria-label="Heat pump size in tons"></div>
+      </div>
+    </div>
+
+
+    <div class="chart-card" id="trCard" style="margin-top:14px" hidden>
+      <h3>Cost versus carbon</h3>
+      <p class="sub">Each dot is one option. Lower and further left is better.</p>
+      <div id="chTrade"></div>
+    </div>
+
+
+    <div class="tiles sum-tiles" id="sumTiles"></div>
+
+    <div class="results-charts" style="margin-top:6px">
+      <div class="charts2">
+        <div class="chart-card">
+          <h3>Total spent over time</h3>
+          <p class="sub" id="cumSub">Upfront costs plus bills, by year</p>
+          <div class="legend"><span><i style="border-color:var(--c-now)"></i><span id="lgNow2">Keep today's heat</span></span><span><i style="border-color:var(--c-hp)"></i>Heat pump</span></div>
+          <div id="chCum"></div>
+        </div>
+        <div class="chart-card">
+          <h3>Heating bill by month</h3>
+          <p class="sub">Dollars per month</p>
+          <div class="legend"><span><i style="border-color:var(--c-now)"></i><span id="lgNow3">Today</span></span><span><i style="border-color:var(--c-hp)"></i>With heat pump</span></div>
+          <div id="chBill"></div>
+        </div>
+      </div>
+      <details class="tbl"><summary>Show monthly numbers as a table</summary><div class="table-scroll"><table><thead><tr><th>Month</th><th>Bill today</th><th>Bill with heat pump</th><th>CO₂ today</th><th>CO₂ with heat pump</th></tr></thead><tbody id="mTable"></tbody></table></div></details>
+    </div>
+
+    <div class="card whatif">
+      <h3>What if&hellip;</h3>
+      <div class="whatif-row">
+        <div><p class="wl">Rebates</p>
+          <div class="seg" role="group" aria-label="Rebates on or off" id="rebSeg"><button data-reb="1">With rebates</button><button data-reb="0">Without rebates</button></div>
+          <p class="muted wn" id="rebLede"></p></div>
+        <div><p class="wl">Smart meter</p>
+          <div class="seg" role="group" aria-label="Smart meter on or off" id="meterSeg"><button data-meter="0">Heat pump only</button><button data-meter="1">Heat pump + smart meter</button></div>
+          <p class="muted wn" id="meterLede"></p></div>
+      </div>
+      <details class="more" id="v1Opts" hidden>
+        <summary>More scenarios (from the model)</summary>
+        <div class="whatif-row" style="margin-top:12px">
+          <div><p class="wl">Winter</p>
+            <div class="seg" role="group" aria-label="Winter weather" id="coldSeg"><button data-cold="0">Typical winter</button><button data-cold="1">Very cold winter</button></div>
+            <p class="muted wn">The model's cold stress test uses a harsher weather year.</p></div>
+          <div><p class="wl">Air conditioning</p>
+            <div class="seg" role="group" aria-label="AC replacement" id="acSeg"><button data-ac="0">Keeping my AC</button><button data-ac="1">Replacing my AC too</button></div>
+            <p class="muted wn">A heat pump also cools, so if your AC is due for replacement we credit its cost ($4,000, placeholder).</p></div>
+        </div>
+      </details>
+    </div>
+
+    <div class="report-cta">
+      <div><h3>Taking this to an installer?</h3><p class="muted">Get a printable report with your home details, the size to ask for, rebates to claim, questions to ask and documents to bring.</p></div>
+      <button class="pill-btn report-btn" data-report><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 20h16"/></svg> Download your report (PDF)</button>
+    </div>
+
+    <div class="rebate-hop card">
+      <div><h3>Curious where rebates come from?</h3><p class="muted">What programs exist near you, who pays them, and what paperwork they need.</p></div>
+      <button class="ghost-btn" id="toRebates">Learn about rebates →</button>
+    </div>
+
+    <h2 class="more-h">Want the details?</h2>
+    <details class="fold">
+      <summary><span class="fh">Carbon (CO₂)</span><span class="muted fs">monthly CO₂ and 15-year totals</span></summary>
+      <div class="fold-body">
+      <div class="tiles" id="co2Tiles"></div>
+      <div class="chart-card">
+        <h3>Heating CO₂ by month</h3>
+        <p class="sub">Kilograms of CO₂ from heating each month</p>
+        <div class="legend"><span><i style="border-color:var(--c-now)"></i><span id="lgNow1">Today</span></span><span><i style="border-color:var(--c-hp)"></i>With heat pump</span></div>
+        <div id="chCo2"></div>
+      </div>
+      </div>
+    </details>
+    <details class="fold">
+      <summary><span class="fh">Money</span><span class="muted fs">bills, break-even and total spent over time</span></summary>
+      <div class="fold-body">
+      <div class="tiles" id="moneyTiles"></div>
+      </div>
+    </details>
+    <details class="fold">
+      <summary><span class="fh">How rebates and a smart meter change the numbers</span><span class="muted fs">side-by-side tables</span></summary>
+      <div class="fold-body">
+      <div class="card" style="padding:12px 16px"><div class="table-scroll"><table class="cmp"><thead><tr><th></th><th>Without rebates</th><th>With rebates</th><th>Rebates change</th></tr></thead><tbody id="rebCmp"></tbody></table></div></div>
+      <p class="muted" id="rebCmpNote" style="font-size:14px;margin-top:10px;max-width:70ch"></p>
+      <h3 style="margin:18px 0 8px;font-size:17px">Smart meter</h3>
+      <div class="card" style="padding:12px 16px"><div class="table-scroll"><table class="cmp"><thead><tr><th></th><th>Heat pump</th><th>Heat pump + smart meter</th><th>Meter adds</th></tr></thead><tbody id="meterCmp"></tbody></table></div></div>
+      <p class="muted" style="font-size:14px;margin-top:10px;max-width:70ch">Placeholder: we assume a smart meter on a time-of-use plan makes electricity 10% cheaper on average, and cost nothing to add. Real utility rate plans and meter costs still need to be worked out.</p>
+      </div>
+    </details>
+    <details class="fold">
+      <summary><span class="fh" id="sizeFoldH">Bigger or smaller?</span><span class="muted fs" id="sizeFoldS">heat pump size trade-offs</span></summary>
+      <div class="fold-body">
+      <div id="lamTable" hidden></div>
+      <div id="sizeCharts">
+      <p class="muted" style="margin:-4px 0 14px;max-width:70ch">A bigger heat pump covers more cold nights on its own but costs more up front. A smaller one leans on your backup heat more often. Here's the trade-off over <span id="lifeYrs"></span> years.</p>
+      <div class="charts2">
+        <div class="chart-card"><h3>Total cost over the heat pump's life</h3><p class="sub">Upfront costs after rebates plus bills, by size (tons)</p><div id="chSizeCost"></div></div>
+        <div class="chart-card"><h3>Total CO₂ over the heat pump's life</h3><p class="sub">Tonnes of CO₂, by size (tons)</p><div id="chSizeCo2"></div></div>
+      </div>
+      </div>
+      </div>
+    </details>
+
+
+    <div class="nav-row">
+      <button class="ghost-btn" data-back>← Change home details</button>
+      <button class="ghost-btn" id="restart">Start over</button>
+    </div>
+  </section>
+
+  <!-- Rebates page: a sub-page of results, reached from the results page -->
+  <section class="step" id="step-4" aria-labelledby="h4">
+    <button class="ghost-btn" data-to-results style="margin-bottom:14px">← Back to results</button>
+    <h2 id="h4" tabindex="-1">About rebates</h2>
+    <p class="muted" style="margin-top:6px;max-width:70ch">Rebates are one-time discounts or tax credits that lower what you pay for a heat pump. They come from several places, and what's available depends on where you live and what you heat with today.</p>
+      <h3 style="margin-top:28px;font-size:24px">Where rebates come from</h3>
+      <div class="src-grid" id="rebSources"></div>
+
+      <h3 style="margin-top:28px;font-size:22px" id="rebRegionH"></h3>
+      <p class="muted" id="rebRegionIntro" style="margin-top:4px;max-width:70ch"></p>
+      <div id="rebPrograms"></div>
+      <p class="banner" id="rebCaveat"></p>
+
+    <div class="report-cta">
+      <div><h3>Bring this to your installer</h3><p class="muted">The report lists the programs and paperwork for your region.</p></div>
+      <button class="pill-btn report-btn" data-report><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 20h16"/></svg> Download your report (PDF)</button>
+    </div>
+    <div class="nav-row"><button class="ghost-btn" data-to-results>← Back to results</button></div>
+  </section>
+
+  <div class="report" id="report" aria-hidden="true"></div>
 </main>
 
-<script>
-// Theme picker: ?theme=lichen|sand|sage|paper, remembered per browser
-(() => {
-  const valid=["lichen","sand","sage","paper"];
-  let t=new URLSearchParams(location.search).get("theme");
-  if(!valid.includes(t)){ try{ t=localStorage.getItem("hp-theme"); }catch(e){} }
-  if(!valid.includes(t)) t="lichen";
-  const apply=v=>{ if(v==="lichen") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme",v);
-    document.querySelectorAll("[data-theme-btn]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.themeBtn===v));
-    try{ localStorage.setItem("hp-theme",v); }catch(e){}
-    const u=new URL(location.href); u.searchParams.set("theme",v); history.replaceState(null,"",u); };
-  document.querySelectorAll("[data-theme-btn]").forEach(b=>b.addEventListener("click",()=>apply(b.dataset.themeBtn)));
-  apply(t);
-})();
-(() => {
-  const $ = id => document.getElementById(id);
-  const DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
-  const MON = ["J","F","M","A","M","J","J","A","S","O","N","D"];
-  const KWH_BTU = 3412.14, TON_KW = 3.517;
-
-  // Placeholder city data (monthly normal temps °F, assumed hourly spread, prices, grid CO2)
-  const CITY = {
-    bos:{name:"Boston, MA", mean:[29.9,31.8,38.3,48.6,58.4,68.0,74.1,72.7,65.6,54.8,44.7,35.2], sd:[10,10,9,9,9,8,7,7,8,8,9,10],
-         kwh:0.31, grid:0.24, fuel:{elec:null, wood:350, kero:4.30, oil:4.00, gas:2.10}},
-    fai:{name:"Fairbanks, AK", mean:[-7.9,-2.5,11.2,32.5,49.7,61.5,62.9,57.4,45.6,25.0,3.6,-3.9], sd:[15,15,13,10,9,8,8,8,8,10,14,15],
-         kwh:0.26, grid:0.55, fuel:{elec:null, wood:300, kero:4.60, oil:4.20, gas:2.60}}
-  };
-  // Fuel: energy per unit (kWh thermal), efficiency, CO2 per unit (kg)
-  const FUEL = {
-    elec:{unit:"kWh", kwh:1, eff:1.00, co2:null},
-    wood:{unit:"cord", kwh:20e6/KWH_BTU, eff:0.70, co2:0},
-    kero:{unit:"gal", kwh:135000/KWH_BTU, eff:0.85, co2:9.75},
-    oil: {unit:"gal", kwh:138500/KWH_BTU, eff:0.85, co2:10.16},
-    gas: {unit:"therm", kwh:100000/KWH_BTU, eff:0.95, co2:5.30}
-  };
-
-  function ninv(p){const a=[-39.6968302866538,220.946098424521,-275.928510446969,138.357751867269,-30.6647980661472,2.50662827745924],b=[-54.4760987982241,161.585836858041,-155.698979859887,66.8013118877197,-13.2806815528857],c=[-0.00778489400243029,-0.322396458041136,-2.40075827716184,-2.54973253934373,4.37466414146497,2.93816398269878],d=[0.00778469570904146,0.32246712907004,2.445134137143,3.75440866190742],pl=0.02425;let q,r;if(p<pl){q=Math.sqrt(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)}if(p>1-pl){q=Math.sqrt(-2*Math.log(1-p));return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)}q=p-.5;r=q*q;return(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1)}
-
-  // Hourly temperature samples per month (quantile sampling of a normal distribution)
-  for (const c of Object.values(CITY)) {
-    c.hours = c.mean.map((m,i)=>{const n=DAYS[i]*24, t=new Float32Array(n); for(let h=0;h<n;h++) t[h]=m+c.sd[i]*ninv((h+.5)/n); return t;});
-    const all = c.hours.flatMap(a=>Array.from(a)).sort((x,y)=>x-y);
-    c.design = all[Math.floor(0.01*all.length)];
-    // Coldest-day profile: design-day mean with a 6°F swing, coldest near 6am
-    c.day = Array.from({length:24},(_,h)=>c.design+4+6*Math.cos((h-15)/24*2*Math.PI));
-  }
-
-  const capFrac = (T,cut) => T < cut ? 0 : T >= 47 ? 1.1 : T >= 5 ? 0.85 + 0.25*(T-5)/42 : Math.max(0.55, 0.85 - 0.30*(5-T)/20);
-  const cop = T => { const pts=[[-15,1.4],[5,1.9],[17,2.5],[47,4.0],[65,4.6]];
-    if (T<=pts[0][0]) return pts[0][1]; for(let i=1;i<pts.length;i++){ if(T<=pts[i][0]){const [x0,y0]=pts[i-1],[x1,y1]=pts[i];return y0+(y1-y0)*(T-x0)/(x1-x0);} } return 4.6; };
-
-  const state = { metric:"cost", view:"month", locks:{fuel:true,loc:true,size:false,meter:false,kwh:true,therm:true} };
-
-  function params(over={}) {
-    const p = {
-      city: CITY[$("loc").value], fuel: $("fuel").value,
-      size: +$("size").value, meter: $("meter").checked,
-      kwh: +$("kwh").value, therm: +$("therm").value,
-      ua: +$("ua").value/1000, tbal: +$("tbal").value, costTon: +$("costTon").value, life: +$("life").value,
-      grid: +$("grid").value, fuelCo2: +$("fuelCo2").value, cutoff: +$("cutoff").value,
-      inc: $("incReb").checked, rebFlat:+$("rebFlat").value, rebTon:+$("rebTon").value, rebCap:+$("rebCap").value
-    };
-    return Object.assign(p, over);
-  }
-  function fuelDefaults(city, fuel){
-    const f = FUEL[fuel];
-    if (fuel==="elec") return {therm: city.kwh, co2: city.grid};
-    return {therm: city.fuel[fuel]/(f.kwh*f.eff), co2: f.co2/(f.kwh*f.eff)};
-  }
-
-  // Hour-level simulation over a list of temperatures
-  function sim(temps, p){
-    const capKw = p.size*TON_KW, hpPrice = p.kwh*(p.meter?0.9:1);
-    let baseCost=0, baseCo2=0, cost=0, co2=0, load=0, hpHeat=0;
-    for (const T of temps){
-      const L = Math.max(0, p.ua*(p.tbal-T)); if(!L) continue;
-      const hp = Math.min(L, capKw*capFrac(T,p.cutoff)), bk = L-hp, e = hp ? hp/cop(T) : 0;
-      load+=L; hpHeat+=hp;
-      baseCost += L*p.therm; baseCo2 += L*p.fuelCo2;
-      cost += e*hpPrice + bk*p.therm; co2 += e*p.grid + bk*p.fuelCo2;
-    }
-    return {baseCost, baseCo2, cost, co2, load, hpHeat};
-  }
-  function evaluate(p){
-    const months = p.city.hours.map(h=>sim(h,p));
-    const yr = months.reduce((a,m)=>{for(const k in m)a[k]=(a[k]||0)+m[k];return a;},{});
-    const upfront = p.size*p.costTon;
-    const rebate = Math.min(p.rebCap, p.rebFlat + p.rebTon*p.size);
-    const net = upfront - (p.inc ? rebate : 0);
-    const save = yr.baseCost - yr.cost, cut = yr.baseCo2 - yr.co2;
-    return {months, yr, upfront, rebate, net, save, cut, payback: save>0 ? net/save : Infinity,
-            lifeCost: net + p.life*yr.cost, lifeCo2: p.life*yr.co2};
-  }
-
-  // ---------- UI wiring ----------
-  const lockIcon = locked => locked
-    ? '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5" fill="currentColor"/><path d="M5 7V5a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>'
-    : '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M5 7V5a3 3 0 0 1 5.8-1" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>';
-  document.querySelectorAll(".lock").forEach(b=>{
-    const k=b.dataset.lock; b.innerHTML=lockIcon(state.locks[k]);
-    b.title = "Locked inputs stay as they are when you press Go";
-    b.addEventListener("click",()=>{state.locks[k]=!state.locks[k]; b.setAttribute("aria-pressed",state.locks[k]); b.innerHTML=lockIcon(state.locks[k]);});
-  });
-
-  function applyCityDefaults(){
-    const c = CITY[$("loc").value], d = fuelDefaults(c, $("fuel").value);
-    $("kwh").value = c.kwh.toFixed(2); $("therm").value = d.therm.toFixed(3);
-    $("grid").value = c.grid.toFixed(2); $("fuelCo2").value = d.co2.toFixed(3);
-    const f = FUEL[$("fuel").value];
-    $("thermHint").textContent = $("fuel").value==="elec" ? "Same as electricity price." :
-      `From $${c.fuel[$("fuel").value].toFixed(2)}/${f.unit} at ${Math.round(f.eff*100)}% efficiency.`;
-  }
-  $("loc").addEventListener("change",()=>{applyCityDefaults();render();});
-  $("fuel").addEventListener("change",()=>{applyCityDefaults();render();});
-
-  function setSize(v){
-    $("size").value=v;
-    document.querySelectorAll("[data-size]").forEach(b=>b.setAttribute("aria-pressed", +b.dataset.size===+v));
-  }
-  document.querySelectorAll("[data-size]").forEach(b=>b.addEventListener("click",()=>{setSize(b.dataset.size);render();}));
-  $("size").addEventListener("input",()=>{setSize($("size").value);render();});
-
-  document.querySelectorAll("[data-metric]").forEach(b=>b.addEventListener("click",()=>{
-    state.metric=b.dataset.metric; document.querySelectorAll("[data-metric]").forEach(x=>x.setAttribute("aria-pressed",x===b)); render();}));
-  document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>{
-    state.view=b.dataset.view; document.querySelectorAll("[data-view]").forEach(x=>x.setAttribute("aria-pressed",x===b)); render();}));
-
-  ["meter","kwh","therm","incReb","rebFlat","rebTon","rebCap","ua","tbal","costTon","life","grid","fuelCo2","cutoff"]
-    .forEach(id=>$(id).addEventListener("input",render));
-
-  const prioText = v => v<20 ? "Lowest cost first." : v>80 ? "Lowest CO₂ first." : v<45 ? "Leaning toward lower cost." : v>55 ? "Leaning toward lower CO₂." : "Balanced between cost and CO₂.";
-  $("prio").addEventListener("input",()=>{const t=prioText(+$("prio").value);$("prio").setAttribute("aria-valuetext",t);$("prioText").textContent=t+" Press Go to pick the heat pump size for this priority.";});
-
-  // Auto-optimize: sweep unlocked choices, minimize weighted lifetime cost + CO2
-  $("go").addEventListener("click",()=>{
-    const w = +$("prio").value/100;
-    const sizes = state.locks.size ? [+$("size").value] : Array.from({length:23},(_,i)=>0.5+i*0.25);
-    const meters = state.locks.meter ? [$("meter").checked] : [false,true];
-    const cands=[]; for(const s of sizes) for(const m of meters){const r=evaluate(params({size:s,meter:m})); cands.push({s,m,r});}
-    const cs=cands.map(c=>c.r.lifeCost), es=cands.map(c=>c.r.lifeCo2);
-    const n=(v,a)=>{const lo=Math.min(...a),hi=Math.max(...a);return hi>lo?(v-lo)/(hi-lo):0;};
-    let best=cands[0],bs=Infinity; for(const c of cands){const s=(1-w)*n(c.r.lifeCost,cs)+w*n(c.r.lifeCo2,es); if(s<bs){bs=s;best=c;}}
-    setSize(best.s); $("meter").checked=best.m; render();
-    $("status").textContent = state.locks.size && state.locks.meter ? "Unlock heat pump size or smart meter to let Go change them."
-      : `Picked ${best.s} tons${best.m?" with smart meter":""}.`;
-  });
-
-  // ---------- Formatting ----------
-  const money = v => (v<0?"−":"")+"$"+Math.abs(Math.round(v)).toLocaleString();
-  const tons = kg => (kg/1000).toFixed(1)+" t";
-
-  // ---------- Chart ----------
-  const NS="http://www.w3.org/2000/svg";
-  function drawChart(base, mods, labels, unit){
-    const svg=$("chart"); svg.innerHTML="";
-    const W=640,H=320,m={l:58,r:10,t:12,b:30},iw=W-m.l-m.r,ih=H-m.t-m.b;
-    const max=Math.max(...base,...mods,1)*1.08, n=base.length;
-    const x=i=>m.l+iw*(n===1?.5:i/(n-1)), y=v=>m.t+ih*(1-v/max);
-    const el=(t,a,parent=svg)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);parent.appendChild(e);return e;};
-    const defs=el("defs",{}); const pat=el("pattern",{id:"hatch",width:7,height:7,patternUnits:"userSpaceOnUse",patternTransform:"rotate(45)"},defs);
-    el("line",{x1:0,y1:0,x2:0,y2:7,stroke:"var(--hp)","stroke-width":1.6},pat);
-    // gridlines
-    const step = niceStep(max/4);
-    for(let v=0; v<=max; v+=step){
-      el("line",{x1:m.l,x2:W-m.r,y1:y(v),y2:y(v),stroke:"var(--line)","stroke-width":1});
-      const t=el("text",{x:m.l-8,y:y(v)+4,"text-anchor":"end","font-size":12,fill:"var(--muted)"}); t.textContent=unit(v);
-    }
-    labels.forEach((l,i)=>{ if(n>12 && i%3) return; const t=el("text",{x:x(i),y:H-8,"text-anchor":"middle","font-size":12,fill:"var(--muted)"}); t.textContent=l; });
-    const pts=a=>a.map((v,i)=>[x(i),y(v)]);
-    // Monotone-ish smooth curve (Catmull-Rom to Bezier, clamped to the plot)
-    const curve=(P,move=true)=>{let d=(move?"M":"L")+P[0][0].toFixed(1)+","+P[0][1].toFixed(1);
-      for(let i=0;i<P.length-1;i++){const p0=P[i-1]||P[i],p1=P[i],p2=P[i+1],p3=P[i+2]||p2,k=6;
-        const c1=[p1[0]+(p2[0]-p0[0])/k,Math.min(m.t+ih,p1[1]+(p2[1]-p0[1])/k)],c2=[p2[0]-(p3[0]-p1[0])/k,Math.min(m.t+ih,p2[1]-(p3[1]-p1[1])/k)];
-        d+=`C${c1[0].toFixed(1)},${c1[1].toFixed(1)} ${c2[0].toFixed(1)},${c2[1].toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;}
-      return d;};
-    const path=a=>curve(pts(a));
-    const gap = path(base)+curve(pts(mods).reverse(),false)+"Z";
-    el("path",{d:gap,fill:"url(#hatch)",opacity:.75});
-    el("path",{d:path(base),fill:"none",stroke:"var(--base)","stroke-width":2.5,"stroke-dasharray":"2 6","stroke-linecap":"round"});
-    el("path",{d:path(mods),fill:"none",stroke:"var(--hp)","stroke-width":3.5,"stroke-linecap":"round","stroke-linejoin":"round"});
-    const desc=el("desc",{}); desc.textContent=labels.map((l,i)=>`${l}: last year ${unit(base[i])}, with heat pump ${unit(mods[i])}`).join("; ");
-  }
-  function niceStep(raw){const p=Math.pow(10,Math.floor(Math.log10(raw||1)));const f=raw/p;return (f<1.5?1:f<3?2:f<7?5:10)*p;}
-
-  // ---------- Render ----------
-  function render(){
-    const p=params(), r=evaluate(p), c=p.city;
-    $("sizeOut").textContent = `${p.size} tons, ${(p.size*TON_KW).toFixed(1)} kW at 5°F. Design load here: ${(p.ua*(p.tbal-c.design)).toFixed(1)} kW at ${Math.round(c.design)}°F.`;
-
-    const isCost = state.metric==="cost";
-    $("chartTitle").textContent = (isCost?"Heating cost":"Heating CO₂") + (state.view==="month"?" by month":" by hour, coldest day") + `, ${c.name}`;
-    let base, mods, labels, unit;
-    if(state.view==="month"){
-      base=r.months.map(m=>isCost?m.baseCost:m.baseCo2); mods=r.months.map(m=>isCost?m.cost:m.co2); labels=MON;
-    } else {
-      const hrs=c.day.map(T=>sim([T],p)); base=hrs.map(h=>isCost?h.baseCost:h.baseCo2); mods=hrs.map(h=>isCost?h.cost:h.co2);
-      labels=c.day.map((_,h)=>h===0?"12a":h===12?"12p":h<12?h+"a":(h-12)+"p");
-    }
-    unit = isCost ? (v=>"$"+(v<10?v.toFixed(2):Math.round(v).toLocaleString())) : (v=>(v<10?v.toFixed(1):Math.round(v).toLocaleString())+" kg");
-    drawChart(base,mods,labels,unit);
-
-    $("co2Num").textContent = tons(r.yr.co2);
-    $("co2Sub").textContent = `vs ${tons(r.yr.baseCo2)} last year`;
-
-    $("roiCost").textContent = isFinite(r.payback) ? `${r.payback.toFixed(1)} yr payback` : "No payback";
-    $("roiCostSub").textContent = `${money(r.save)} saved per year on ${money(r.net)} net cost` + (p.inc?` (after ${money(r.rebate)} rebates).`:". Rebates not included.");
-    $("roiCo2").textContent = `${tons(r.cut)} cut per year`;
-    $("roiCo2Sub").textContent = `${tons(r.cut*p.life)} over ${p.life} years. Heat pump covers ${Math.round(100*r.yr.hpHeat/r.yr.load)}% of the heat.`;
-
-    // Comparison table: same home, size, fuel; each city's own default prices unless location is current
-    const rows = Object.entries(CITY).map(([k,cc])=>{
-      const cur = k===$("loc").value, d=fuelDefaults(cc,p.fuel);
-      const pp = cur ? p : params({city:cc, kwh:cc.kwh, therm:d.therm, grid:cc.grid, fuelCo2:d.co2});
-      const rr = evaluate(pp);
-      return `<tr class="${cur?"cur":""}"><td>${cc.name}</td><td>${Math.round(cc.design)}°F</td><td>${Math.round(100*rr.yr.hpHeat/rr.yr.load)}%</td><td>${money(rr.save)}</td><td>${isFinite(rr.payback)?rr.payback.toFixed(1)+" yr":"None"}</td><td>${tons(rr.cut)}</td></tr>`;
-    });
-    $("cmp").innerHTML = rows.join("");
-  }
-
-  applyCityDefaults(); setSize(2.5); render();
-})();
-</script>
+<script src="ui/regions.js"></script>
+<script src="ui/resstock.js"></script>
+<script src="ui/rebates.js"></script>
+<script src="ui/model-stub.js"></script>
+<script src="ui/model-v1.js"></script>
+<script src="ui/charts.js"></script>
+<script src="ui/app.js"></script>
 </body>
 </html>
