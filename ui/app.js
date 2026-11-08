@@ -455,9 +455,11 @@
       b.setAttribute("aria-pressed", b.dataset.inc === state.income);
       b.onclick = () => { state.income = b.dataset.inc; save(); renderResults(); };
     });
-    const stdUsd = Math.min(h.rebatesUsd, w.upfront.installedUsd);
+    const stdUsd = w.sizeTons ? Math.min(h.rebatesUsd, w.upfront.installedUsd) : h.rebatesUsd;
     $("stdAmt").textContent = money(stdUsd);
-    $("rebTotal").innerHTML = `Total rebates: ${money(w.upfront.rebatesUsd)}<small>${money(w.upfront.installedUsd)} installed − ${money(w.upfront.rebatesUsd)} = ${money(w.upfront.netUsd)} upfront</small>`;
+    $("rebTotal").innerHTML = w.sizeTons
+      ? `Total rebates: ${money(w.upfront.rebatesUsd)}<small>${money(w.upfront.installedUsd)} installed − ${money(w.upfront.rebatesUsd)} = ${money(w.upfront.netUsd)} upfront</small>`
+      : `Total rebates available: ${money(h.rebatesUsd + incomeUsd())}<small>They come off the cost of a heat pump. At this setting of the dial we suggest keeping your gas furnace, so nothing is counted yet.</small>`;
     $("rebIntro").textContent = r.id === "minneapolis" ? "Rebates come off your upfront cost. Add the income-based rebate if your household qualifies." : "Rebates come off your upfront cost.";
     $("incBox").hidden = r.id !== "minneapolis"; 
     const incAmt = incomeUsd();
