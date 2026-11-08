@@ -146,50 +146,30 @@
   });
 
   // ---------- Step 2: climate ----------
+  // Content lives in ui/regions.js (CLIMATE, CLIMATE_TYPES, SOURCES); each claim is tagged and cited.
+  const { SOURCES, CLIMATE_TYPES } = window.HP_DATA;
   const ico = {
     sun: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
     leaf: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-9 6-14 15-14 0 9-5 15-14 15"/><path d="M5 19l7-7"/></svg>',
     snow: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M4 7l16 10M20 7 4 17"/></svg>'
   };
   const pct = v => Math.round(v * 100) + "%";
-  const degF = v => (v < 0 ? "−" : "") + Math.abs(Math.round(v)) + " °F";
-  function climateStory(r) {
-    const s = Model().climateStats(r);
-    const gasPerHeat = r.fuelPrices.gas / (FUELS.gas.kwh * FUELS.gas.eff);
-    const priceRatio = r.electricityUsdPerKWh / gasPerHeat;
-    const share = s.heatingShareAbove5F;
-    const headline = share >= 0.9 ? `${r.name}'s winters are heat pump territory.`
-      : share >= 0.75 ? `${r.name} is a great fit for a heat pump, with a plan for the coldest nights.`
-      : `${r.name} is a tough test, but a heat pump can still carry much of the load.`;
-    const intro = `The coldest month here averages ${degF(s.coldestMonthMeanF)}, and the coldest nights of a typical winter reach about ${degF(s.designTempF)}.`;
-
-    const excel = share >= 0.75
-      ? { h: "Most of your winter", p: `${share >= 0.98 ? 'Nearly all' : 'About ' + pct(share)} of the heat a home here needs comes on days warmer than 5 °F. That's where a cold-climate heat pump is two to three times as efficient as a furnace.` }
-      : { h: "Spring, fall and milder winter days", p: `About ${pct(share)} of the heat a home here needs comes on days warmer than 5 °F, when a heat pump is at its best. That's still a big slice of the year.` };
-
-    let ideal;
-    if (r.gridKgCo2PerKWh < 0.05) ideal = { h: "Cutting carbon", p: `Your electricity comes from ${r.gridNote}, so heat from a heat pump is close to carbon-free.` };
-    else if (s.warmestMonthMeanF >= 70) ideal = { h: "Heating and cooling in one", p: `Summers average ${degF(s.warmestMonthMeanF)} in the warmest month, so the same unit can replace your air conditioner.` };
-    else ideal = { h: "Long spring and fall seasons", p: `${s.shoulderMonths} months a year sit between 30 °F and 55 °F, the sweet spot where a heat pump runs most efficiently.` };
-
-    let less;
-    if (s.hoursBelowMinus13F > 150) less = { h: "The deepest cold snaps", p: `About ${Math.round(s.hoursBelowMinus13F / 10) * 10} hours a year drop below −13 °F. A heat pump loses much of its power then, so keep a backup for those nights.` };
-    else if (r.typicalHome.currentHeat === "electric" && r.gridKgCo2PerKWh < 0.05) less = { h: "Carbon, if you already heat with electricity", p: `Electric heat here is already clean, so switching from baseboards mostly saves money and adds cooling. The carbon cut is small.` };
-    else if (priceRatio > 3) less = { h: "Big savings against cheap gas", p: `Natural gas is cheap here compared with electricity, so bill savings over a gas furnace may be modest. Switching from oil, propane or electric heat saves more.` };
-    else less = { h: "The very coldest nights", p: `Around ${Math.round(s.hoursBelow5F / 10) * 10} hours a year fall below 5 °F. The heat pump works harder then and a backup may help.` };
-
-    return { s, headline, intro, excel, ideal, less };
-  }
+  const TAGS = { research: "Research", data: "Team data", reasoning: "Our reasoning", gap: "Not researched" };
+  const tagHtml = t => `<span class="tag tag-${t}">${TAGS[t]}</span>`;
+  const cite = ids => ids && ids.length ? ids.map(n => `<sup><a href="#src-${n}" class="cite">${n}</a></sup>`).join("") : "";
   function renderClimate() {
     const r = region(); if (!r) return;
-    const c = climateStory(r);
+    const c = r.climate;
     $("cKicker").textContent = "Your climate · " + r.full;
     $("h1").textContent = c.headline;
-    $("cIntro").textContent = c.intro;
-    $("cMini").innerHTML = `<div><b>${degF(c.s.coldestMonthMeanF)}</b>coldest month, on average</div><div><b>${degF(c.s.designTempF)}</b>a very cold night</div><div><b>${c.s.heatingMonths}</b>months of heating</div>`;
-    $("cFacts").innerHTML = [
-      ["Heat pumps excel at", c.excel, "sun", ""], ["Your climate is ideal for", c.ideal, "leaf", ""], ["Where we expect less benefit", c.less, "snow", "less"]
-    ].map(([k, f, i, cls]) => `<div class="fact ${cls}"><div class="ico">${ico[i]}</div><p class="muted" style="font-size:13px;font-weight:600">${k}</p><h3>${f.h}</h3><p style="margin-top:6px">${f.p}</p></div>`).join("");
+    $("cIntro").textContent = c.status === "researched" ? "Here is what the research and the team's data say about heat pumps where you live." : c.status === "limited" ? "We have less research for this region, so some of this page is our own reasoning, marked as such." : "This is a hard case for heat pumps, and we say so plainly below.";
+    $("cMini").innerHTML = c.design ? `<div><b>${c.design.text}</b>${c.design.label}${cite(c.design.src)}</div>` : "";
+    $("cSpecialist").hidden = !c.specialist; $("cSpecialist").innerHTML = c.specialist ? `<b>Needs a specialist.</b> ${c.specialist}` : "";
+    const icons = ["sun", "leaf", "snow"];
+    $("cFacts").innerHTML = c.cards.map((f, i) => `<div class="fact ${i === 2 ? "less" : ""}"><div class="ico">${ico[icons[i]]}</div><p class="muted" style="font-size:13px;font-weight:600">${f.k}</p><h3>${f.h}</h3><p style="margin-top:6px">${f.p}${cite(f.src)}</p><p style="margin-top:8px">${tagHtml(f.tag)}</p></div>`).join("");
+    $("cTypes").innerHTML = CLIMATE_TYPES.map(t => `<div class="ctype ${t.id === c.type ? "here" : ""}"><h3>${t.name}${t.id === c.type ? ' <span class="tag yours">Like yours</span>' : ""}</h3><p style="margin-top:6px;font-size:14px">${t.text}${cite(t.src)}</p></div>`).join("");
+    $("cNotes").innerHTML = c.notes.map(n => `<li>${tagHtml(n.tag)} ${n.text}${cite(n.src)}</li>`).join("");
+    $("cSources").innerHTML = Object.entries(SOURCES).map(([n, s]) => `<li id="src-${n}" value="${n}">${s.u ? `<a href="${s.u}" target="_blank" rel="noopener">${s.t}</a>` : s.t}</li>`).join("");
   }
   $("toHome").addEventListener("click", () => { unlock(2); go(2); });
 

@@ -1,7 +1,6 @@
 // PLACEHOLDER MODEL. Stands in for the Model workstream until a real model exists.
-// The page only talks to window.HeatPumpModel through two functions:
-//   HeatPumpModel.run(inputs)          -> outputs (or a Promise of outputs)
-//   HeatPumpModel.climateStats(region) -> plain-language climate facts for step 2
+// The page only talks to window.HeatPumpModel through one function:
+//   HeatPumpModel.run(inputs) -> outputs (or a Promise of outputs)
 // The input/output shape is documented in docs/INTERFACES.md ("UI/Model handoff").
 // To plug in the real model: load a script after this one that replaces window.HeatPumpModel
 // (or individual functions) with the same shape, and set isPlaceholder to false.
@@ -106,26 +105,5 @@
     };
   }
 
-  // Plain-language climate facts for step 2.
-  function climateStats(region) {
-    const months = hourlyTemps(region);
-    let degHours = 0, mildDegHours = 0, coldHours = 0, deepColdHours = 0;
-    months.forEach(temps => { for (const T of temps) {
-      const d = Math.max(0, 60 - T); degHours += d; if (T >= 5) mildDegHours += d;
-      if (T < 5) coldHours++; if (T < -13) deepColdHours++;
-    }});
-    const m = region.monthlyMeanF;
-    return {
-      heatingShareAbove5F: degHours ? mildDegHours / degHours : 1,   // share of heating need on hours ≥ 5 °F
-      hoursBelow5F: coldHours,
-      hoursBelowMinus13F: deepColdHours,
-      coldestMonthMeanF: Math.min(...m),
-      warmestMonthMeanF: Math.max(...m),
-      heatingMonths: m.filter(t => t < 55).length,
-      shoulderMonths: m.filter(t => t >= 30 && t < 55).length,
-      designTempF: region.designTempF
-    };
-  }
-
-  window.HeatPumpModel = { run, climateStats, isPlaceholder: true, sizes: SIZES };
+  window.HeatPumpModel = { run, isPlaceholder: true, sizes: SIZES };
 })();

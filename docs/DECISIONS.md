@@ -40,6 +40,7 @@ Add a row here with each new entry.
 | D-017 | 2026-11-07 | UI | Smart meter is a simple toggle for now; flesh out later | active |
 | D-018 | 2026-11-07 | UI | Results show high-level answers first; rebate explainer on its own page | active |
 | D-019 | 2026-11-07 | UI | Map the front end to model v1 for Minneapolis; add carbon-price dial | active |
+| D-020 | 2026-11-07 | UI | Climate page claims are cited and tagged by evidence type | active |
 
 ## How to add an entry
 
@@ -208,3 +209,12 @@ Anyone (teammate or Claude thread) who makes a decision that affects the repo, t
 - **Decided by:** Gavin (request); Claude (mapping).
 - **Refs:** branch `claude/project-thread-6h36e8`; model by sharvis3.
 - **Status:** active (supersede when the end model lands)
+
+### D-020 · 2026-11-07 · Climate page claims are cited and tagged by evidence type
+- **Workstream:** UI
+- **Decision:** Step 2 keeps its structure (headline, three cards, heat pump explainer) and adds a qualitative climate-type overview plus a Sources footer. Each claim is tagged Research (cited study), Team data (computed from `data.zip`), Our reasoning (own inference, e.g. gas-vs-electric price arithmetic) or Not researched. Minneapolis and Boston have researched content; Montréal is limited; Fairbanks shows a "needs a specialist" message because the sources found report significant data gaps for very cold climates. Design temperatures use ASHRAE 99.6% (Minneapolis −9 °F from the `.ddy` in `data.zip`, Boston 8 °F).
+- **Why:** Gavin asked what research backed the page; the first version was rules over placeholder numbers with unsourced general claims.
+- **Decided by:** Gavin.
+- **Refs:** `ui/regions.js` (`CLIMATE`, `SOURCES`).
+- **Status:** active (Boston hourly weather and current MA prices still to be added; Montréal and Fairbanks need research)
+
