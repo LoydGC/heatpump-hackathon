@@ -403,6 +403,7 @@ details.fold .fs{font-size:13px}
         <div class="form-grid">
           <div class="f"><label for="sqft">Home size (sq ft) <span class="src" data-src="floorAreaSqft"></span></label><input id="sqft" type="number" min="500" max="4000" step="50"></div>
           <div class="f"><label for="heat">Heating today <span class="src" data-src="currentHeat"></span></label><select id="heat"></select></div>
+          <div class="f"><label for="ins">How well insulated is your house? <span class="src" data-src="insulationR"></span></label><input id="ins" type="range" min="0" max="3" step="1" value="1" aria-describedby="insVal"><p class="hint" id="insVal" style="font-weight:600;color:var(--accent)"></p></div>
           <div class="f"><label for="tstat">Thermostat in winter (°F) <span class="src" data-src="thermostatF"></span></label><input id="tstat" type="number" min="55" max="78" step="1"></div>
         </div>
 

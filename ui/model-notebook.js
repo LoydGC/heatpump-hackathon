@@ -41,12 +41,12 @@
   }
 
   // run_thermal_hp_sim for one profile (null = no heat pump) over the year
-  function sim(home, prof, inp, aux) {
+  function sim(home, prof, inp, aux, scale) {
     const monthly = DAYS.map(() => ({ costUsd: 0, co2Kg: 0 }));
     let kwh = 0, aux_btu = 0, hp_btu = 0, usd = 0, kg = 0;
     const el = inp.prices.electricityUsdPerKWh;
     for (let t = 0; t < D.hours; t++) {
-      const need = home.demandBtu[t] * 10, T = D.tempF[t];
+      const need = home.demandBtu[t] * 10 * scale, T = D.tempF[t];
       if (!(need > 0)) continue;
       let hp = 0, e = 0;
       if (prof) {
@@ -62,21 +62,23 @@
   }
 
   const cache = new Map();   // profile sims are the slow part; they depend on home, prices and fuel only
-  function allSims(home, inp, aux) {
-    const key = [home.buildingId, inp.prices.electricityUsdPerKWh, aux.usd, aux.kg].join("|");
-    if (!cache.has(key)) cache.set(key, { base: sim(home, null, inp, aux), hp: D.profiles.map(p => sim(home, p, inp, aux)) });
+  function allSims(home, inp, aux, k) {
+    const key = [home.buildingId, k, inp.prices.electricityUsdPerKWh, aux.usd, aux.kg].join("|");
+    if (!cache.has(key)) cache.set(key, { base: sim(home, null, inp, aux, k), hp: D.profiles.map(p => sim(home, p, inp, aux, k)) });
     return cache.get(key);
   }
 
+  // Notebook's find_closest_row idea: the exported ResStock home (typical insulation) nearest to the home size.
   function pickHome(sqft) {
-    return D.homes.reduce((b, h) => Math.abs(h.areaSqft - sqft) < Math.abs(b.areaSqft - sqft) ? h : b);
+    const bins = Object.entries(D.binMidSqft), bin = bins.reduce((b, e) => Math.abs(e[1] - sqft) < Math.abs(b[1] - sqft) ? e : b)[0];
+    return D.homes[D.grid.ref[bin]];
   }
 
   function run(inp) {
     if (inp.region.id !== "minneapolis") return Prev.run(inp);
-    const home = pickHome(inp.home.floorAreaSqft), aux = auxPerBtu(inp);
+    const home = pickHome(inp.home.floorAreaSqft), k = home.unifiedR / (inp.home.insulationR || 3.5), aux = auxPerBtu(inp);
     const sc = inp.scenario || {}, price = Number.isFinite(sc.carbonUsd) ? sc.carbonUsd : LAMBDAS[Number.isInteger(sc.lamIdx) ? sc.lamIdx : 8];
-    const { base, hp } = allSims(home, inp, aux), type = inp.costs.rebateType || "none";
+    const { base, hp } = allSims(home, inp, aux, k), type = inp.costs.rebateType || "none";
     const rowsAt = pr => {
       const g = s => s.usd + s.kg * pr / 1000, bg = g(base);
       return D.profiles.map((p, i) => {
@@ -105,7 +107,7 @@
     const shown = chosen || alt;
     const mkMonthly = c => base.monthly.map((m, i) => ({ today: { costUsd: m.costUsd, co2Kg: m.co2Kg },
       heatPump: c ? { costUsd: c.s.monthly[i].costUsd, co2Kg: c.s.monthly[i].co2Kg } : { costUsd: m.costUsd, co2Kg: m.co2Kg } }));
-    const heatKWh = home.demandBtu.reduce((a, b) => a + b, 0) * 10 / BTU_PER_KWH, peakKw = Math.max(...home.demandBtu) * 10 / BTU_PER_KWH;
+    const heatKWh = k * home.demandBtu.reduce((a, b) => a + b, 0) * 10 / BTU_PER_KWH, peakKw = k * Math.max(...home.demandBtu) * 10 / BTU_PER_KWH;
     const sRow = c => c ? c.s : base;
     const s = sRow(shown), life = LIFE;
     const upfront = shown ? { installedUsd: shown.cap, rebatesUsd: shown.reb, netUsd: shown.net } : { installedUsd: 0, rebatesUsd: 0, netUsd: 0 };
@@ -124,7 +126,7 @@
       sizes: rows.map(r => ({ sizeTons: r1(r.p.nominalTons), lifetimeCostUsd: r.net + life * r.s.usd, lifetimeCo2Kg: life * r.s.kg, heatPumpShare: r.s.coverage,
                               paybackYears: r.opSave > 0 ? r.net / r.opSave : null, profile: r.p.id })),
       sweep,
-      nb: { carbonUsdPerTonne: price, rebateType: type, buildingId: home.buildingId, homeAreaSqft: home.areaSqft, profile: shown ? shown.p.id : null, keepFurnace: !chosen, altTons: alt ? r1(alt.p.nominalTons) : null,
+      nb: { carbonUsdPerTonne: price, rebateType: type, buildingId: home.buildingId, homeAreaSqft: home.areaSqft, loadScale: k, profile: shown ? shown.p.id : null, keepFurnace: !chosen, altTons: alt ? r1(alt.p.nominalTons) : null,
             brand: shown ? shown.p.brand : null, grandCostUsd: chosen ? chosen.grand : baseGrand, baselineGrandCostUsd: baseGrand },
       notes: [
         "Runs the team's model.ipynb: a real ResStock home's hourly heating load and real Minneapolis weather, matched to AHRI-listed cold-climate heat pumps.",

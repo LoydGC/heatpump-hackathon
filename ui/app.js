@@ -8,6 +8,9 @@
   const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const INSTALLED_USD_PER_TON = 5500;   // placeholder
   const LIFETIME_YEARS = 15;            // data.zip analysis_years
+  // Insulation slider: levels sit on the notebook's unified-R scale (model.ipynb calculate_unified_r); spoken equivalents below.
+  const INS_LEVELS = [2.5, 3.5, 4.5, 5], INS_LABELS = ["Not well", "Fair", "Decent", "Good"];
+  const ENV_R = { drafty: 2.5, average: 3.5, tight: 5 }, INS_W = { 2.5: 0.12, 3.5: 0.095, 4.5: 0.075, 5: 0.055 };   // stand-in heat loss, W per F per sq ft
   const PRICE_KEYS = ["electricityUsdPerKWh", "fuelUsdPerUnit", "rebatesUsd"];
 
   // ---------- State ----------
@@ -110,7 +113,8 @@
       envelope: r.typicalHome.envelope,
       currentHeat: r.typicalHome.currentHeat,
       thermostatF: r.typicalHome.thermostatF,
-      heatLossWPerF: Math.round(sqft * ENVELOPES[env].wPerFPerSqft / 5) * 5,
+      insulationR: ENV_R[r.typicalHome.envelope],
+      heatLossWPerF: Math.round(sqft * INS_W[ov.insulationR ?? ENV_R[env]] / 5) * 5,
       electricityUsdPerKWh: r.electricityUsdPerKWh,
       fuelUsdPerUnit: heat === "electric" ? (ov.electricityUsdPerKWh ?? r.electricityUsdPerKWh) : r.fuelPrices[heat],
       rebatesUsd: 0,   // rebates follow the notebook rule: none / partial / full (see rebateType)
@@ -132,7 +136,7 @@
     return {
       schemaVersion: 1,
       region: { id: r.id, name: r.full, designTempF: r.designTempF, monthlyMeanF: r.monthlyMeanF, monthlySdF: r.monthlySdF, dataStatus: r.dataStatus },
-      home: { source: Object.keys(state.overrides).length ? "custom" : "typical", floorAreaSqft: h.floorAreaSqft, envelope: h.envelope,
+      home: { source: Object.keys(state.overrides).length ? "custom" : "typical", floorAreaSqft: h.floorAreaSqft, envelope: h.envelope, insulationR: h.insulationR,
               homeType: h.homeType, sizeBin: h.sizeBin, binLevel: h.binLevel,
               resstockRef: (c => c && c.n ? { n: c.n, medianKWh: c.kwh, medianTherms: c.therms, medianOtherFuelKWh: c.otherKwh } : null)(selection(r, state.overrides).cell),
               heatLossWPerF: h.heatLossWPerF, thermostatF: h.thermostatF, currentHeat: h.currentHeat },
@@ -235,12 +239,13 @@
   function setOverride(key, val) {
     const r = region(), d = typical(r, state.overrides);
     if (key === "currentHeat") { delete state.overrides.fuelUsdPerUnit; delete state.overrides.rebatesUsd; }
-    if (key === "floorAreaSqft" || key === "envelope" || key === "homeType" || key === "sizeBin" || key === "binLevel") delete state.overrides.heatLossWPerF;
+    if (key === "floorAreaSqft" || key === "envelope" || key === "insulationR" || key === "homeType" || key === "sizeBin" || key === "binLevel") delete state.overrides.heatLossWPerF;
     if (val === "" || val == null || (typeof val === "number" && !isFinite(val)) || val === d[key]) delete state.overrides[key];
     else state.overrides[key] = val;
     state.sizeTons = null;
     renderHome(key); save();
   }
+  $("ins").addEventListener("input", e => setOverride("insulationR", INS_LEVELS[+e.target.value]));
   FIELDS.forEach(([id, key, parse]) => {
     $(id).addEventListener("change", e => setOverride(key, e.target.value === "" ? "" : parse(e.target.value)));
   });
@@ -254,6 +259,7 @@
     const td = typical(r, {});
 
 
+    { const k = Math.max(0, INS_LEVELS.indexOf(h.insulationR)); $("ins").value = k; $("insVal").textContent = INS_LABELS[k]; }
     FIELDS.forEach(([id, key]) => { if (key !== skipKey || id === "heat") $(id).value = h[key]; });
     $("fuelPriceL").textContent = h.currentHeat === "electric" ? "Fuel price (same as electricity)" : `${f.short[0].toUpperCase() + f.short.slice(1)} ($ per ${f.unit})`;
     $("fuelPrice").disabled = h.currentHeat === "electric";
@@ -512,7 +518,7 @@
     const ov0 = state.overrides;
     const rows = [
       ["Home type and size", `${Math.round(selection(r, ov0).sqft).toLocaleString()} sq ft`, "sizeBin"],
-      ["How well it holds heat", ENVELOPES[h.envelope].label, "envelope"],
+      ["How well insulated", INS_LABELS[Math.max(0, INS_LEVELS.indexOf(h.insulationR))], "insulationR"],
       ["Current heating", f.label, "currentHeat"],
       ["Winter thermostat", `${h.thermostatF} °F`, "thermostatF"],
       ["Heat loss", `${h.heatLossWPerF} W per °F`, "heatLossWPerF"],
