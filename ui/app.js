@@ -276,11 +276,8 @@
     FIELDS.forEach(([id, key]) => { if (key !== skipKey || id === "heat") $(id).value = h[key]; });
     const sel = selection(r, state.overrides), lvlBins = binList(sel.lvl);
     $("htype").value = sel.type;
-    $("sbin").innerHTML = lvlBins.map(b => {
-      const c = cellOf(r, sel.type, sel.lvl, b), n = c ? c.n : null;
-      const tag = hasRS(r) && n === 0 ? " – not available here" : "";
-      return `<option value="${b}"${n === 0 ? " disabled" : ""}${b === sel.bin ? " selected" : ""}>${binLabel(b)} sq ft${tag}</option>`;
-    }).join("");
+    $("sbin").innerHTML = lvlBins.filter(b => !hasRS(r) || (cellOf(r, sel.type, sel.lvl, b) || {}).n)
+      .map(b => `<option value="${b}"${b === sel.bin ? " selected" : ""}>${binLabel(b)} sq ft</option>`).join("");
     document.querySelectorAll("#blSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.lvl === sel.lvl));
     $("binNote").textContent = (sel.fellBack ? `ResStock has no ${typeLabel(sel.type).split(" (")[0].toLowerCase()} homes of ${binLabel(sel.want)} sq ft in ${r.name}, so we're showing the nearest group, ${binLabel(sel.bin)} sq ft. ` : "") +
       (r.id === V1.regionId ? "Model v1 uses one fixed house, so home type and size don't change its numbers yet." : "Home type and size (500–3,999 sq ft) set the heat-loss estimate in the placeholder stand-in; the team's model isn't plugged in for this region.");

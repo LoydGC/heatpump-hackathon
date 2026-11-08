@@ -258,3 +258,4 @@ Anyone (teammate or Claude thread) who makes a decision that affects the repo, t
 
 _D-021 update (2026-11-08):_ Gavin: the Home type list shows only single-family detached and attached; the disabled mobile-home and multi-family entries are removed, not greyed out.
 
+_D-021 update (2026-11-08):_ Gavin: size groups with no ResStock homes are removed from the size dropdown instead of greyed out. If a previous choice becomes unavailable, the nearest available group is selected with a short note.
