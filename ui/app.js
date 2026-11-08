@@ -13,6 +13,7 @@
   // ---------- State ----------
   // Income-based rebate tiers (HEAR as in apply_rebate.py): share of area median income -> rebate cap in dollars.
   const INCOME_USD = { none: 0, partial: 4000, full: 8000 };
+  const incomeUsd = () => state.regionId === "minneapolis" ? INCOME_USD[state.income] : 0;   // income tiers apply to Minneapolis only
   const blank = () => ({ regionId: null, maxStep: 0, overrides: {}, priority: 0.5, prioSet: false, sizeTons: null, usedTypical: true, rebatesOn: true, income: "none", cold: false, acCredit: false });
   let state = blank();
   try { const s = JSON.parse(sessionStorage.getItem("hp-wizard")); if (s && (s.regionId === null || REGIONS[s.regionId])) state = Object.assign(blank(), s); } catch (e) {}
@@ -133,10 +134,10 @@
       prices: { electricityUsdPerKWh: h.electricityUsdPerKWh, fuelUsdPerUnit: fuelPrice, fuelUnit: f.unit, timeOfUse: tou == null ? !!h.timeOfUse : tou,
                 fuelUsdPerKWhHeat: fuelPrice / (f.kwh * f.eff) },
       emissions: { gridKgCo2PerKWh: r.gridKgCo2PerKWh, fuelKgCo2PerUnit: fuelCo2, fuelKgCo2PerKWhHeat: fuelCo2 / (f.kwh * f.eff) },
-      costs: { installedUsdPerTon: h.installedUsdPerTon, rebatesUsd: rebatesOn ? h.rebatesUsd + INCOME_USD[state.income] : 0, lifetimeYears: LIFETIME_YEARS },
+      costs: { installedUsdPerTon: h.installedUsdPerTon, rebatesUsd: rebatesOn ? h.rebatesUsd + incomeUsd() : 0, lifetimeYears: LIFETIME_YEARS },
       priority: state.prioSet ? state.priority : (isV1(r) ? DEFAULT_LAM_IDX / DIAL_STEPS : state.priority),
       sizeTons: sizeTons ?? null,
-      scenario: { coldWinter: state.cold, acCredit: state.acCredit, rebatesOn, incomeUsd: INCOME_USD[state.income], lamIdx: lamIdx ?? dialIdx() }  // used by model v1
+      scenario: { coldWinter: state.cold, acCredit: state.acCredit, rebatesOn, incomeUsd: incomeUsd(), lamIdx: lamIdx ?? dialIdx() }  // used by model v1
     };
   }
 
@@ -458,11 +459,12 @@
       b.setAttribute("aria-pressed", b.dataset.inc === state.income);
       b.onclick = () => { state.income = b.dataset.inc; save(); renderResults(); };
     });
-    $("incSeg").hidden = $("incL").hidden = false;
-    const incAmt = INCOME_USD[state.income];
+    $("incBox").hidden = r.id !== "minneapolis";
+    const incAmt = incomeUsd();
     $("incLede").textContent = !state.rebatesOn ? "Turn rebates on to count an income-based rebate."
-      : incAmt ? `Households in this range can qualify for up to ${money(incAmt)} more, counted above. Your income as a share of your area's median.`
-      : "Pick your range to count an income-based rebate, worth up to $8,000.";
+      : incAmt === 8000 ? "Income at or under 80% of area median: the full $8,000 rebate, counted above."
+      : incAmt === 4000 ? "Income between 80% and 150% of area median: half the rebate, $4,000, counted above."
+      : "Income over 150% of area median: no income-based rebate.";
     const row = (k, a, b, d, on) => `<tr class="${on ? "on" : ""}"><td>${k}</td><td>${a}</td><td>${b}</td><td class="diff">${d}</td></tr>`;
     const dlt = (x, y, fmt) => { const v = x - y; return v === 0 ? "—" : fmt(v); };
     $("rebCmp").innerHTML = [

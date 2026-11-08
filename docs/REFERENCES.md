@@ -44,17 +44,11 @@ The dashboard shows no citation markers. This file is the reference list for the
 
 - "two to three times as efficient as ordinary electric heat": source 1
 
-## Income-based rebate tiers (results page toggle)
+## Income-based rebate (results page toggle, Minneapolis only)
 
-The "Income-based rebate" toggle adds a tier amount on top of the utility rebate, capped at the installed cost:
+Rule set by Gavin (2026-11-08): income at or under 80% of area median income (AMI) gets the full $8,000; 80% to 150% gets half, $4,000; over 150% gets none. The amount is added to the utility rebate and capped at the installed cost. It matches `apply_rebate.py` and the "up to $8,000 under 80% AMI" line in `ui/rebates.js` and `data/raw/rebates/mn_rebates_2026.md` (homeenergybasics.com/heat-pumps/states/mn).
 
-| Household income (share of area median income) | Amount counted | Where it comes from |
-|---|---|---|
-| Over 150% | $0 | no income-based rebate |
-| 80% to 150% | up to $4,000 | `apply_rebate.py` ("partial"). **No source cited in the repo.** |
-| Under 80% | up to $8,000 | `apply_rebate.py` ("full"); also `ui/rebates.js` and `data/raw/rebates/mn_rebates_2026.md` (homeenergybasics.com/heat-pumps/states/mn: "up to $8,000 for households under 80% of AMI") |
-
-Flags to resolve before relying on these:
-- The $4,000 tier for 80% to 150% AMI is uncited. As we understand the federal HEAR (home electrification and appliance rebates) design, the middle tier pays a share of the cost (not a flat $4,000) up to the same $8,000 heat pump cap. We have not verified this against the DOE or state program pages; please confirm.
-- `ui/rebates.js` lists the Minnesota HEAR program as "Check status" (not launched in the team's sources). The toggle counts it as if open; the price shown is therefore best case for qualifying households.
-- Income limits are set by area median income for your county and household size, which the dashboard does not look up.
+Flags:
+- The half-rebate ($4,000) tier is not cited anywhere in the repo.
+- The Minnesota income-based program is listed as not launched in the team's sources.
+- The dashboard does not look up county AMI; the household picks its own range.

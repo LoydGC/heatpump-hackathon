@@ -117,6 +117,7 @@ button,select,input{font:inherit;color:inherit}
 .f.full{grid-column:1/-1}
 .seg{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--panel)}
 .seg button{flex:1;border:0;background:none;padding:8px 4px;cursor:pointer;font-weight:600;font-size:14px}
+.seg button small{font-weight:500;font-size:12px}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--panel);border-radius:999px}
 .src{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
 .src.yours{color:var(--accent)}
@@ -472,9 +473,9 @@ details.fold .fs{font-size:13px}
         <div><p class="wl">Rebates</p>
           <div class="seg" role="group" aria-label="Rebates on or off" id="rebSeg"><button data-reb="1">With rebates</button><button data-reb="0">Without rebates</button></div>
           <p class="muted wn" id="rebLede"></p>
-          <p class="wl" style="margin-top:14px" id="incL">Income-based rebate: your income vs. area median</p>
-          <div class="seg seg3" role="group" aria-labelledby="incL" id="incSeg"><button data-inc="none">Over 150%</button><button data-inc="partial">80–150%</button><button data-inc="full">Under 80%</button></div>
-          <p class="muted wn" id="incLede"></p></div>
+          <div id="incBox"><p class="wl" style="margin-top:14px" id="incL">Income-based rebate: your household income vs. area median</p>
+          <div class="seg seg3" role="group" aria-labelledby="incL" id="incSeg"><button data-inc="full">80% or less<br><small>$8,000</small></button><button data-inc="partial">80–150%<br><small>$4,000</small></button><button data-inc="none">Over 150%<br><small>None</small></button></div>
+          <p class="muted wn" id="incLede"></p></div></div>
       </div>
       <details class="more" id="v1Opts" hidden>
         <summary>More scenarios (from the model)</summary>
