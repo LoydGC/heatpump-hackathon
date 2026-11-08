@@ -350,7 +350,7 @@
       marker: out.paybackYears != null && out.paybackYears <= life ? { index: out.paybackYears, text: "Break even" } : null,
       fmt: (v, tip) => tip ? money(v) : "$" + kFmt(v)
     });
-    $("cumSub").textContent = `Upfront costs plus heating bills, year by year (years on the bottom)`;
+    $("cumSub").textContent = `Upfront costs plus bills, by year`;
     HPCharts.lineChart($("chBill"), {
       labels: MON, ariaLabel: "Monthly heating bill",
       series: [{ name: "Today", color: cNow, values: out.monthly.map(m => m.today.costUsd) }, { name: "Heat pump", color: cHp, values: out.monthly.map(m => m.heatPump.costUsd) }],
