@@ -42,10 +42,10 @@
       designTempF: -9,        // ASHRAE 99.6% heating design: −23.0 °C (data.zip .ddy)
       monthlyMeanF: [17.3, 21.8, 33.5, 45.5, 60.7, 71.6, 75.4, 72.4, 65.4, 51.3, 36.8, 23.4], // TMYx 2011–2025
       monthlySdF:   [12.7, 11.9, 11.8, 14.1, 11.4, 8.7, 7.1, 7.0, 10.7, 12.6, 9.3, 10.8],
-      electricityUsdPerKWh: 0.1644,      // EIA, MN residential 2026 YTD
+      electricityUsdPerKWh: 0.12,        // model.ipynb price_per_kWh_electric default (was EIA MN 2026 YTD $0.1644)
       gridKgCo2PerKWh: 0.435,            // MISO 2025 hourly average (team calc)
       gridNote: "a grid that is about one-third coal and one-third wind",
-      fuelPrices: { gas: 1.03, oil: 4.00, propane: 2.50, electric: 0.1644, wood: 300, kerosene: 4.30 }, // gas: EIA winter avg $10.65/Mcf; others placeholder
+      fuelPrices: { gas: 1.20, oil: 4.00, propane: 2.50, electric: 0.12, wood: 300, kerosene: 4.30 }, // gas and electric: model.ipynb defaults ($1.20/therm, $0.12/kWh); others placeholder
       rebatesUsd: 2000,                  // Xcel cold-climate ducted rebate; +$1,100 CenterPoint if gas furnace kept
       rebateIfGasBackupUsd: 1100,
       typicalHome: { floorAreaSqft: 2000, envelope: "tight", currentHeat: "gas", thermostatF: 68,
