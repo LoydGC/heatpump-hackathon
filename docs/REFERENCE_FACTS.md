@@ -38,7 +38,7 @@ Not in ResStock, so not guaranteed: thermostat setting (68 °F), electricity and
 The Minneapolis results use model v1's fixed house, so this typical home does not change those numbers.
 
 ### R-03 · Size bins offered in the UI
-Seven bins: 500–749, 750–999, 1000–1499, 1500–1999, 2000–2499, 2500–2999, 3000–3999 sq ft. A bin with no ResStock homes in a city is hidden for that city and type. If a choice becomes unavailable, the nearest available bin is used.
+Seven bins: 500–749, 750–999, 1000–1499, 1500–1999, 2000–2499, 2500–2999, 3000–3999 sq ft. The top bin is displayed as "3000+" on the page; the data behind it is still capped at 3999. A bin with no ResStock homes in a city is hidden for that city and type. If a choice becomes unavailable, the nearest available bin is used.
 
 ### R-04 · Home types offered in the UI
 Single-family detached and single-family attached. Mobile homes and multi-family are not offered.

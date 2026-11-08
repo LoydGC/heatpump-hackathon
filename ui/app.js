@@ -69,7 +69,8 @@
   const BIN_EDGES = { fine: [750, 1000, 1500, 2000, 2500, 3000], coarse: [1500, 2500] };
   const binList = lvl => RS[lvl];
   const binFor = (lvl, sqft) => binList(lvl)[BIN_EDGES[lvl].filter(e => sqft >= e).length];
-  const binLabel = b => b.endsWith("+") ? b.slice(0, -1) + "+" : b.replace("-", "–");
+  // Display only: the top bin (3000-3999 in the data) is shown as "3000+" (Gavin 2026-11-08); the data is still capped at 3999.
+  const binLabel = b => b === "3000-3999" ? "3000+" : b.endsWith("+") ? b.slice(0, -1) + "+" : b.replace("-", "–");
   const cellOf = (r, type, lvl, bin) => (RS.cells[r.id] || {})[`${type}|${lvl}|${bin}`] || null;
   const hasRS = r => !!RS.cells[r.id];
   function selection(r, ov) {
