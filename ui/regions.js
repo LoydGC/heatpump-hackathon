@@ -102,9 +102,7 @@
         { k: "In your climate", h: "Most winter hours suit a heat pump", tag: "data", src: [7, 3],
           p: "In the team's typical-year weather file, about 90% of the heat a home needs falls on hours at or above 5 °F, and about 73% at or above 17 °F. Those are the temperatures where cold-climate units publish their ratings." },
         { k: "Big savings from replacing", h: "Electric heat or propane", tag: "research", src: [2, 1],
-          p: "A Minnesota field study of cold-climate heat pumps found about 55% energy-cost savings against electric resistance heat and about 40% against propane. Its guidance: size the unit to carry the whole home down to about 10 °F, and use backup below that." },
-        { k: "It may not be a good fit if you heat with", h: "Natural gas", tag: "reasoning", src: [7],
-          p: "Natural gas is cheap here: electricity costs about 4.5 times as much as gas per unit of heat. A heat pump delivering 2 to 3 units of heat per unit of electricity would likely raise the bill. It can still cut carbon, because the grid break-even is around 2.3 units. This is our own arithmetic from the team's price and emissions data; the Minnesota studies covered homes without gas, so we found no field result for gas-heated homes." }
+          p: "A Minnesota field study of cold-climate heat pumps found about 55% energy-cost savings against electric resistance heat and about 40% against propane. Its guidance: size the unit to carry the whole home down to about 10 °F, and use backup below that." }
       ],
       notes: [
         { tag: "data", text: "The typical-year file's coldest hour is −12 °F with no hours below −13 °F. The older, colder TMY3 file has 32 hours below −13 °F and a low of −24 °F, so a cold winter is harder on a heat pump than a typical one.", src: [7] },
@@ -120,9 +118,7 @@
         { k: "In your climate", h: "Cold nights are within what heat pumps handle", tag: "reasoning", src: [8, 3, 2],
           p: "Boston's coldest nights are around 8 °F. Cold-climate heat pumps are rated down to 5 °F and keep working well below that." },
         { k: "Big savings from replacing", h: "Electric resistance heat", tag: "research", src: [4, 5],
-          p: "A Massachusetts cost study found heat pumps about three times as efficient as electric resistance heat, with a payback near four years even without incentives. A Harvard study put the yearly savings for a typical electric-heated home at up to $2,900." },
-        { k: "It may not be a good fit if you heat with", h: "Natural gas or oil", tag: "research", src: [5, 4],
-          p: "The Harvard study found switching from natural gas typically raises yearly bills by about $300 to $500. For oil, bills fall only modestly, and the Synapse study put payback past 25 years without incentives. Rebates, cooling savings and a lower-priced electricity plan can change that." }
+          p: "A Massachusetts cost study found heat pumps about three times as efficient as electric resistance heat, with a payback near four years even without incentives. A Harvard study put the yearly savings for a typical electric-heated home at up to $2,900." }
       ],
       notes: [
         { tag: "gap", text: "Boston hourly weather has not been added yet, so the number of hours below 5 °F is not computed.", src: [] },
