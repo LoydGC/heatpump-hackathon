@@ -197,7 +197,7 @@
   const pct = v => Math.round(v * 100) + "%";
   const TAGS = { research: "Research", data: "Team data", reasoning: "Our reasoning", gap: "Not researched" };
   const tagHtml = t => `<span class="tag tag-${t}">${TAGS[t]}</span>`;
-  const cite = ids => ids && ids.length ? ids.map(n => `<sup><a href="#src-${n}" class="cite">${n}</a></sup>`).join("") : "";
+  const cite = ids => ids && ids.length ? ids.filter(n => SOURCES[n] && SOURCES[n].u).map(n => `<sup><a href="${SOURCES[n].u}" target="_blank" rel="noopener" class="cite" title="${SOURCES[n].t.replace(/"/g, "&quot;")}">${n}</a></sup>`).join("") : "";
   function renderClimate() {
     const r = region(); if (!r) return;
     const c = r.climate;
@@ -208,7 +208,6 @@
     const icons = ["sun", "leaf", "snow"];
     $("cFacts").innerHTML = c.cards.map((f, i) => `<div class="fact ${i === 2 ? "less" : ""}"><div class="ico">${ico[icons[i]]}</div><p class="muted" style="font-size:13px;font-weight:600">${f.k}</p><h3>${f.h}</h3><p style="margin-top:6px">${f.p}${cite(f.src)}</p><p style="margin-top:8px">${tagHtml(f.tag)}</p></div>`).join("");
     $("cTypes").innerHTML = CLIMATE_TYPES.map(t => `<div class="ctype ${t.id === c.type ? "here" : ""}"><h3>${t.name}${t.id === c.type ? ' <span class="tag yours">Like yours</span>' : ""}</h3><p style="margin-top:6px;font-size:14px">${t.text}${cite(t.src)}</p></div>`).join("");
-    $("cSources").innerHTML = Object.entries(SOURCES).map(([n, s]) => `<li id="src-${n}" value="${n}">${s.u ? `<a href="${s.u}" target="_blank" rel="noopener">${s.t}</a>` : s.t}</li>`).join("");
   }
   $("toHome").addEventListener("click", () => { unlock(2); go(2); });
 

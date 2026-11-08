@@ -276,3 +276,5 @@ _D-021 update (2026-11-08):_ Gavin: the "Size groups" toggle (9 or 4 sizes) is r
 _D-021 update (2026-11-08):_ Gavin: for visual purposes the top size bin is labelled "3000+" instead of "3000–3999". Display only: the data and statistics still use ResStock homes of 3000–3999 sq ft.
 
 _D-005 update (2026-11-08):_ Gavin: keep only the green "lichen" theme. The theme switcher, the sand, sage and paper themes, the `?theme=` option and their extra fonts are removed.
+
+_D-020 update (2026-11-08):_ Gavin: no citation list. Each numbered citation on the climate page is now a direct link (new tab) to its source; citations whose source has no URL (team data) show no marker. The Sources section and its tag legend are removed. Source data stays in `ui/regions.js` (`SOURCES`).
