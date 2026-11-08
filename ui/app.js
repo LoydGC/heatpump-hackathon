@@ -302,7 +302,7 @@
     } else {
       $("rReco").textContent = `A ${out.sizeTons}-ton cold-climate heat pump`;
     }
-    renderDial(out);
+    renderDial(out); renderTradeoff(out);
     if (!v1) $("rSizes").innerHTML = out.sizes.map(s => `<button data-size="${s.sizeTons}" aria-pressed="${s.sizeTons === out.sizeTons}">${s.sizeTons} t${s.sizeTons === out.recommendedSizeTons ? '<span class="star" aria-label="suggested">★</span>' : ""}</button>`).join("");
     if (!v1) $("rSizes").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { state.sizeTons = +b.dataset.size; save(); renderResults(); }));
 
@@ -407,6 +407,28 @@
     $("dialVal").textContent = dialSetText(+e.target.value);   // instant label; results follow
     renderResults();
   });
+  // Cost-versus-carbon trade-off: one dot per option the model considered (v1: one per dial setting; stand-in: one per size).
+  function renderTradeoff(out) {
+    const life = out.lifetimeYears, t = v => Math.round(v).toLocaleString();
+    let pts = [];
+    if (out.v1) {
+      const seen = new Set();
+      V1.sweep(out.v1.scenario).forEach(r => {
+        const cur = r.lamIdx === out.v1.lamIdx, k = `${r.sizeKbtuh}|${Math.round(r.lifetimeCostUsd)}|${Math.round(r.lifetimeCo2T)}`;
+        if (seen.has(k) && !cur) return; seen.add(k);
+        const name = r.sizeKbtuh ? `${r.sizeKbtuh / 12}-ton heat pump` : "Keep the furnace";
+        pts.push({ x: r.lifetimeCo2T, y: r.lifetimeCostUsd, current: cur, label: cur ? name : `${name}: ${dollars(r.lifetimeCostUsd)}, ${t(r.lifetimeCo2T)} t CO₂` });
+      });
+    } else {
+      pts.push({ x: out.lifetime.todayCo2Kg / 1000, y: out.lifetime.todayCostUsd, label: "Keep today's heat" });
+      out.sizes.forEach(s => { const cur = s.sizeTons === out.sizeTons, name = `${s.sizeTons}-ton heat pump`;
+        pts.push({ x: s.lifetimeCo2Kg / 1000, y: s.lifetimeCostUsd, current: cur, label: cur ? name : `${name}: ${dollars(s.lifetimeCostUsd)}, ${t(s.lifetimeCo2Kg / 1000)} t CO₂` }); });
+    }
+    $("trCard").hidden = pts.length < 2;
+    if (pts.length < 2) return;
+    HPCharts.tradeoffChart($("chTrade"), { points: pts, ariaLabel: `Lifetime cost versus lifetime CO2 over ${life} years for each option`,
+      xFmt: v => t(v), yFmt: v => "$" + kFmt(v), xTitle: `CO₂ over ${life} years (tonnes)`, yTitle: `Cost over ${life} years` });
+  }
   function renderDial(out) {
     const v1 = out.v1, idx = v1 ? v1.lamIdx : dialIdx();
     $("dial").value = idx; $("dialVal").textContent = dialSetText(idx);
