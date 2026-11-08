@@ -240,7 +240,7 @@ Anyone (teammate or Claude thread) who makes a decision that affects the repo, t
 
 ### D-023 · 2026-11-08 · No references to the repo or "data pack" in user-facing text
 - **Workstream:** UI
-- **Decision:** Visible copy never mentions the repo, data.zip or a "data pack"; say "the team's data" instead. The Boston "Carrying the whole winter" card is now "Handling the cold": it is now two short plain sentences (coldest nights about 8 °F; units rated to 5 °F and work below), with no comparison to other cities, and drops the line that said Boston hourly weather isn't in the repo. The gap is kept as a neutral "Not researched" note.
+- **Decision:** Visible copy never mentions the repo, data.zip or a "data pack"; say "the team's data" instead. The Boston "Carrying the whole winter" card is now "Handling the cold": it is now two short plain sentences (coldest nights about 8 °F; units rated to 5 °F and work below), with no comparison to other cities, and drops the line that said Boston hourly weather isn't in the repo. The "Not researched" notes block on the climate page is removed (Gavin, 2026-11-08); regions.js still holds the notes data.
 - **Why:** Gavin: a card that points at a repo is worrying to read.
 - **Decided by:** Gavin.
 - **Refs:** `ui/regions.js`, `ui/app.js`, `ui/rebates.js`, `index.html`.

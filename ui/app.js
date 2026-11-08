@@ -220,7 +220,6 @@
     const icons = ["sun", "leaf", "snow"];
     $("cFacts").innerHTML = c.cards.map((f, i) => `<div class="fact ${i === 2 ? "less" : ""}"><div class="ico">${ico[icons[i]]}</div><p class="muted" style="font-size:13px;font-weight:600">${f.k}</p><h3>${f.h}</h3><p style="margin-top:6px">${f.p}${cite(f.src)}</p><p style="margin-top:8px">${tagHtml(f.tag)}</p></div>`).join("");
     $("cTypes").innerHTML = CLIMATE_TYPES.map(t => `<div class="ctype ${t.id === c.type ? "here" : ""}"><h3>${t.name}${t.id === c.type ? ' <span class="tag yours">Like yours</span>' : ""}</h3><p style="margin-top:6px;font-size:14px">${t.text}${cite(t.src)}</p></div>`).join("");
-    $("cNotes").innerHTML = c.notes.map(n => `<li>${tagHtml(n.tag)} ${n.text}${cite(n.src)}</li>`).join("");
     $("cSources").innerHTML = Object.entries(SOURCES).map(([n, s]) => `<li id="src-${n}" value="${n}">${s.u ? `<a href="${s.u}" target="_blank" rel="noopener">${s.t}</a>` : s.t}</li>`).join("");
   }
   $("toHome").addEventListener("click", () => { unlock(2); go(2); });
