@@ -19,7 +19,7 @@
   // A saved or tampered state can't unlock pages: no region means step 1 only; never past the last page.
   state.maxStep = Math.max(0, Math.min(+state.maxStep || 0, 4));
   if (!state.regionId) state.maxStep = 0;
-  delete state.overrides.homeType; delete state.overrides.envelope;  // home type and heat-holding inputs were removed from the page
+  delete state.overrides.homeType; delete state.overrides.envelope; delete state.overrides.timeOfUse;  // home type and heat-holding inputs were removed from the page
   if (!INCOME_USD.hasOwnProperty(state.income)) state.income = "none";
   state.sizeTons = null;                // no size picker any more; the suggestion follows the dial
   const save = () => { try { sessionStorage.setItem("hp-wizard", JSON.stringify(state)); } catch (e) {} };
@@ -240,7 +240,6 @@
   });
   // Home type + size dropdowns (ResStock options)
   $("sbin").addEventListener("change", e => setOverride("sizeBin", e.target.value));
-  $("tou").addEventListener("change", e => setOverride("timeOfUse", e.target.checked));
 
   function renderHome(skipKey) {
     const r = region(); if (!r) return;
@@ -258,7 +257,6 @@
       (r.id === V1.regionId ? "Model v1 uses one fixed house, so home type and size don't change its numbers yet." : "Home type and size (500–3,999 sq ft) set the heat-loss estimate in the placeholder stand-in; the team's model isn't plugged in for this region.");
     $("fuelPriceL").textContent = h.currentHeat === "electric" ? "Fuel price (same as electricity)" : `${f.short[0].toUpperCase() + f.short.slice(1)} ($ per ${f.unit})`;
     $("fuelPrice").disabled = h.currentHeat === "electric";
-    $("tou").checked = !!h.timeOfUse;
     document.querySelectorAll("[data-src]").forEach(s => {
       const yours = s.dataset.src in state.overrides; s.textContent = yours ? "yours" : "typical"; s.classList.toggle("yours", yours);
     });
@@ -387,7 +385,6 @@
       b.onclick = () => { state.acCredit = b.dataset.ac === "1"; save(); renderResults(); }; });
 
 
-    await renderMeter(out);
     await renderRebates(out);
   }
 
@@ -436,27 +433,6 @@
   }
   // The model data loads asynchronously; refresh results once it is there.
   V1.ready.then(ok => { if (ok && region()) { renderDial(); if (current === 3 || current === 4) renderResults(); } });
-
-  // ---------- Smart meter comparison: heat pump vs heat pump + smart meter ----------
-  async function renderMeter(out) {
-    const run = tou => runModel(modelInputs(out.sizeTons, state.rebatesOn, tou));
-    const [no, yes] = await Promise.all([run(false), run(true)]);
-    const had = !!effective().timeOfUse;
-    const meterSave = no.annual.heatPump.costUsd - yes.annual.heatPump.costUsd;
-    $("meterLede").textContent = had ? "Counting your smart meter." : `Adding one could trim about ${money(meterSave)} a year (placeholder estimate).`;
-    $("meterSeg").querySelectorAll("button").forEach(b => {
-      b.setAttribute("aria-pressed", (b.dataset.meter === "1") === had);
-      b.onclick = () => { setOverride("timeOfUse", b.dataset.meter === "1"); renderResults(); };
-    });
-    const d = (a, b) => { const v = a - b; return v === 0 ? "—" : (v > 0 ? "−" : "+") + money(Math.abs(v)); };
-    const row = (k, a, b, c) => `<tr><td>${k}</td><td>${a}</td><td>${b}</td><td class="diff">${c}</td></tr>`;
-    $("meterCmp").innerHTML = [
-      row("Yearly heating bill", money(no.annual.heatPump.costUsd), money(yes.annual.heatPump.costUsd), d(no.annual.heatPump.costUsd, yes.annual.heatPump.costUsd)),
-      row("Break-even", paybackTxt(no), paybackTxt(yes),
-          no.paybackYears != null && yes.paybackYears != null ? (yes.paybackYears - no.paybackYears < 0 ? "−" : "+") + Math.abs(yes.paybackYears - no.paybackYears).toFixed(1) + " years" : "—"),
-      row(`Total cost over ${out.lifetimeYears} years`, money(no.lifetime.costUsd), money(yes.lifetime.costUsd), d(no.lifetime.costUsd, yes.lifetime.costUsd))
-    ].join("");
-  }
 
   // ---------- Rebates section ----------
   const RB = window.HP_REBATES;
@@ -539,7 +515,6 @@
       ["How well it holds heat", ENVELOPES[h.envelope].label, "envelope"],
       ["Current heating", f.label, "currentHeat"],
       ["Winter thermostat", `${h.thermostatF} °F`, "thermostatF"],
-      ["Smart meter / time-of-use rate", h.timeOfUse ? "Yes (assumed 10% cheaper electricity)" : "No", "timeOfUse"],
       ["Heat loss (our estimate)", `${h.heatLossWPerF} W per °F`, "heatLossWPerF"],
       ["Electricity price", `$${h.electricityUsdPerKWh.toFixed(3)} per kWh`, "electricityUsdPerKWh"],
       ...(h.currentHeat === "electric" ? [] : [[`${f.short[0].toUpperCase() + f.short.slice(1)} price`, `$${h.fuelUsdPerUnit.toFixed(2)} per ${f.unit}`, "fuelUsdPerUnit"]]),

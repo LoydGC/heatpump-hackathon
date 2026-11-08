@@ -78,3 +78,4 @@ To filter by workstream: search the page for `| UI |`, `| Model |`, `| Data |` o
 | 2026-11-08 | repo | UI | Added income-based rebate toggle (apply_rebate.py tiers); model-v1 accepts incomeUsd | Claude, for Gavin | this push | D-029 |
 | 2026-11-08 | repo | UI | Removed home type dropdown and heat-holding input from the home page | Claude, for Gavin | this push | D-030 |
 | 2026-11-08 | repo | UI | Removed ResStock reference box from the home page | Claude, for Gavin | this push | D-031 |
+| 2026-11-08 | repo | UI | Removed smart meter inputs, toggle, table and report row | Claude, for Gavin | this push | D-032 |

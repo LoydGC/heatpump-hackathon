@@ -401,9 +401,6 @@ details.fold .fs{font-size:13px}
           <div class="f full"><p class="hint muted" id="binNote"></p></div>
           <div class="f"><label for="heat">Heating today <span class="src" data-src="currentHeat"></span></label><select id="heat"></select></div>
           <div class="f"><label for="tstat">Thermostat in winter (°F) <span class="src" data-src="thermostatF"></span></label><input id="tstat" type="number" min="55" max="78" step="1"></div>
-          <div class="f full"><span class="lbl">Smart meter <span class="src" data-src="timeOfUse"></span></span>
-            <label class="check"><input type="checkbox" id="tou"> I already have a smart meter (time-of-use rate)</label>
-            <p class="hint muted">Leave it off to see what adding one would do; the results page compares heat pump with and without a smart meter. Placeholder: 10% cheaper electricity.</p></div>
         </div>
 
         <details class="more">
@@ -479,9 +476,6 @@ details.fold .fs{font-size:13px}
           <p class="wl" style="margin-top:14px" id="incL">Income-based rebate: your income vs. area median</p>
           <div class="seg seg3" role="group" aria-labelledby="incL" id="incSeg"><button data-inc="none">Over 150%</button><button data-inc="partial">80–150%</button><button data-inc="full">Under 80%</button></div>
           <p class="muted wn" id="incLede"></p></div>
-        <div><p class="wl">Smart meter</p>
-          <div class="seg" role="group" aria-label="Smart meter on or off" id="meterSeg"><button data-meter="0">Heat pump only</button><button data-meter="1">Heat pump + smart meter</button></div>
-          <p class="muted wn" id="meterLede"></p></div>
       </div>
       <details class="more" id="v1Opts" hidden>
         <summary>More scenarios (from the model)</summary>
@@ -526,13 +520,10 @@ details.fold .fs{font-size:13px}
       </div>
     </details>
     <details class="fold">
-      <summary><span class="fh">How rebates and a smart meter change the numbers</span><span class="muted fs">side-by-side tables</span></summary>
+      <summary><span class="fh">How rebates change the numbers</span><span class="muted fs">side-by-side tables</span></summary>
       <div class="fold-body">
       <div class="card" style="padding:12px 16px"><div class="table-scroll"><table class="cmp"><thead><tr><th></th><th>Without rebates</th><th>With rebates</th><th>Rebates change</th></tr></thead><tbody id="rebCmp"></tbody></table></div></div>
       <p class="muted" id="rebCmpNote" style="font-size:14px;margin-top:10px;max-width:70ch"></p>
-      <h3 style="margin:18px 0 8px;font-size:17px">Smart meter</h3>
-      <div class="card" style="padding:12px 16px"><div class="table-scroll"><table class="cmp"><thead><tr><th></th><th>Heat pump</th><th>Heat pump + smart meter</th><th>Meter adds</th></tr></thead><tbody id="meterCmp"></tbody></table></div></div>
-      <p class="muted" style="font-size:14px;margin-top:10px;max-width:70ch">Placeholder: we assume a smart meter on a time-of-use plan makes electricity 10% cheaper on average, and cost nothing to add. Real utility rate plans and meter costs still need to be worked out.</p>
       </div>
     </details>
     <details class="fold">

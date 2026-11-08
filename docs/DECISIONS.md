@@ -308,3 +308,5 @@ _D-029 (2026-11-08):_ Gavin: add a rebate toggle specific to income. Results pag
 _D-030 (2026-11-08):_ Gavin: remove the home type dropdown and the "how well does it hold heat" input from the home page. Home type is always single-family detached internally; draftiness stays whatever the typical home uses (Boston: from ResStock) and still sets heat loss. Saved overrides for both are dropped on load. The printable report still lists the heat-holding row.
 
 _D-031 (2026-11-08):_ Gavin: delete the "ResStock reference, not our model" box on page 3. Removed from the home page (Tell us about your home). The same reference banner at the top of the results page is unchanged.
+
+_D-032 (2026-11-08):_ Gavin: remove the smart meter stuff. Removed the smart meter checkbox (home page), the "Smart meter" toggle in the What if card, the smart meter comparison table and the report row. Fold renamed "How rebates change the numbers". Model runs use the flat tariff only; saved smart meter overrides are dropped.
