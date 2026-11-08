@@ -256,8 +256,6 @@
     delete state.overrides.heatLossWPerF; state.sizeTons = null; renderHome(); save();
   }));
   $("tou").addEventListener("change", e => setOverride("timeOfUse", e.target.checked));
-  const prioText = v => v < 20 ? "We'll favor the lowest total cost." : v > 80 ? "We'll favor the lowest carbon." : v < 45 ? "Leaning toward lower cost." : v > 55 ? "Leaning toward lower carbon." : "A balance of cost and carbon.";
-  $("prio").addEventListener("input", e => { state.priority = +e.target.value / 100; state.prioSet = true; state.sizeTons = null; $("prioText").textContent = prioText(+e.target.value); save(); });
 
   function renderHome(skipKey) {
     const r = region(); if (!r) return;
@@ -286,7 +284,6 @@
     $("fuelPrice").disabled = h.currentHeat === "electric";
     $("tou").checked = !!h.timeOfUse;
     document.querySelectorAll("#envSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.env === h.envelope));
-    $("prio").value = Math.round((state.prioSet ? state.priority : 0.5) * 100); $("prioText").textContent = prioText(+$("prio").value);
     document.querySelectorAll("[data-src]").forEach(s => {
       const yours = s.dataset.src in state.overrides; s.textContent = yours ? "yours" : "typical"; s.classList.toggle("yours", yours);
     });
