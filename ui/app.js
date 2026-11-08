@@ -34,6 +34,7 @@
   const V1 = window.HeatPumpModelV1;
   const DEFAULT_LAM_IDX = 8;                        // $300/t: the notebook's default carbon price (dollars_per_ton_co2)
   const DIAL_STEPS = 12;                            // 13 slider positions = the model's lambda grid
+  const carbonUsd = () => Number.isFinite(state.carbonUsd) ? state.carbonUsd : 300;   // $ per tonne CO2, Patrick's notebook default 300
   const dialIdx = () => state.prioSet ? Math.round(state.priority * DIAL_STEPS) : (isV1(region()) ? DEFAULT_LAM_IDX : DIAL_STEPS / 2);  // stand-in default = balanced
   const USE_V1 = false;   // Gavin 2026-11-08: Sharvi's v1 is early-stage and non-authoritative; where models conflict, Patrick's notebook model wins
   const NB = window.HeatPumpModelNB;   // Patrick's notebook model, used for Minneapolis
@@ -141,7 +142,7 @@
       costs: { installedUsdPerTon: h.installedUsdPerTon, rebatesUsd: 0, rebateType: rebatesOn ? state.income : "none", lifetimeYears: LIFETIME_YEARS },
       priority: state.prioSet ? state.priority : (isV1(r) ? DEFAULT_LAM_IDX / DIAL_STEPS : state.priority),
       sizeTons: sizeTons ?? null,
-      scenario: { coldWinter: state.cold, acCredit: state.acCredit, rebatesOn, incomeUsd: incomeUsd(), lamIdx: lamIdx ?? dialIdx() }  // used by model v1
+      scenario: { coldWinter: state.cold, acCredit: state.acCredit, rebatesOn, incomeUsd: incomeUsd(), lamIdx: lamIdx ?? dialIdx(), carbonUsd: carbonUsd() }  // used by model v1
     };
   }
 
@@ -350,7 +351,7 @@
     $("mTable").innerHTML = out.monthly.map((m, i) => `<tr><td>${MON[i]}</td><td>${money(m.today.costUsd)}</td><td>${money(m.heatPump.costUsd)}</td><td>${Math.round(m.today.co2Kg).toLocaleString()} kg</td><td>${Math.round(m.heatPump.co2Kg).toLocaleString()} kg</td></tr>`).join("");
 
     // Size trade-off (placeholder regions) or the dial sweep (model v1)
-    const isSweep = !!out.v1;
+    const isSweep = !!out.sweep;
     $("sizeCharts").hidden = isSweep; $("lamTable").hidden = !isSweep;
     $("sizeFoldH").textContent = "Other sizes and settings";
     $("sizeFoldS").textContent = isSweep ? "what the model suggests at every dial setting" : "how bigger and smaller units compare";
@@ -385,19 +386,28 @@
   const sizeLabel = k => k ? `${k / 12}-ton hybrid heat pump` : "Keep the gas furnace";
   const dollars = v => "$" + Math.round(v).toLocaleString();
   function dialSetText(idx) {
-    if (isV1(region())) return `${dollars(NB.lambdas[idx])} per tonne of CO₂`;
+    if (isV1(region())) return `${dollars(carbonUsd())} per tonne of CO₂`;
     return idx === 0 ? "Lowest total cost" : idx === DIAL_STEPS ? "Lowest carbon" : idx < DIAL_STEPS / 2 ? "Leaning toward lower cost" : idx > DIAL_STEPS / 2 ? "Leaning toward lower carbon" : "A balance of cost and carbon";
   }
-  $("dial").addEventListener("input", e => {
-    state.priority = +e.target.value / DIAL_STEPS; state.prioSet = true; state.sizeTons = null; save();
-    $("dialVal").textContent = dialSetText(+e.target.value);
+  ["dial", "dial2"].forEach(id => $(id).addEventListener("input", e => {
+    if (isV1(region())) state.carbonUsd = +e.target.value;
+    else { state.priority = +e.target.value / DIAL_STEPS; state.prioSet = true; }
+    state.sizeTons = null; save(); renderDial();
     if (current === 3) renderResults();
-  });
+  }));
   // Cost-versus-carbon trade-off: one dot per option the model considered (v1: one per dial setting; stand-in: one per size).
   function renderTradeoff(out) {
     const life = out.lifetimeYears, t = v => Math.round(v).toLocaleString();
     let pts = [];
-    if (out.v1) {
+    if (out.sweep) {
+      const seen = new Set();
+      out.sweep.forEach(r => {
+        const cur = r.lam === out.nb.carbonUsdPerTonne, k = `${r.sizeTons}|${Math.round(r.lifetimeCostUsd)}|${Math.round(r.lifetimeCo2T)}`;
+        if (seen.has(k) && !cur) return; seen.add(k);
+        const name = r.sizeTons ? `${r.sizeTons}-ton heat pump` : "Keep the furnace";
+        pts.push({ x: r.lifetimeCo2T, y: r.lifetimeCostUsd, current: cur, label: cur ? name : `${name} at ${dollars(r.lam)}/t: ${dollars(r.lifetimeCostUsd)}, ${t(r.lifetimeCo2T)} t CO₂` });
+      });
+    } else if (out.v1) {
       const seen = new Set();
       V1.sweep(out.v1.scenario).forEach(r => {
         const cur = r.lamIdx === out.v1.lamIdx, k = `${r.sizeKbtuh}|${Math.round(r.lifetimeCostUsd)}|${Math.round(r.lifetimeCo2T)}`;
@@ -415,15 +425,20 @@
     HPCharts.tradeoffChart($("chTrade"), { points: pts, ariaLabel: `Lifetime cost versus lifetime CO2 over ${life} years for each option`,
       xFmt: v => t(v), yFmt: v => "$" + kFmt(v), xTitle: `CO₂ over ${life} years (tonnes)`, yTitle: `Cost over ${life} years` });
   }
-  function renderDial() { const idx = dialIdx(); $("dial").value = idx; $("dialVal").textContent = dialSetText(idx); }
+  function renderDial() {
+    const nb = isV1(region());
+    ["dial", "dial2"].forEach(id => { const el = $(id); el.max = nb ? 1000 : DIAL_STEPS; el.step = nb ? 10 : 1; el.value = nb ? carbonUsd() : dialIdx(); });
+    ["dialVal", "dialVal2"].forEach(id => { $(id).textContent = dialSetText(nb ? 0 : dialIdx()); });
+    $("dial2Card").hidden = false;
+  }
   function renderLamTable(out) {
-    const rows = V1.sweep(out.v1.scenario);
+    const rows = out.sweep;
     $("lamTable").innerHTML = `<p class="muted" style="max-width:70ch;margin:-4px 0 12px">Each row is one setting of the dial, with what the model recommends there. Your current setting is highlighted. Costs are ${out.lifetimeYears}-year totals with the model's own rebate assumption.</p>
       <div class="table-scroll"><table class="lamtbl"><thead><tr><th>Dial ($ per tonne CO₂)</th><th>Model picks</th><th>${out.lifetimeYears}-yr cost</th><th>${out.lifetimeYears}-yr CO₂</th><th>$ per tonne avoided</th></tr></thead><tbody>${
-      rows.map(r => `<tr class="${r.lamIdx === out.v1.lamIdx ? "cur" : ""}"><td>${dollars(r.lam)}</td><td>${sizeLabel(r.sizeKbtuh)}</td><td>${dollars(r.lifetimeCostUsd)}</td><td>${r.lifetimeCo2T.toFixed(0)} t</td><td>${r.usdPerTonne != null ? dollars(r.usdPerTonne) : "—"}</td></tr>`).join("")}</tbody></table></div>`;
+      rows.map(r => `<tr class="${r.lam === out.nb.carbonUsdPerTonne ? "cur" : ""}"><td>${dollars(r.lam)}</td><td>${r.sizeTons ? r.sizeTons + "-ton hybrid heat pump" : "Keep the gas furnace"}</td><td>${dollars(r.lifetimeCostUsd)}</td><td>${r.lifetimeCo2T.toFixed(0)} t</td><td>${r.usdPerTonne != null ? dollars(r.usdPerTonne) : "—"}</td></tr>`).join("")}</tbody></table></div>`;
   }
   // The model data loads asynchronously; refresh results once it is there.
-  V1.ready.then(ok => { if (ok && region()) { renderDial(); if (current === 3 || current === 4) renderResults(); } });
+  
 
   // ---------- Rebates section ----------
   const RB = window.HP_REBATES;

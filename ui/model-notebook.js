@@ -75,15 +75,25 @@
   function run(inp) {
     if (inp.region.id !== "minneapolis") return Prev.run(inp);
     const home = pickHome(inp.home.floorAreaSqft), aux = auxPerBtu(inp);
-    const lamIdx = inp.scenario && Number.isInteger(inp.scenario.lamIdx) ? inp.scenario.lamIdx : 8, price = LAMBDAS[lamIdx];
+    const sc = inp.scenario || {}, price = Number.isFinite(sc.carbonUsd) ? sc.carbonUsd : LAMBDAS[Number.isInteger(sc.lamIdx) ? sc.lamIdx : 8];
     const { base, hp } = allSims(home, inp, aux), type = inp.costs.rebateType || "none";
-    const grand = s => s.usd + s.kg * price / 1000, baseGrand = grand(base);
-    const rows = D.profiles.map((p, i) => {
-      const s = hp[i], cap = capitalCost(p.nominalTons), reb = getRebate(cap, type), net = cap - reb, save = baseGrand - grand(s);
-      return { p, s, cap, reb, net, grandSave: save, opSave: base.usd - s.usd, grand: grand(s) };
+    const rowsAt = pr => {
+      const g = s => s.usd + s.kg * pr / 1000, bg = g(base);
+      return D.profiles.map((p, i) => {
+        const s = hp[i], cap = capitalCost(p.nominalTons), reb = getRebate(cap, type), net = cap - reb;
+        return { p, s, cap, reb, net, grandSave: bg - g(s), opSave: base.usd - s.usd, grand: g(s) };
+      });
+    };
+    const winnerOf = rs => { const w = rs.filter(r => r.p.nominalTons > 0 && r.grandSave > 0); return w.length ? w.reduce((b, r) => r.grand < b.grand ? r : b) : null; };
+    const baseGrand = base.usd + base.kg * price / 1000;
+    const rows = rowsAt(price), winner = winnerOf(rows);
+    // the dial sweep: what the notebook picks at each carbon price on the dial (plus the current one)
+    const sweep = LAMBDAS.concat(LAMBDAS.includes(price) ? [] : [price]).sort((a, b) => a - b).map(pr => {
+      const w = winnerOf(rowsAt(pr)), s2 = w ? w.s : base;
+      const lifeCost = (w ? w.net : 0) + LIFE * s2.usd, lifeCo2T = LIFE * s2.kg / 1000, baseLife = LIFE * base.usd, baseCo2T = LIFE * base.kg / 1000;
+      return { lam: pr, sizeTons: w ? r1(w.p.nominalTons) : 0, lifetimeCostUsd: lifeCost, lifetimeCo2T: lifeCo2T,
+               usdPerTonne: w && baseCo2T > lifeCo2T ? (lifeCost - baseLife) / (baseCo2T - lifeCo2T) : null };
     });
-    const winners = rows.filter(r => r.p.nominalTons > 0 && r.grandSave > 0);
-    const winner = winners.length ? winners.reduce((b, r) => r.grand < b.grand ? r : b) : null;
     let chosen = winner;
     if (inp.sizeTons) {   // an explicit size (e.g. the rebate comparison re-running the page's pick): best profile of that size
       const same = rows.filter(r => Math.abs(r.p.nominalTons - inp.sizeTons) < 0.05);
@@ -109,7 +119,8 @@
       lifetime: { costUsd: upfront.netUsd + life * s.usd, co2Kg: life * s.kg, todayCostUsd: life * base.usd, todayCo2Kg: life * base.kg },
       sizes: rows.map(r => ({ sizeTons: r1(r.p.nominalTons), lifetimeCostUsd: r.net + life * r.s.usd, lifetimeCo2Kg: life * r.s.kg, heatPumpShare: r.s.coverage,
                               paybackYears: r.opSave > 0 ? r.net / r.opSave : null, profile: r.p.id })),
-      nb: { carbonUsdPerTonne: price, lamIdx, rebateType: type, buildingId: home.buildingId, homeAreaSqft: home.areaSqft, profile: chosen ? chosen.p.id : null,
+      sweep,
+      nb: { carbonUsdPerTonne: price, rebateType: type, buildingId: home.buildingId, homeAreaSqft: home.areaSqft, profile: chosen ? chosen.p.id : null,
             brand: chosen ? chosen.p.brand : null, grandCostUsd: chosen ? chosen.grand : baseGrand, baselineGrandCostUsd: baseGrand },
       notes: [
         "Runs the team's model.ipynb: a real ResStock home's hourly heating load and real Minneapolis weather, matched to AHRI-listed cold-climate heat pumps.",
