@@ -308,7 +308,7 @@
       $("rReco").textContent = "Keep your gas furnace for now";
     } else if (out.nb && out.nb.winnerJson && out.nb.isWinner) {   // the notebook's winner.json row is the suggestion
       const W = out.nb.winnerJson;
-      $("rReco").textContent = `${out.nb.brand.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, c => c.toUpperCase())} ${W.machine_profile}: a ${W.nominal_tons.toFixed(2)}-ton (${Math.round(W.nominal_tons * 12)},000 BTU/h) cold-climate heat pump`;
+      $("rReco").textContent = `A ${W.nominal_tons.toFixed(2)}-ton (${Math.round(W.nominal_tons * 12)},000 BTU/h) cold-climate heat pump`;
     } else {
       $("rReco").textContent = `A ${out.sizeTons}-ton (${Math.round(out.sizeTons * 12)},000 BTU/h) cold-climate heat pump`;
     }
