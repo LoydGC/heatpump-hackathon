@@ -68,3 +68,4 @@ To filter by workstream: search the page for `| UI |`, `| Model |`, `| Data |` o
 | 2026-11-08 | repo | UI | Climate illustration: outdoor heat pump unit at half size, refrigerant lines re-attached | Claude, for Gavin | this push | |
 | 2026-11-08 | repo | UI | Removed the "may not be a good fit" climate card (Minneapolis, Boston); card grid now fits 2 or 3 cards | Claude, for Gavin | this push | D-024 |
 | 2026-11-08 | repo | UI | Shortened the four climate-type blurbs | Claude, for Gavin | this push | D-024 |
+| 2026-11-08 | repo | UI | Added "Cleaner heat / Even where gas is cheap" card (Minneapolis, Boston); R-07 in REFERENCE_FACTS | Claude, for Gavin | this push | D-024 |

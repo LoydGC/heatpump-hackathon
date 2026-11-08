@@ -126,6 +126,9 @@ Mean sq ft is the average size of ResStock homes in that bin; the UI uses it as 
 | 2500–2999 | 0 | – | – | – | – |
 | 3000–3999 | 1 | 3228 | 8,032 | 0 | 0 |
 
+### R-07 · Carbon break-even versus a gas furnace
+Gas furnace: 5.306 kg CO2 per therm, 95% efficient, 29.307 kWh per therm = 0.191 kg CO2 per kWh of heat. A heat pump beats it on carbon when units of heat per unit of electricity exceed grid kg/kWh divided by 0.191. Minneapolis (MISO 2025 average, 0.435 kg/kWh): about 2.3. Boston (0.24 kg/kWh, placeholder grid figure): about 1.3. Good units deliver 2 to 3 or more (CEE field study).
+
 ## Not guaranteed (placeholders)
 
 - Boston and Fairbanks prices, rebates, installed cost, monthly temperatures and grid carbon in `ui/regions.js`. Minneapolis prices come from the team's data.
