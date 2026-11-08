@@ -537,7 +537,7 @@
     $("report").innerHTML = `
       <header><p style="font-weight:700;color:#3E5A33">Heat pump request sheet · for your installer</p>
         <h1>${esc(r.full)}</h1>
-        <p>Prepared ${esc(date)} with the Heat Pump Guide (prototype). ${Object.keys(ov).length ? `${Object.keys(ov).length} detail${Object.keys(ov).length > 1 ? "s" : ""} entered by the homeowner; the rest are typical values for the area.` : "All home details are typical values for the area; the homeowner has not yet entered their own."}</p></header>
+        <p>Prepared ${esc(date)} with ResiOpt. ${Object.keys(ov).length ? `${Object.keys(ov).length} detail${Object.keys(ov).length > 1 ? "s" : ""} entered by the homeowner; the rest are typical values for the area.` : "All home details are typical values for the area; the homeowner has not yet entered their own."}</p></header>
 
       <div class="warn"><b>Next step: your installer.</b> Bring this report to a licensed installer, who will run the load calculation (ACCA Manual J) and system design to confirm the equipment.</div>
 

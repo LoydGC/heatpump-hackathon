@@ -326,3 +326,5 @@ _D-034 (2026-11-08):_ Gavin: remove "More scenarios from the model" and make the
 _D-034 update (2026-11-08):_ Bug: the income rebate total read $0 for every choice whenever the model suggested keeping the gas furnace (carbon dial toward lower cost), because there is no heat pump to take rebates off. The card now shows the rebates available (utility plus income tier) with a plain line explaining they apply once a heat pump is added.
 
 _D-034 update (2026-11-08):_ Gavin: remove the "$3,100 included for everyone" line; just have the income-based rebate. The Rebates card now shows only the income buttons and one line, "Income-based rebate: $X" with the resulting upfront cost. The card is Minneapolis-only. The standard utility rebate is still in the math and still appears in the "Upfront costs, after rebates" tile; it is just no longer shown or toggled in this card.
+
+_D-035 (2026-11-08):_ Gavin: the header brand reads "ResiOpt" instead of "Heat Pump Guide", keeping the drop icon. Also the page title and the printable report footer.
