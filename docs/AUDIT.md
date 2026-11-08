@@ -64,3 +64,4 @@ To filter by workstream: search the page for `| UI |`, `| Model |`, `| Data |` o
 | 2026-11-08 | repo | UI | Climate citations now link directly to sources; Sources list removed | Claude, for Gavin | this push | D-020 |
 | 2026-11-08 | repo | UI | Results page: removed subtitle, placeholder/model banner and notes list | Claude, for Gavin | this push | D-018 |
 | 2026-11-08 | repo | UI | Added cost-versus-carbon trade-off chart to results page (`ui/charts.js` tradeoffChart) | Claude, for Gavin | this push | D-018 |
+| 2026-11-08 | repo | UI | Moved the cost-vs-carbon dial to the home step under a new title; removed from results | Claude, for Gavin | this push | D-019 |

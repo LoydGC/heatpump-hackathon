@@ -23,7 +23,7 @@
   const V1 = window.HeatPumpModelV1;
   const DEFAULT_LAM_IDX = 10;                       // $500/t: about where the model's heat pump starts to win
   const DIAL_STEPS = 12;                            // 13 slider positions = the model's lambda grid
-  const dialIdx = () => state.prioSet ? Math.round(state.priority * DIAL_STEPS) : DEFAULT_LAM_IDX;
+  const dialIdx = () => state.prioSet ? Math.round(state.priority * DIAL_STEPS) : (isV1(region()) ? DEFAULT_LAM_IDX : DIAL_STEPS / 2);  // stand-in default = balanced
   const isV1 = r => !!r && r.id === V1.regionId && V1.loaded();
   async function runModel(inp) {
     if (inp.region.id === V1.regionId && V1.loaded()) {
@@ -264,6 +264,7 @@
     document.querySelectorAll("[data-src]").forEach(s => {
       const yours = s.dataset.src in state.overrides; s.textContent = yours ? "yours" : "typical"; s.classList.toggle("yours", yours);
     });
+    renderDial();
     const n = Object.keys(state.overrides).length;
     $("homeStatus").textContent = n ? `You've changed ${n} detail${n > 1 ? "s" : ""}. Everything else uses typical values for ${r.name}.` : `Nothing changed yet: this is the typical ${r.name} home.`;
     $("useCustom").textContent = n ? "See my report →" : "See the report →";
@@ -302,7 +303,7 @@
     } else {
       $("rReco").textContent = `A ${out.sizeTons}-ton cold-climate heat pump`;
     }
-    renderDial(out); renderTradeoff(out);
+    renderDial(); renderTradeoff(out);
     if (!v1) $("rSizes").innerHTML = out.sizes.map(s => `<button data-size="${s.sizeTons}" aria-pressed="${s.sizeTons === out.sizeTons}">${s.sizeTons} t${s.sizeTons === out.recommendedSizeTons ? '<span class="star" aria-label="suggested">★</span>' : ""}</button>`).join("");
     if (!v1) $("rSizes").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { state.sizeTons = +b.dataset.size; save(); renderResults(); }));
 
@@ -404,8 +405,8 @@
   }
   $("dial").addEventListener("input", e => {
     state.priority = +e.target.value / DIAL_STEPS; state.prioSet = true; state.sizeTons = null; save();
-    $("dialVal").textContent = dialSetText(+e.target.value);   // instant label; results follow
-    renderResults();
+    $("dialVal").textContent = dialSetText(+e.target.value);
+    if (current === 3) renderResults();
   });
   // Cost-versus-carbon trade-off: one dot per option the model considered (v1: one per dial setting; stand-in: one per size).
   function renderTradeoff(out) {
@@ -429,26 +430,7 @@
     HPCharts.tradeoffChart($("chTrade"), { points: pts, ariaLabel: `Lifetime cost versus lifetime CO2 over ${life} years for each option`,
       xFmt: v => t(v), yFmt: v => "$" + kFmt(v), xTitle: `CO₂ over ${life} years (tonnes)`, yTitle: `Cost over ${life} years` });
   }
-  function renderDial(out) {
-    const v1 = out.v1, idx = v1 ? v1.lamIdx : dialIdx();
-    $("dial").value = idx; $("dialVal").textContent = dialSetText(idx);
-    if (!v1) {
-      $("dialH").textContent = "What matters more to you?";
-      $("dialExplain").textContent = "Slide toward \"Most CO₂ cut\" to favor the heat pump that cuts the most carbon, or toward \"Lowest cost\" to favor the lowest total cost. The same setting is on the home step.";
-      $("dialResult").textContent = "";
-      return;
-    }
-    $("dialH").textContent = "How much do you care about CO₂?";
-    $("dialExplain").textContent = "Think of it as a carbon tax dial: how many dollars would you pay to keep one tonne of CO₂ out of the air? At low settings the cheapest option wins, so you keep your furnace. Turn it up and the heat pump wins.";
-    const sc = v1.scenario, hp = V1.bestHeatPump(sc), life = out.lifetimeYears;
-    if (!hp) { $("dialResult").textContent = "The model finds no heat pump option for this scenario."; return; }
-    const rebateAdj = sc.rebatesOn ? 0 : hp.up_front ? (hp.centerpoint_rule ? 3100 : 2000) : 0;
-    const extra = hp.lifetime_cost + rebateAdj - out.lifetime.todayCostUsd;
-    const perT = hp.tonnes_saved_15y ? extra / hp.tonnes_saved_15y : null;
-    const wins = extra <= 0 || (perT != null && v1.lam >= perT);
-    $("dialResult").textContent = `Over ${life} years the ${sizeLabel(hp.size_kbtuh).toLowerCase()} costs ${extra >= 0 ? dollars(extra) + " more" : dollars(-extra) + " less"} than gas alone and avoids ${hp.tonnes_saved_15y.toFixed(1)} tonnes of CO₂` +
-      (extra > 0 && perT != null ? `, about ${dollars(perT)} per tonne. ${wins ? "That's at or below your dial, so the heat pump wins." : "That's above your dial, so keeping your furnace wins."}` : ". The heat pump wins on cost and carbon.");
-  }
+  function renderDial() { const idx = dialIdx(); $("dial").value = idx; $("dialVal").textContent = dialSetText(idx); }
   function renderLamTable(out) {
     const rows = V1.sweep(out.v1.scenario);
     $("lamTable").innerHTML = `<p class="muted" style="max-width:70ch;margin:-4px 0 12px">Each row is one setting of the dial, with what the model recommends there. Your current setting is highlighted. Costs are ${out.lifetimeYears}-year totals with the model's own rebate assumption.</p>
@@ -456,7 +438,7 @@
       rows.map(r => `<tr class="${r.lamIdx === out.v1.lamIdx ? "cur" : ""}"><td>${dollars(r.lam)}</td><td>${sizeLabel(r.sizeKbtuh)}</td><td>${dollars(r.lifetimeCostUsd)}</td><td>${r.lifetimeCo2T.toFixed(0)} t</td><td>${r.usdPerTonne != null ? dollars(r.usdPerTonne) : "—"}</td></tr>`).join("")}</tbody></table></div>`;
   }
   // The model data loads asynchronously; refresh results once it is there.
-  V1.ready.then(ok => { if (ok && region() && (current === 3 || current === 4)) renderResults(); });
+  V1.ready.then(ok => { if (ok && region()) { renderDial(); if (current === 3 || current === 4) renderResults(); } });
 
   // ---------- Smart meter comparison: heat pump vs heat pump + smart meter ----------
   async function renderMeter(out) {
