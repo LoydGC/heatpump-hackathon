@@ -255,3 +255,6 @@ Anyone (teammate or Claude thread) who makes a decision that affects the repo, t
 - **Refs:** `ui/regions.js` (`CLIMATE`).
 - **Status:** active
 - **Update (2026-11-08):** the design-temperature stat (e.g. "8 °F, a very cold night") above the cards is removed from the climate page (Gavin: it was random). The installer report still lists the design temperature.
+
+_D-021 update (2026-11-08):_ Gavin: the Home type list shows only single-family detached and attached; the disabled mobile-home and multi-family entries are removed, not greyed out.
+

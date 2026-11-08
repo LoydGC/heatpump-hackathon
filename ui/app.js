@@ -56,10 +56,7 @@
   const RS = window.RESSTOCK || { fine: [], coarse: [], cells: {} };
   const HOME_TYPES = [
     { id: "sfd", label: "Single-family detached", rs: "Single-Family Detached", on: true },
-    { id: "sfa", label: "Single-family attached (townhouse, rowhouse)", rs: "Single-Family Attached", on: true },
-    { id: "mh", label: "Mobile home (not covered yet)", on: false },
-    { id: "mf24", label: "Multi-family, 2 to 4 units (not covered yet)", on: false },
-    { id: "mf5", label: "Multi-family, 5+ units (not covered yet)", on: false }
+    { id: "sfa", label: "Single-family attached (townhouse, rowhouse)", rs: "Single-Family Attached", on: true }
   ];
   const BIN_MID = { fine: [625, 875, 1250, 1750, 2250, 2750, 3500], coarse: [1000, 2000, 3000] };
   const BIN_EDGES = { fine: [750, 1000, 1500, 2000, 2500, 3000], coarse: [1500, 2500] };
@@ -248,7 +245,7 @@
     $(id).addEventListener("change", e => setOverride(key, e.target.value === "" ? "" : parse(e.target.value)));
   });
   // Home type + size dropdowns (ResStock options)
-  HOME_TYPES.forEach(t => { const o = document.createElement("option"); o.value = t.id; o.textContent = t.label; o.disabled = !t.on; $("htype").appendChild(o); });
+  HOME_TYPES.forEach(t => { const o = document.createElement("option"); o.value = t.id; o.textContent = t.label; $("htype").appendChild(o); });
   $("htype").addEventListener("change", e => setOverride("homeType", e.target.value));
   $("sbin").addEventListener("change", e => setOverride("sizeBin", e.target.value));
   document.querySelectorAll("#blSeg button").forEach(b => b.addEventListener("click", () => {
