@@ -22,6 +22,7 @@
   if (!state.regionId) state.maxStep = 0;
   delete state.overrides.homeType; delete state.overrides.envelope; delete state.overrides.timeOfUse;  // home type and heat-holding inputs were removed from the page
   if (!INCOME_USD.hasOwnProperty(state.income)) state.income = "none";
+  state.cold = false; state.acCredit = false;   // the model scenarios (cold winter, AC credit) were removed
   state.rebatesOn = true;               // standard utility rebates are always counted; only the income-based one is a control
   state.sizeTons = null;                // no size picker any more; the suggestion follows the dial
   const save = () => { try { sessionStorage.setItem("hp-wizard", JSON.stringify(state)); } catch (e) {} };
@@ -377,11 +378,6 @@
     }
 
     // Scenario options only exist in the model v1 region
-    $("v1Opts").hidden = !out.v1;
-    $("coldSeg").querySelectorAll("button").forEach(b => { b.setAttribute("aria-pressed", (b.dataset.cold === "1") === state.cold);
-      b.onclick = () => { state.cold = b.dataset.cold === "1"; save(); renderResults(); }; });
-    $("acSeg").querySelectorAll("button").forEach(b => { b.setAttribute("aria-pressed", (b.dataset.ac === "1") === state.acCredit);
-      b.onclick = () => { state.acCredit = b.dataset.ac === "1"; save(); renderResults(); }; });
 
 
     await renderRebates(out);
@@ -459,7 +455,11 @@
       b.setAttribute("aria-pressed", b.dataset.inc === state.income);
       b.onclick = () => { state.income = b.dataset.inc; save(); renderResults(); };
     });
-    $("incBox").hidden = r.id !== "minneapolis"; $("whatIf").hidden = r.id !== "minneapolis";   // the What if card only holds the income rebate and the model scenarios
+    const stdUsd = Math.min(h.rebatesUsd, w.upfront.installedUsd);
+    $("stdAmt").textContent = money(stdUsd);
+    $("rebTotal").innerHTML = `Total rebates: ${money(w.upfront.rebatesUsd)}<small>${money(w.upfront.installedUsd)} installed − ${money(w.upfront.rebatesUsd)} = ${money(w.upfront.netUsd)} upfront</small>`;
+    $("rebIntro").textContent = r.id === "minneapolis" ? "Rebates come off your upfront cost. Add the income-based rebate if your household qualifies." : "Rebates come off your upfront cost.";
+    $("incBox").hidden = r.id !== "minneapolis"; 
     const incAmt = incomeUsd();
     $("incLede").textContent = incAmt === 8000 ? "Income at or under 80% of area median: the full $8,000 rebate, counted above."
       : incAmt === 4000 ? "Income between 80% and 150% of area median: half the rebate, $4,000, counted above."

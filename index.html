@@ -182,7 +182,10 @@ footer{margin-top:40px;font-size:13px}
 .dial h3{font-size:19px}
 .dial-row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;margin-top:14px;font-weight:600;font-size:14px}
 .dial-val{font-family:var(--display);font-size:22px;font-weight:600;margin-top:6px}
-details.more#v1Opts{margin-top:14px}
+.reb-line{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;padding:10px 14px;background:var(--panel2,#f1f3ea);border-radius:12px}
+.reb-line b{font-family:var(--display);font-size:18px}
+.reb-total{margin-top:16px;padding:12px 14px;border-radius:12px;background:var(--accent);color:var(--panel);font-weight:600}
+.reb-total small{display:block;font-weight:500;opacity:.9}
 .lamtbl tr.cur td{background:var(--hp-soft);font-weight:700}
 
 /* Results: summary first, details folded */
@@ -467,26 +470,14 @@ details.fold .fs{font-size:13px}
     </div>
 
     <div class="card whatif" id="whatIf">
-      <h3>What if&hellip;</h3>
-      <div class="whatif-row">
-        <div><div id="stdBox" hidden><p class="wl">Standard rebates <span class="muted" style="font-weight:500">(utility, open to everyone)</span></p>
-          <div class="seg" role="group" aria-label="Standard rebates included or left out" id="rebSeg"><button data-reb="1">Include them</button><button data-reb="0">Leave them out</button></div>
-          <p class="muted wn" id="rebLede"></p></div>
-          <div id="incBox"><p class="wl" id="incL">Income-based rebate <span class="muted" style="font-weight:500">(extra, if your income qualifies)</span></p>
-          <div class="seg seg3" role="group" aria-labelledby="incL" id="incSeg"><button data-inc="full">80% or less<br><small>$8,000</small></button><button data-inc="partial">80–150%<br><small>$4,000</small></button><button data-inc="none">Over 150%<br><small>None</small></button></div>
-          <p class="muted wn" id="incLede"></p></div></div>
-      </div>
-      <details class="more" id="v1Opts" hidden>
-        <summary>More scenarios (from the model)</summary>
-        <div class="whatif-row" style="margin-top:12px">
-          <div><p class="wl">Winter</p>
-            <div class="seg" role="group" aria-label="Winter weather" id="coldSeg"><button data-cold="0">Typical winter</button><button data-cold="1">Very cold winter</button></div>
-            <p class="muted wn">The model's cold stress test uses a harsher weather year.</p></div>
-          <div><p class="wl">Air conditioning</p>
-            <div class="seg" role="group" aria-label="AC replacement" id="acSeg"><button data-ac="0">Keeping my AC</button><button data-ac="1">Replacing my AC too</button></div>
-            <p class="muted wn">A heat pump also cools, so if your AC is due for replacement we credit its cost ($4,000).</p></div>
-        </div>
-      </details>
+      <h3>Rebates</h3>
+      <p class="muted" style="margin:-2px 0 14px" id="rebIntro"></p>
+      <div class="reb-line"><span>Utility rebate</span><b id="stdAmt"></b><span class="muted">included for everyone</span></div>
+      <div id="stdBox" hidden><div class="seg" id="rebSeg"><button data-reb="1"></button><button data-reb="0"></button></div><p id="rebLede"></p></div>
+      <div id="incBox" style="margin-top:14px"><p class="wl" id="incL">Income-based rebate <span class="muted" style="font-weight:500">(your household income vs. area median)</span></p>
+        <div class="seg seg3" role="group" aria-labelledby="incL" id="incSeg"><button data-inc="full">80% or less<br><small>$8,000</small></button><button data-inc="partial">80–150%<br><small>$4,000</small></button><button data-inc="none">Over 150%<br><small>None</small></button></div>
+        <p class="muted wn" id="incLede"></p></div>
+      <div class="reb-total" id="rebTotal"></div>
     </div>
 
     <div class="report-cta">
