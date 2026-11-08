@@ -111,11 +111,11 @@
     // dominated options are drawn first so the green circles sit on top where they overlap
     pts.filter(p => !p.current).sort((a, b) => dom(b) - dom(a)).forEach(p => {
       const d = dom(p); if (d) nDom++;
-      const g = el("circle", { cx: X(p.x), cy: Y(p.y), r: 5, fill: d ? "var(--grid)" : "var(--panel)", stroke: d ? "var(--axis)" : "var(--c-hp)", "stroke-width": 2, opacity: d ? 0.8 : 1 }, svg);
+      const g = el("circle", { cx: X(p.x), cy: Y(p.y), r: 5, fill: d ? "#CBC9B8" : "var(--panel)", stroke: d ? "#A9A794" : "var(--c-hp)", "stroke-width": 2, opacity: 1 }, svg);
       el("title", {}, g).textContent = d ? p.label + " (greyed out: another option is cheaper and cleaner)" : p.label;
     });
     const lg = document.createElement("div"); lg.className = "legend"; lg.style.marginTop = "6px";
-    lg.innerHTML = `<span><i style="border-color:var(--c-hp)"></i>Worth considering</span><span><i style="border-color:var(--axis)"></i>Greyed out (${nDom}): another option is both cheaper and cleaner</span>`;
+    lg.innerHTML = `<span><i style="border-color:var(--c-hp)"></i>Worth considering</span><span><i style="border-color:#A9A794"></i>Greyed out (${nDom}): another option is both cheaper and cleaner</span>`;
     host.appendChild(lg);
     pts.filter(p => p.current).forEach(p => {
       const g = el("circle", { cx: X(p.x), cy: Y(p.y), r: 8, fill: "var(--accent)", stroke: "var(--panel)", "stroke-width": 2 }, svg);
