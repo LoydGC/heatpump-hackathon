@@ -81,8 +81,14 @@
   // The notebook's find_closest_row(df, heating_fuel, heating_setpoint, unified_r, area): among homes with that fuel, the smallest
   // sum of squared differences in standard-deviation units (std over all 173 homes); first one wins a tie, as pandas idxmin does.
   const FUEL = { gas: "Natural Gas", electric: "Electricity", propane: "Propane", oil: "Fuel Oil", wood: "Other Fuel", kerosene: "Other Fuel" };
+  // Toggle: window.NOTEBOOK_ZSCORE_POOL = true (or ?zpool=1) z-scores over the fuel-matched homes instead of all homes. Default off = notebook.
+  const zPool = () => (typeof window !== "undefined" && (window.NOTEBOOK_ZSCORE_POOL === true || /[?&]zpool=1/.test(window.location.search)));
+  function poolScales(c) {
+    const sd = f => { const m = c.reduce((a, h) => a + f(h), 0) / c.length; return Math.sqrt(c.reduce((a, h) => a + (f(h) - m) ** 2, 0) / Math.max(1, c.length - 1)) || 1; };
+    return { heating_setpoint: sd(h => h.setpointF), unified_r_value: sd(h => h.unifiedR), area: sd(h => h.areaSqft) };
+  }
   function findClosestRow(fuel, setpoint, unifiedR, area) {
-    const sc = D.scales, c = D.homes.filter(h => h.fuel === fuel);
+    const c = D.homes.filter(h => h.fuel === fuel), sc = zPool() ? poolScales(c) : D.scales;
     if (!c.length) return null;
     let best = null, bd = Infinity;
     for (const h of c) {

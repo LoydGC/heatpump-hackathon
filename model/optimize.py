@@ -113,7 +113,8 @@ def get_rebate(capital_cost: float, type):
         return -0
 
 
-def find_closest_row(df, heating_fuel, heating_setpoint, unified_r, area):
+def find_closest_row(df, heating_fuel, heating_setpoint, unified_r, area, scale_pool="all"):
+    # scale_pool="all": std over every home (the notebook, authoritative). "candidates": z-score over the fuel-matched pool only (toggle, off by default).
     numeric_columns = ["heating_setpoint", "unified_r_value", "area"]
     numeric_values = df[numeric_columns].copy()
     numeric_values["heating_setpoint"] = pd.to_numeric(
@@ -127,7 +128,7 @@ def find_closest_row(df, heating_fuel, heating_setpoint, unified_r, area):
         raise ValueError(f"No numeric rows found for heating_fuel={heating_fuel!r}")
     setpoint = pd.to_numeric(pd.Series([heating_setpoint], dtype="string").str.extract(r"([-+]?\d+(?:\.\d+)?)", expand=False).iloc[0], errors="coerce")
     target = pd.Series([setpoint, unified_r, area], index=numeric_columns, dtype=float)
-    scales = numeric_values.std().replace(0, 1)
+    scales = (candidate_values if scale_pool == "candidates" else numeric_values).std().replace(0, 1)
     distances = (((candidate_values - target) / scales) ** 2).sum(axis=1)
     return df.loc[distances.idxmin()]
 
@@ -181,7 +182,7 @@ def run_thermal_hp_sim(t_amb_f, heating_demand, cop_ratings=None, capacity_ratin
 # ---------------------------------------------------------------- the notebook run (cells "Parameter search" + "Heat pump selection")
 def optimize(dollars_per_ton_co2=300, location="Minneapolis", square_footage=1500, current_heating_system="Natural Gas",
              chosen_set_point=68, price_per_kWh_electric=0.12, price_per_therm_secondary=None, rebate_type="partial",
-             insulation_r=2.5, building_id: str | None = None):
+             insulation_r=2.5, building_id: str | None = None, scale_pool="all"):
     if location not in ("Minneapolis", "minneapolis"):
         raise ValueError(f"No data for location={location!r}; the notebook only has Minneapolis.")
     price_per_kWh_electric = 0.12 if price_per_kWh_electric is None else price_per_kWh_electric
@@ -191,10 +192,10 @@ def optimize(dollars_per_ton_co2=300, location="Minneapolis", square_footage=150
     df = load_buildings()
     if building_id is None:
         try:
-            home = find_closest_row(df, heating_fuel=fuel, heating_setpoint=chosen_set_point, unified_r=insulation_r, area=square_footage)
+            home = find_closest_row(df, heating_fuel=fuel, heating_setpoint=chosen_set_point, unified_r=insulation_r, area=square_footage, scale_pool=scale_pool)
             fuel_fallback = False
         except ValueError:   # no ResStock home with that fuel: match among gas homes
-            home = find_closest_row(df, heating_fuel="Natural Gas", heating_setpoint=chosen_set_point, unified_r=insulation_r, area=square_footage)
+            home = find_closest_row(df, heating_fuel="Natural Gas", heating_setpoint=chosen_set_point, unified_r=insulation_r, area=square_footage, scale_pool=scale_pool)
             fuel_fallback = True
         building_id = home["building_id"]
     else:
@@ -242,10 +243,12 @@ def main():
     ap.add_argument("--rebate-type", default="partial", choices=["full", "partial", "none"])
     ap.add_argument("--insulation-r", type=float, default=2.5, help="unified R target for find_closest_row (dashboard: 2.5, 3.5, 4.5, 5)")
     ap.add_argument("--building", default=None, help="force a ResStock building id (274938 = the notebook's hardcoded home)")
+    ap.add_argument("--zscore-candidates", action="store_true", help="z-score find_closest_row features over the fuel-matched pool instead of all homes")
     ap.add_argument("--out-dir", default=".")
     a = ap.parse_args()
     out = optimize(a.dollars_per_ton_co2, a.location, a.square_footage, a.current_heating_system, a.chosen_set_point,
-                   a.price_per_kwh_electric, a.price_per_therm_secondary, a.rebate_type, a.insulation_r, a.building)
+                   a.price_per_kwh_electric, a.price_per_therm_secondary, a.rebate_type, a.insulation_r, a.building,
+                   "candidates" if a.zscore_candidates else "all")
     os.makedirs(a.out_dir, exist_ok=True)
     out["results"].to_csv(os.path.join(a.out_dir, "heat_pump_selection_results.csv"), index=False)
     with open(os.path.join(a.out_dir, "winner.json"), "w") as f:
